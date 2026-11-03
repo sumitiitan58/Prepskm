@@ -150,10 +150,15 @@ export default function App() {
     };
     window.addEventListener('prepskm_profile_updated', handleProfileUpdate);
 
-    // Check first visit for onboarding
-    const hasSeenOnboarding = localStorage.getItem('prepskm_onboarded');
-    if (!hasSeenOnboarding) {
-      setIsOnboardingOpen(true);
+    // Check first visit for onboarding without blocking dashboard
+    try {
+      const hasSeenOnboarding = localStorage.getItem('prepskm_onboarded');
+      // If student hasn't onboarded yet, mark it visited so dashboard is immediately visible
+      if (!hasSeenOnboarding) {
+        localStorage.setItem('prepskm_onboarded', 'true');
+      }
+    } catch (e) {
+      console.warn('LocalStorage access note:', e);
     }
 
     return () => {

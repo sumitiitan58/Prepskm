@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,9 +35,9 @@
       }
     }, true);
   </script>
-  <meta name="description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
+  <meta name="description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and mentor video lectures." />
   <meta property="og:title" content="Prepskm - JEE & NEET Study Platform" />
-  <meta property="og:description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
+  <meta property="og:description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and mentor video lectures." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -45,6 +45,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
 
   <!-- Cropper.js CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
@@ -66,12 +91,336 @@
           document.documentElement.classList.remove('dark');
           document.documentElement.classList.add('light');
         }
-      } catch (e) {}
+      } catch (e) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
     })();
   </script>
 </head>
-<body class="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-150">
-  <div id="root"></div>
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-150">
+  <div id="root">
+    <!-- Complete Pre-Rendered Prepskm Main Interface (Prevents any blank page on load) -->
+    <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      
+      <!-- Top Social & Announcement Banner -->
+      <div class="bg-indigo-600 text-white text-xs py-1.5 px-4">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="font-bold tracking-wide">Prepskm</span>
+            <span class="opacity-70">|</span>
+            <span class="opacity-90">Founded by @unfiltereddsumit • Distraction-Free JEE & NEET Ecosystem</span>
+          </div>
+          <div class="flex items-center gap-4 text-indigo-100">
+            <a href="https://t.me/prepskm" target="_blank" rel="noreferrer" class="hover:text-white underline transition">Telegram @prepskm</a>
+            <a href="https://t.me/unfiltreddsumit" target="_blank" rel="noreferrer" class="hover:text-white underline transition">Chat @unfiltreddsumit</a>
+            <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-white underline transition">YouTube</a>
+            <a href="https://instagram.com/unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-white underline transition">Instagram</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Navigation Header -->
+      <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16 gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-indigo-500/20">
+                P
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-black text-lg tracking-tight text-slate-900 dark:text-white">Prepskm</span>
+                  <span class="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                    v2.6
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none">by @unfiltereddsumit</p>
+              </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="hidden md:flex flex-1 max-w-md mx-4">
+              <div class="w-full relative flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl px-3.5 py-2 text-sm text-slate-400 cursor-pointer">
+                <svg class="w-4 h-4 mr-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <span>Search chapters, notes, PYQs, tests...</span>
+                <kbd class="ml-auto px-2 py-0.5 text-[10px] font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-500">⌘K</kbd>
+              </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center gap-2.5">
+              <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Firebase Realtime
+              </span>
+              <div class="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-xs">
+                  A
+                </div>
+                <div class="hidden lg:block text-left">
+                  <p class="text-xs font-bold leading-tight">Aspirant</p>
+                  <p class="text-[10px] text-slate-500 leading-tight">JEE Main</p>
+                </div>
+              </div>
+              <button class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition">
+                Sign In
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Navigation Bar -->
+          <nav class="flex items-center gap-1 overflow-x-auto py-2 scrollbar-none border-t border-slate-100 dark:border-slate-800/80 text-xs font-semibold">
+            <button class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold whitespace-nowrap shadow-xs">
+              Backlog Destroyer
+            </button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition">
+              Study Materials Hub
+            </button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition flex items-center gap-1.5">
+              <span>Mentor Videos</span>
+              <span class="px-1.5 py-0.2 bg-rose-500 text-white text-[9px] rounded-full font-bold">New</span>
+            </button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition">
+              NTA CBT Mock Tests
+            </button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition">
+              Test History
+            </button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition">
+              1:1 Mentorship (₹5/min)
+            </button>
+            <button class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap transition">
+              About Prepskm
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Main Dashboard Container -->
+      <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Hero Announcement Banner -->
+        <section class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-700 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-indigo-600/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+          <div class="space-y-2 z-10 max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-semibold text-indigo-100 border border-white/20">
+              <span>Target: JEE Main (Class 12)</span>
+              <span>•</span>
+              <span>Daily Study Engine</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+              Crush Your JEE & NEET Dreams with Zero Distractions
+            </h1>
+            <p class="text-sm md:text-base text-indigo-100 opacity-90 font-medium">
+              NTA-Style CBT Mock Tests, Backlog Destroyer, Notes Vault & 1:1 Mentorship Passes.
+            </p>
+          </div>
+          <div class="flex items-center gap-3 z-10 w-full sm:w-auto">
+            <button class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-bold text-sm shadow-md transition">
+              Start Mock Test
+            </button>
+            <button class="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-indigo-800/80 hover:bg-indigo-800 text-white font-bold text-sm border border-indigo-500/40 transition">
+              Score Progress
+            </button>
+          </div>
+        </section>
+
+        <!-- Metric Statistics Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Card 1: Clearance Progress -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Backlog Clearance</span>
+              <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mb-3 overflow-hidden">
+              <div class="bg-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+              <span>0 Chapters Cleared</span>
+              <span>0 Remaining</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Active Study Streak -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Study Streak</span>
+              <span class="text-amber-500 font-bold text-xs">🔥 Consistency</span>
+            </div>
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-3xl font-black text-slate-900 dark:text-white">5</span>
+              <span class="text-xs font-bold text-amber-500">Days Active 🔥</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Consistency creates AIR 1!</p>
+          </div>
+
+          <!-- Card 3: Quick Action / AI Planner -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Backlog Destroyer</span>
+              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">Live Cloud Sync</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
+                <span>AI Study Planner</span>
+              </button>
+              <button class="py-2 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
+                + Add Chapter
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Weekly Schedule & Aaj Ka Target -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-md">Weekly Schedule</span>
+                <span class="text-xs text-slate-500">Planner & Target Engine</span>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Aaj Ka Target & Weekly Planner</h3>
+            </div>
+            <!-- Days pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto">
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                <p class="text-[10px] text-slate-400">Mon</p>
+                <p class="font-black">0</p>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-indigo-600 text-white text-xs font-bold shadow-xs">
+                <p class="text-[10px] text-indigo-200">Tue</p>
+                <p class="font-black">0</p>
+                <span class="text-[9px] block text-indigo-200 font-normal">Today</span>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                <p class="text-[10px] text-slate-400">Wed</p>
+                <p class="font-black">0</p>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                <p class="text-[10px] text-slate-400">Thu</p>
+                <p class="font-black">0</p>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                <p class="text-[10px] text-slate-400">Fri</p>
+                <p class="font-black">0</p>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                <p class="text-[10px] text-slate-400">Sat</p>
+                <p class="font-black">0</p>
+              </div>
+              <div class="px-2.5 py-1.5 rounded-lg text-center bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                <p class="text-[10px] text-slate-400">Sun</p>
+                <p class="font-black">0</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Aaj Ka Target Progress</p>
+              <h4 class="text-base font-bold text-slate-900 dark:text-white">Aaj ka study target set karein aur backlog destroy karein!</h4>
+              <p class="text-xs text-slate-500 mt-1">Consistency aur dedicated problem solving se hi top rank aati hai.</p>
+            </div>
+            <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition whitespace-nowrap">
+              + Set Target for Today
+            </button>
+          </div>
+        </section>
+
+        <!-- Backlog Subject Filters & List -->
+        <section class="space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto">
+              <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white">All</button>
+              <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">Physics</button>
+              <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">Chemistry</button>
+              <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">Mathematics</button>
+              <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">Biology</button>
+            </div>
+            <div class="flex items-center gap-1 text-xs">
+              <span class="px-2.5 py-1 rounded-md font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200">all</span>
+              <span class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-700">pending</span>
+              <span class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-700">in progress</span>
+              <span class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-700">cleared</span>
+            </div>
+          </div>
+
+          <!-- Feature Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:border-indigo-500/50 transition">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold mb-3">
+                📚
+              </div>
+              <h4 class="font-bold text-slate-900 dark:text-white mb-1">Study Materials Hub</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Chapter-wise notes, quick revision formula sheets & top PYQ archives.</p>
+              <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Explore Vault →</span>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:border-indigo-500/50 transition">
+              <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold mb-3">
+                🎥
+              </div>
+              <h4 class="font-bold text-slate-900 dark:text-white mb-1">Mentor Video Lectures</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Concept deep dives & exam strategy videos by Sumit and verified mentors.</p>
+              <span class="text-xs font-bold text-rose-600 dark:text-rose-400">Watch Lessons →</span>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:border-indigo-500/50 transition">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-3">
+                ⚡
+              </div>
+              <h4 class="font-bold text-slate-900 dark:text-white mb-1">NTA CBT Mock Test Engine</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Real exam simulation with official NTA timer, marking scheme and palette.</p>
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Take Mock Test →</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- About Prepskm Section -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 md:p-8 shadow-xs">
+          <div class="max-w-3xl">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-0.5 rounded-md">About Platform</span>
+            <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-2 mb-3">
+              Prepskm: Purely Distraction-Free JEE & NEET Preparation
+            </h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+              Created by Sumit Sharma (<span class="font-bold text-indigo-600 dark:text-indigo-400">@unfiltereddsumit</span>), Prepskm exists to protect serious aspirants from YouTube clickbait, endless scrolling, and commercial coaching hype. We combine high-speed NTA CBT mock testing, backlog tracking, curated formula vaults, and 1:1 mentorship from verified NIT/IIT mentors.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <a href="https://t.me/prepskm" target="_blank" rel="noreferrer" class="px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-xs font-bold hover:bg-indigo-100 transition">
+                Join Telegram Community (@prepskm)
+              </a>
+              <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold hover:bg-rose-100 transition">
+                Watch on YouTube (@unfiltereddsumit)
+              </a>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Complete Footer -->
+      <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <div class="flex items-center gap-2">
+            <span class="font-black text-slate-800 dark:text-slate-200">PREPSKM</span>
+            <span>•</span>
+            <span>Engineered for Aspirants by @unfiltereddsumit</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <a href="https://t.me/prepskm" target="_blank" rel="noreferrer" class="hover:text-indigo-600 transition">Telegram</a>
+            <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-indigo-600 transition">YouTube</a>
+            <a href="https://instagram.com/unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-indigo-600 transition">Instagram</a>
+            <span>•</span>
+            <span>All rights reserved © 2026</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
