@@ -1,21 +1,1835 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prepskm - JEE & NEET Study Platform</title>
-    <meta name="description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
-    <meta property="og:title" content="Prepskm - JEE & NEET Study Platform" />
-    <meta property="og:description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" integrity="sha512-5vL1S0+c0e0rD55Pz3Q3R2a6q9k8q7W70pG/rS6c7z4B3G08F47n89hNf7A8x0Q" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  </head>
-  <body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prepskm - JEE & NEET Study Platform</title>
+  <meta name="description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
+  <meta property="og:title" content="Prepskm - JEE & NEET Study Platform" />
+  <meta property="og:description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Cropper.js CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase Compat SDK CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #030712;
+      color: #f3f4f6;
+    }
+    code, pre, kbd, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #030712;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+    .custom-glow {
+      box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP CREATOR BANNER -->
+  <aside class="bg-gradient-to-r from-indigo-950 via-slate-950 to-indigo-950 border-b border-indigo-500/15 px-4 py-1.5 text-xs text-slate-300">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-extrabold text-indigo-400">PREPSKM</span>
+        <span class="text-slate-600 hidden sm:inline">|</span>
+        <span class="text-[11px] sm:text-xs">Distraction-Free Platform by @unfiltereddsumit</span>
+      </div>
+      <div class="flex items-center gap-4 text-[11px]">
+        <a href="https://t.me/prepskm" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-sky-400 transition">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i> <span>Channel @prepskm</span>
+        </a>
+        <a href="https://t.me/unfiltreddsumit" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-sky-300 transition">
+          <i data-lucide="message-square" class="w-3.5 h-3.5"></i> <span>Chat @unfiltreddsumit</span>
+        </a>
+        <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-rose-400 transition" title="YouTube">
+          <i data-lucide="youtube" class="w-3.5 h-3.5"></i>
+        </a>
+        <a href="https://instagram.com/unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-pink-400 transition" title="Instagram">
+          <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- GLOBAL NAVBAR -->
+  <header class="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-xl border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Logo -->
+      <div onclick="switchTab('tracker')" class="cursor-pointer flex items-center gap-2.5 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-600/30 group-hover:scale-105 transition">
+          P
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-black text-xl text-white tracking-tight group-hover:text-indigo-300 transition">Prepskm</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">v2.0</span>
+          </div>
+          <p class="text-[10px] text-slate-400 -mt-0.5">by @unfiltereddsumit</p>
+        </div>
+      </div>
+
+      <!-- Universal Search Button -->
+      <div class="flex-1 max-w-md mx-2 hidden sm:block">
+        <button onclick="openSearchModal()" class="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-400 text-xs transition">
+          <div class="flex items-center gap-2">
+            <i data-lucide="search" class="w-4 h-4 text-indigo-400"></i>
+            <span>Search chapters, notes, PYQs, tests...</span>
+          </div>
+          <kbd class="px-2 py-0.5 rounded bg-slate-950 border border-slate-700 text-[10px] text-slate-500 font-mono">⌘K</kbd>
+        </button>
+      </div>
+
+      <!-- Navigation & User Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="openSearchModal()" class="sm:hidden p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Promotional Scripts Modal -->
+        <button onclick="openCampaignModal()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition" title="Creator Launch Scripts">
+          <i data-lucide="megaphone" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Student Profile Badge -->
+        <button onclick="openOnboardingModal()" class="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 text-left transition">
+          <div id="nav-avatar" class="w-7 h-7 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xs font-bold shrink-0">
+            A
+          </div>
+          <div class="hidden lg:block text-xs">
+            <p id="nav-student-name" class="font-bold text-white truncate max-w-[90px]">Aspirant</p>
+            <p id="nav-student-exam" class="text-[10px] text-indigo-400">JEE Main</p>
+          </div>
+        </button>
+
+        <!-- Strictly Protected Admin Button (Hidden unless admin verified) -->
+        <button id="admin-panel-btn" onclick="switchTab('admin')" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition shadow-lg">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+          <span>Admin Panel</span>
+        </button>
+
+        <!-- Auth Button -->
+        <div id="auth-btn-container">
+          <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition">
+            Sign In
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Sub-Tabs -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-2 overflow-x-auto py-2 border-t border-slate-800/40 text-xs sm:text-sm font-semibold">
+      <button id="tab-btn-tracker" onclick="switchTab('tracker')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition shrink-0">
+        <i data-lucide="flame" class="w-4 h-4 text-amber-400"></i>
+        <span>Backlog Destroyer</span>
+      </button>
+
+      <button id="tab-btn-materials" onclick="switchTab('materials')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
+        <i data-lucide="book-open" class="w-4 h-4 text-cyan-400"></i>
+        <span>Study Materials Hub</span>
+      </button>
+
+      <button id="tab-btn-mock_tests" onclick="switchTab('mock_tests')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
+        <i data-lucide="graduation-cap" class="w-4 h-4 text-emerald-400"></i>
+        <span>NTA CBT Mock Tests</span>
+      </button>
+
+      <button id="tab-btn-mentorship" onclick="switchTab('mentorship')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+        <span>1:1 Mentorship (₹5/min)</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+
+    <!-- DYNAMIC DASHBOARD GREETING -->
+    <section id="greeting-banner" class="p-5 sm:p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span id="greeting-target-badge" class="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+            Target: JEE Main (Class 12)
+          </span>
+          <span class="text-slate-600">•</span>
+          <span class="text-xs text-slate-400">Discipline > Motivation</span>
+        </div>
+        <h1 id="greeting-heading" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+          Welcome back, Aspirant! Ready to conquer JEE Main today?
+        </h1>
+        <p class="text-xs text-slate-400">
+          Clear your priority backlogs, revise formula sheets, and attempt a 20% numerical balanced CBT test.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2.5 shrink-0">
+        <button onclick="switchTab('mock_tests')" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i> Start Mock Test
+        </button>
+        <button onclick="switchTab('mentorship')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-amber-300 border border-amber-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> 1:1 Mentorship
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 1: BACKLOG TRACKER -->
+    <section id="view-tracker" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Progress -->
+        <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-950/40 border border-indigo-500/20 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Backlog Clearance</span>
+            <span id="backlog-percent-text" class="text-2xl font-black text-white">25%</span>
+          </div>
+          <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden p-0.5 border border-slate-700/60">
+            <div id="backlog-progress-bar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500" style="width: 25%"></div>
+          </div>
+          <div class="mt-3 flex justify-between text-xs text-slate-400">
+            <span id="backlog-cleared-text">1 Cleared</span>
+            <span id="backlog-remaining-text">3 Remaining</span>
+          </div>
+        </div>
+
+        <!-- Streak -->
+        <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/20 shadow-lg flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400 block mb-1">Active Study Streak</span>
+            <div class="flex items-baseline gap-2">
+              <span id="streak-counter" class="text-3xl font-black text-white">5</span>
+              <span class="text-sm font-semibold text-amber-300">Days Active 🔥</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Don't break the chain before exam day!</p>
+          </div>
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 animate-pulse">
+            <i data-lucide="flame" class="w-8 h-8 fill-amber-400/20"></i>
+          </div>
+        </div>
+
+        <!-- Queue Summary & Add Button -->
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-lg flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Backlog Queue</span>
+            <span class="px-2 py-0.5 text-xs font-bold rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Synced</span>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <div>
+              <p id="backlog-total-count" class="text-2xl font-black text-white">4 Chapters</p>
+              <p class="text-xs text-slate-400">Priority scheduling</p>
+            </div>
+            <button onclick="openAddBacklogModal()" class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition active:scale-95">
+              <i data-lucide="plus" class="w-4 h-4"></i> Add Chapter
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5 overflow-x-auto py-0.5" id="backlog-subject-filters">
+          <button onclick="filterBacklogSubject('All')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white">All</button>
+          <button onclick="filterBacklogSubject('Physics')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300">Physics</button>
+          <button onclick="filterBacklogSubject('Chemistry')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300">Chemistry</button>
+          <button onclick="filterBacklogSubject('Mathematics')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300">Mathematics</button>
+          <button onclick="filterBacklogSubject('Biology')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800/80 text-slate-300">Biology</button>
+        </div>
+      </div>
+
+      <!-- Backlog Item Container -->
+      <div id="backlog-list" class="space-y-3"></div>
+    </section>
+
+    <!-- SECTION 2: STUDY MATERIALS HUB -->
+    <section id="view-materials" class="space-y-6 hidden">
+      <!-- Category Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1" id="material-category-tabs">
+        <button onclick="filterMaterialCategory('all')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow-lg shrink-0">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> All Resources
+        </button>
+        <button onclick="filterMaterialCategory('notes')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
+          <i data-lucide="file-text" class="w-4 h-4"></i> Handwritten Notes
+        </button>
+        <button onclick="filterMaterialCategory('formula_sheet')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
+          <i data-lucide="book-open" class="w-4 h-4"></i> Formula Sheets
+        </button>
+        <button onclick="filterMaterialCategory('pyq')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
+          <i data-lucide="award" class="w-4 h-4"></i> Previous Year PYQs
+        </button>
+        <button onclick="filterMaterialCategory('video')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
+          <i data-lucide="video" class="w-4 h-4"></i> Video Lectures
+        </button>
+      </div>
+
+      <!-- Materials Grid -->
+      <div id="materials-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- SECTION 3: NTA CBT MOCK TEST ENGINE -->
+    <section id="view-mock_tests" class="space-y-6 hidden">
+      <!-- Test Generator Setup Screen -->
+      <div id="test-generator-container" class="space-y-6">
+        <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 shadow-xl">
+          <div class="max-w-2xl space-y-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> NTA-Standard CBT Mock Test Engine
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Create Balanced Mock Test</h2>
+            <p class="text-xs sm:text-sm text-slate-300">
+              Strictly balances <span class="text-indigo-400 font-bold">80% MCQs</span> and <span class="text-amber-400 font-bold">20% Numerical Value Questions (NAT)</span> with Physics → Chem → Math/Bio sequence and +4 / -1 marking.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-5">
+            <!-- Exam Target -->
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <label class="block text-xs font-bold text-slate-300 uppercase">1. Target Exam</label>
+              <div class="grid grid-cols-3 gap-2" id="exam-toggle-group">
+                <button type="button" onclick="setTestExam('JEE Main')" class="test-exam-btn py-2.5 rounded-xl text-xs font-bold bg-indigo-600 text-white border border-indigo-500">JEE Main</button>
+                <button type="button" onclick="setTestExam('JEE Advanced')" class="test-exam-btn py-2.5 rounded-xl text-xs font-bold bg-slate-950 text-slate-400 border border-slate-800">JEE Advanced</button>
+                <button type="button" onclick="setTestExam('NEET')" class="test-exam-btn py-2.5 rounded-xl text-xs font-bold bg-slate-950 text-slate-400 border border-slate-800">NEET</button>
+              </div>
+            </div>
+
+            <!-- Subject Checklist -->
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <label class="block text-xs font-bold text-slate-300 uppercase">2. Subjects (Physics → Chem → Math/Bio)</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="test-subjects-group">
+                <label class="p-3 rounded-xl border border-indigo-500 bg-indigo-500/15 text-indigo-300 text-xs font-bold flex items-center justify-between cursor-pointer">
+                  <span>Physics</span> <input type="checkbox" checked value="Physics" class="test-subject-cb accent-indigo-500">
+                </label>
+                <label class="p-3 rounded-xl border border-indigo-500 bg-indigo-500/15 text-indigo-300 text-xs font-bold flex items-center justify-between cursor-pointer">
+                  <span>Chemistry</span> <input type="checkbox" checked value="Chemistry" class="test-subject-cb accent-indigo-500">
+                </label>
+                <label class="p-3 rounded-xl border border-indigo-500 bg-indigo-500/15 text-indigo-300 text-xs font-bold flex items-center justify-between cursor-pointer">
+                  <span>Mathematics</span> <input type="checkbox" checked value="Mathematics" class="test-subject-cb accent-indigo-500">
+                </label>
+                <label class="p-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-bold flex items-center justify-between cursor-pointer">
+                  <span>Biology</span> <input type="checkbox" value="Biology" class="test-subject-cb accent-indigo-500">
+                </label>
+              </div>
+            </div>
+
+            <!-- Chapter Selection with Minimum Constraints -->
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="block text-xs font-bold text-slate-300 uppercase">3. Chapters Selection</label>
+                  <p class="text-[11px] text-slate-400">Rule: ≥10 ch = min 10 Q | ≥20 ch = min 20 Q | Full syllabus = min 75 Q</p>
+                </div>
+                <button type="button" onclick="selectAllTestChapters()" class="text-xs text-indigo-400 font-bold hover:underline">Select All</button>
+              </div>
+              <div id="test-chapters-list" class="max-h-56 overflow-y-auto space-y-1.5 pr-1"></div>
+            </div>
+          </div>
+
+          <!-- Question Count & Launch -->
+          <div class="space-y-5">
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <label class="block text-xs font-bold text-slate-300 uppercase">Questions Count</label>
+              <div class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <div>
+                  <span id="test-qcount-display" class="text-3xl font-black text-white">20</span>
+                  <span class="text-xs text-slate-400 block">Questions</span>
+                </div>
+                <div class="text-right text-xs text-slate-400">
+                  <p id="test-min-required-text">Min: 5 questions</p>
+                  <p id="test-duration-est">Time: 30 Mins</p>
+                </div>
+              </div>
+
+              <input id="test-qcount-slider" type="range" min="5" max="90" step="5" value="20" oninput="updateQCountSlider(this.value)" class="w-full accent-indigo-500 cursor-pointer">
+
+              <!-- Ratio breakdown -->
+              <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2 text-xs">
+                <div class="flex justify-between text-slate-300">
+                  <span>MCQs (80%):</span>
+                  <span id="test-mcq-count" class="font-bold text-indigo-400">16</span>
+                </div>
+                <div class="flex justify-between text-slate-300">
+                  <span>Numerical Value (NAT 20%):</span>
+                  <span id="test-nat-count" class="font-bold text-amber-400">4</span>
+                </div>
+                <div class="pt-2 border-t border-slate-800 flex justify-between font-bold text-white">
+                  <span>Max Score:</span>
+                  <span id="test-max-marks" class="text-emerald-400">+80 Marks</span>
+                </div>
+              </div>
+
+              <button onclick="launchNtaTest()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black text-sm shadow-xl shadow-indigo-600/30 transition active:scale-98 flex items-center justify-center gap-2">
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i> Launch NTA CBT Mock Test
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CBT Exam Fullscreen Screen (Reveals during active test) -->
+      <div id="cbt-exam-engine" class="hidden fixed inset-0 z-50 bg-slate-950 text-white flex-col">
+        <!-- CBT Header -->
+        <div class="h-14 bg-slate-900 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3">
+            <span class="font-black text-indigo-400 text-lg tracking-wider">PREPSKM</span>
+            <span id="cbt-exam-tag" class="text-xs px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 font-bold border border-indigo-500/20">JEE Main CBT</span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div id="cbt-timer-box" class="flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-800 border border-slate-700 font-mono font-bold text-sm text-indigo-300">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+              <span id="cbt-time-remaining">30:00</span>
+            </div>
+            <button onclick="submitExamNow()" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md">
+              Submit Exam
+            </button>
+          </div>
+        </div>
+
+        <!-- CBT Content -->
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+          <div class="flex-1 p-6 overflow-y-auto flex flex-col justify-between border-r border-slate-800">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span id="cbt-question-number-badge" class="px-2.5 py-1 rounded bg-indigo-600 font-black text-xs">Q 1 of 20</span>
+                <span id="cbt-question-subject-badge" class="text-xs font-bold text-indigo-400">Physics</span>
+                <span id="cbt-question-type-badge" class="text-xs font-bold px-2 py-0.5 bg-slate-800 rounded">MCQ (+4, -1)</span>
+              </div>
+              <div id="cbt-question-text" class="py-4 text-sm sm:text-base leading-relaxed text-slate-100 font-medium whitespace-pre-wrap"></div>
+              <div id="cbt-question-diagram-container" class="mb-4"></div>
+              <div id="cbt-options-container" class="space-y-2.5"></div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <button onclick="clearResponse()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">Clear Response</button>
+                <button onclick="markForReviewAndNext()" class="px-4 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-semibold">Mark Review & Next</button>
+              </div>
+              <button onclick="saveAndNext()" class="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md">Save & Next</button>
+            </div>
+          </div>
+
+          <!-- Palette -->
+          <div class="w-full md:w-80 bg-slate-900/60 p-4 shrink-0 flex flex-col justify-between overflow-y-auto">
+            <div>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3">Question Palette</h4>
+              <div class="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-950 border border-slate-800 mb-4">
+                <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 rounded bg-emerald-600 text-white text-[9px] flex items-center justify-center" id="count-ans">0</div> <span>Answered</span></div>
+                <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 rounded bg-rose-600 text-white text-[9px] flex items-center justify-center" id="count-notans">0</div> <span>Not Answered</span></div>
+                <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 rounded bg-purple-600 text-white text-[9px] flex items-center justify-center" id="count-marked">0</div> <span>Marked Review</span></div>
+                <div class="flex items-center gap-1.5"><div class="w-3.5 h-3.5 rounded bg-slate-700 text-white text-[9px] flex items-center justify-center" id="count-notvis">0</div> <span>Not Visited</span></div>
+              </div>
+              <div id="cbt-palette-grid" class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post Test Scorecard & Solutions -->
+      <div id="cbt-scorecard-container" class="hidden space-y-6"></div>
+    </section>
+
+    <!-- SECTION 4: 1:1 MENTORSHIP BOOKING WITH UPI & PASS CARD -->
+    <section id="view-mentorship" class="space-y-6 hidden">
+      <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-xl">
+        <div class="max-w-2xl space-y-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Direct Call with @unfiltereddsumit
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-black text-white">1:1 Mentorship at Flat ₹5 / Minute</h2>
+          <p class="text-xs sm:text-sm text-slate-300">
+            No expensive coaching fees. Book only the minutes you need for daily timetable fixing, backlog destruction, and honest reality checks.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-5">
+          <h3 class="font-bold text-white text-base">Book Your Mentorship Slot</h3>
+          <form id="mentorship-form" onsubmit="handleMentorshipSubmit(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Full Name</label>
+                <input id="mentor-name" type="text" required placeholder="Your Name" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">WhatsApp / Phone Number</label>
+                <input id="mentor-phone" type="tel" required placeholder="+91 98765 43210" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Target Exam</label>
+                <select id="mentor-exam" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <option value="JEE Main">JEE Main</option>
+                  <option value="JEE Advanced">JEE Advanced</option>
+                  <option value="NEET">NEET</option>
+                  <option value="Class 12 Boards">Class 12 Boards</option>
+                  <option value="Dropper">Dropper</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Preferred Time Window</label>
+                <select id="mentor-slot" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <option value="Morning (9:00 AM - 11:00 AM)">Morning (9:00 AM - 11:00 AM)</option>
+                  <option value="Evening (6:00 PM - 8:00 PM)">Evening (6:00 PM - 8:00 PM)</option>
+                  <option value="Late Night (9:00 PM - 11:00 PM)">Late Night (9:00 PM - 11:00 PM)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Duration Selector -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-semibold text-slate-300 uppercase">Select Duration (Flat ₹5/min)</label>
+                <span id="mentor-duration-label" class="text-xs font-bold text-indigo-400">30 Mins = ₹150</span>
+              </div>
+              <div class="grid grid-cols-4 gap-2 mb-2">
+                <button type="button" onclick="setMentorDuration(15)" class="mentor-dur-btn p-2.5 rounded-xl border text-center text-xs font-bold bg-slate-950 border-slate-800 text-slate-400">15m (₹75)</button>
+                <button type="button" onclick="setMentorDuration(30)" class="mentor-dur-btn p-2.5 rounded-xl border text-center text-xs font-bold bg-indigo-600 border-indigo-500 text-white">30m (₹150)</button>
+                <button type="button" onclick="setMentorDuration(45)" class="mentor-dur-btn p-2.5 rounded-xl border text-center text-xs font-bold bg-slate-950 border-slate-800 text-slate-400">45m (₹225)</button>
+                <button type="button" onclick="setMentorDuration(60)" class="mentor-dur-btn p-2.5 rounded-xl border text-center text-xs font-bold bg-slate-950 border-slate-800 text-slate-400">60m (₹300)</button>
+              </div>
+            </div>
+
+            <!-- Online UPI Scan Box -->
+            <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-center gap-5">
+              <div class="bg-white p-2.5 rounded-xl shadow-lg shrink-0">
+                <img id="upi-qr-image" src="https://api.qrserver.com/v1/create-qr-code/?data=upi://pay?pa=prepskm@upi&pn=Prepskm&am=150&size=140x140" alt="UPI QR" class="w-32 h-32 block">
+              </div>
+              <div class="space-y-2 text-xs text-slate-300 text-center sm:text-left">
+                <p class="font-bold text-white text-sm">Scan with Google Pay, PhonePe, Paytm, BHIM</p>
+                <p class="text-slate-400">UPI ID: <span class="font-mono font-bold text-white">prepskm@upi</span></p>
+                <p class="text-[11px] text-slate-500">Pay the exact amount and enter UPI UTR (optional) to generate your verified digital pass.</p>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-indigo-600 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition">
+              Confirm & Generate Official Prepskm Mentorship Pass Card
+            </button>
+          </form>
+        </div>
+
+        <!-- Generated Pass Container -->
+        <div id="pass-card-display-container" class="space-y-4">
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
+              <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <h4 class="font-bold text-white text-sm">Verified Pass System</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Upon booking, your cryptographic token pass (e.g. PSKM-JEE-84920-VERIFIED) will generate here with a 1-click button to send straight to Sumit on Telegram.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: STRICTLY PROTECTED ADMIN PANEL -->
+    <section id="view-admin" class="space-y-6 hidden">
+      <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+          <div>
+            <span class="px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/20">Authenticated Admin</span>
+            <h3 class="text-xl font-black text-white mt-1">Question Bank & Token Verifier</h3>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <button onclick="switchAdminSubTab('add_q')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold">Add Question (Cropper)</button>
+            <button onclick="switchAdminSubTab('verify_token')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white">Verify Token</button>
+            <button onclick="switchAdminSubTab('firebase_cfg')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white">Firebase Config</button>
+          </div>
+        </div>
+
+        <!-- SubTab 1: Question Builder with Cropper.js -->
+        <div id="admin-sub-add_q" class="space-y-5">
+          <form id="admin-question-form" onsubmit="handleAdminSaveQuestion(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Target Exam</label>
+                <select id="aq-exam" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <option value="JEE Main">JEE Main</option>
+                  <option value="JEE Advanced">JEE Advanced</option>
+                  <option value="NEET">NEET</option>
+                  <option value="Class 12">Class 12</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Subject</label>
+                <select id="aq-subject" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Biology">Biology</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Question Type</label>
+                <select id="aq-type" onchange="handleAdminQTypeChange(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <option value="single_choice">Single Choice MCQ</option>
+                  <option value="numerical">Numerical Value Type (NAT)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Chapter Name</label>
+              <input id="aq-chapter" type="text" required placeholder="e.g. Kinematics or Organic Chemistry" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Question Problem Statement</label>
+              <textarea id="aq-text" rows="3" required placeholder="Enter question text or derivation..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"></textarea>
+            </div>
+
+            <!-- In-browser Cropper Upload -->
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <p class="font-bold text-white text-xs flex items-center gap-1.5">
+                  <i data-lucide="crop" class="w-4 h-4 text-indigo-400"></i> Built-in In-Browser Cropper.js
+                </p>
+                <p class="text-[11px] text-slate-400">Select an image to crop the question diagram directly</p>
+              </div>
+              <label class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer">
+                Upload & Crop Diagram
+                <input type="file" accept="image/*" class="hidden" onchange="openCropper(event)">
+              </label>
+            </div>
+            <div id="cropped-img-preview" class="hidden"></div>
+
+            <!-- Options Box -->
+            <div id="aq-options-box" class="space-y-2">
+              <label class="block text-xs font-semibold text-slate-300 uppercase">MCQ Options (Check the correct radio)</label>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="correct-opt" checked value="0" class="accent-indigo-500">
+                  <input id="aq-opt-0" type="text" required placeholder="Option A (Correct)" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="correct-opt" value="1" class="accent-indigo-500">
+                  <input id="aq-opt-1" type="text" required placeholder="Option B" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="correct-opt" value="2" class="accent-indigo-500">
+                  <input id="aq-opt-2" type="text" required placeholder="Option C" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="radio" name="correct-opt" value="3" class="accent-indigo-500">
+                  <input id="aq-opt-3" type="text" required placeholder="Option D" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                </div>
+              </div>
+            </div>
+
+            <!-- Numerical Value Input -->
+            <div id="aq-nat-box" class="hidden p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+              <label class="block text-xs font-bold text-amber-300 mb-1">Correct Numerical Value (NAT)</label>
+              <input id="aq-nat-val" type="number" step="any" placeholder="e.g. 10" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Step-by-Step Explanation</label>
+              <textarea id="aq-explanation" rows="2" placeholder="Explanation revealed only after test submission..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30">
+              Save Question to Firestore Bank
+            </button>
+          </form>
+        </div>
+
+        <!-- SubTab 2: Token Verifier -->
+        <div id="admin-sub-verify_token" class="hidden space-y-4">
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Mentorship Token Authenticator</h4>
+            <div class="flex gap-2">
+              <input id="admin-token-input" type="text" placeholder="Enter Token (e.g. PSKM-JEE-84920-VERIFIED)" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs uppercase">
+              <button onclick="verifyAdminToken()" class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs">Verify Code</button>
+            </div>
+            <div id="admin-token-result" class="hidden"></div>
+          </div>
+        </div>
+
+        <!-- SubTab 3: Firebase Config Setup -->
+        <div id="admin-sub-firebase_cfg" class="hidden space-y-4">
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Firebase Configuration</h4>
+            <p class="text-xs text-slate-400">Save credentials to synchronize live with Cloud Firestore & Firebase Auth.</p>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <input id="fb-apiKey" placeholder="apiKey" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+              <input id="fb-projectId" placeholder="projectId" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+              <input id="fb-authDomain" placeholder="authDomain" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+              <input id="fb-storageBucket" placeholder="storageBucket" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+            </div>
+            <button onclick="saveFirebaseCredentials()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs">Save Firebase Config</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-8 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-400">
+      <div class="space-y-1 text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-2">
+          <span class="font-extrabold text-white text-sm">PREPSKM</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Distraction-Free</span>
+        </div>
+        <p class="text-slate-500">Created by Sumit (@unfiltereddsumit) • JEE, NEET & Boards Preparation Platform.</p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs">
+        <a href="https://t.me/prepskm" target="_blank" rel="noreferrer" class="hover:text-sky-400 transition flex items-center gap-1">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i> Telegram @prepskm
+        </a>
+        <a href="https://t.me/unfiltreddsumit" target="_blank" rel="noreferrer" class="hover:text-sky-300 transition flex items-center gap-1">
+          <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat @unfiltreddsumit
+        </a>
+        <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-rose-400 transition flex items-center gap-1">
+          <i data-lucide="youtube" class="w-3.5 h-3.5"></i> YouTube
+        </a>
+        <a href="https://instagram.com/unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-pink-400 transition flex items-center gap-1">
+          <i data-lucide="instagram" class="w-3.5 h-3.5"></i> Instagram
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING PREP AI WIDGET -->
+  <div class="fixed bottom-5 right-5 z-40">
+    <button id="prep-ai-btn" onclick="togglePrepAI()" class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-indigo-500/40 border border-indigo-400/30 transition hover:scale-105 active:scale-95">
+      <i data-lucide="bot" class="w-5 h-5 text-indigo-200"></i>
+      <span>Prep AI Mentor</span>
+      <span class="px-1.5 py-0.5 rounded bg-white/20 text-[10px] uppercase font-black">Sumit AI</span>
+    </button>
+  </div>
+
+  <!-- PREP AI CHAT WINDOW -->
+  <div id="prep-ai-window" class="hidden fixed bottom-5 right-5 z-50 w-[94vw] sm:w-[420px] h-[580px] max-h-[85vh] rounded-3xl bg-slate-900 border border-indigo-500/30 shadow-2xl flex flex-col overflow-hidden">
+    <!-- Header -->
+    <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
+          <i data-lucide="bot" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-white text-sm">Prep AI Mentor</h4>
+          <p class="text-[10px] text-slate-400">Strict Mentor by @unfiltereddsumit</p>
+        </div>
+      </div>
+      <button onclick="togglePrepAI()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Messages -->
+    <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
+      <div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%]">
+        Radhe Radhe! Main hoon Prep AI — official academic mentor of Prepskm by @unfiltereddsumit. Physics, Chem, Bio ya Maths ka conceptual doubt pucho. Par faltu timepass kiya toh seedha reality check aur daat milegi!
+      </div>
+    </div>
+
+    <!-- Quick Chips -->
+    <div class="px-3 py-1.5 bg-slate-950 border-t border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
+      <button onclick="sendQuickPrompt('Bhai padhai me mann nahi lag raha, kya karu?')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">"Mann nahi lag raha..."</button>
+      <button onclick="sendQuickPrompt('Explain King\'s property of definite integrals with proof')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">King's Property</button>
+      <button onclick="sendQuickPrompt('How to solve projectile maximum height derivation?')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">Projectile Formula</button>
+    </div>
+
+    <!-- Chat Form -->
+    <div class="p-3 bg-slate-950 border-t border-slate-800">
+      <form onsubmit="handleAIChatSubmit(event)" class="flex gap-2">
+        <input id="ai-chat-input" type="text" placeholder="Ask doubt or formula..." class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <button type="submit" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- UNIVERSAL SEARCH MODAL -->
+  <div id="modal-search" class="hidden fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
+      <div class="p-4 border-b border-slate-800 flex items-center gap-3 bg-slate-950">
+        <i data-lucide="search" class="w-5 h-5 text-indigo-400"></i>
+        <input id="universal-search-input" oninput="handleUniversalSearch(this.value)" type="text" placeholder="Search chapters, notes, PYQs, tests..." class="w-full bg-transparent text-white text-sm focus:outline-none">
+        <button onclick="closeSearchModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="universal-search-results" class="p-4 overflow-y-auto space-y-3 max-h-96"></div>
+    </div>
+  </div>
+
+  <!-- STUDENT ONBOARDING MODAL -->
+  <div id="modal-onboarding" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-5">
+      <div class="text-center space-y-1">
+        <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold">Personalize Prepskm</span>
+        <h3 class="text-2xl font-black text-white">Welcome Aspirant</h3>
+        <p class="text-xs text-slate-400">Set your exam target to calibrate tests, notes, and study queue.</p>
+      </div>
+      <form onsubmit="handleOnboardingSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Your Full Name</label>
+          <input id="onboard-name" type="text" required placeholder="Aryan Sharma" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Target Exam</label>
+          <select id="onboard-exam" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            <option value="JEE Main">JEE Main</option>
+            <option value="JEE Advanced">JEE Advanced</option>
+            <option value="NEET">NEET</option>
+            <option value="Class 12">Class 12 Boards</option>
+            <option value="Class 11">Class 11 Foundation</option>
+            <option value="Dropper">Dropper</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg">
+          Start Conquering My Prep
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="modal-auth" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 sm:p-8 space-y-5">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white text-base">Student & Admin Sign In</h3>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Email</label>
+          <input id="auth-email" type="email" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Password</label>
+          <input id="auth-password" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md">
+          Sign In
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-800 space-y-2">
+        <p class="text-[11px] font-bold text-slate-400 uppercase text-center">1-Click Demo Login</p>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button type="button" onclick="quickDemoLogin('sumitiitan58@gmail.com')" class="p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
+            Admin Demo
+          </button>
+          <button type="button" onclick="quickDemoLogin('aspirant@prepskm.com')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">
+            Student Demo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD BACKLOG MODAL -->
+  <div id="modal-add-backlog" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white text-base">Add Chapter to Backlog</h3>
+        <button onclick="closeAddBacklogModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="handleSaveBacklog(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Subject</label>
+          <select id="bl-subject" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Biology">Biology</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Chapter Name</label>
+          <input id="bl-chapter" type="text" required placeholder="e.g. Rotational Motion" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Priority</label>
+          <select id="bl-priority" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            <option value="high">High (High Weightage)</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs">Save to Backlog</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROMOTIONAL CAMPAIGN MODAL -->
+  <div id="modal-campaign" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-2xl p-6 space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-white text-base">Creator Launch Scripts (@unfiltereddsumit)</h3>
+          <p class="text-xs text-slate-400">Copy ready-made promotional scripts for YouTube, Reels & Telegram</p>
+        </div>
+        <button onclick="closeCampaignModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="flex gap-2 text-xs">
+        <button onclick="switchCampaignTab('yt')" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold">YouTube Video</button>
+        <button onclick="switchCampaignTab('reel')" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-amber-500 text-white font-bold">30s Reel</button>
+        <button onclick="switchCampaignTab('tg')" class="px-3 py-1.5 rounded-lg bg-sky-500 text-white font-bold">Telegram Post</button>
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <pre id="campaign-script-text" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono whitespace-pre-wrap select-all"></pre>
+      </div>
+      <button onclick="copyCampaignScript()" class="py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs">Copy Script to Clipboard</button>
+    </div>
+  </div>
+
+  <!-- CROPPER MODAL -->
+  <div id="modal-cropper" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-5 py-3 border-b border-slate-800 flex items-center justify-between">
+        <h4 class="font-bold text-white text-sm">Crop Question / Option Diagram</h4>
+        <button onclick="closeCropper()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="flex-1 bg-slate-950 p-4 flex items-center justify-center max-h-[450px] overflow-hidden">
+        <img id="cropper-target-img" src="" alt="Crop target" class="max-h-[400px] max-w-full block">
+      </div>
+      <div class="p-3 bg-slate-900 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeCropper()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400">Cancel</button>
+        <button onclick="applyCrop()" class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs">Apply Snip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN JAVASCRIPT APP ENGINE -->
+  <script>
+    // ==================== INITIAL DATA REPOSITORY ====================
+    const DEFAULT_QUESTIONS = [
+      {
+        id: 'phy-01',
+        targetExam: 'JEE Main',
+        classLevel: 'Class 11',
+        subject: 'Physics',
+        chapter: 'Kinematics',
+        type: 'single_choice',
+        text: 'A projectile is launched from ground level at an angle θ = 45° with an initial velocity of 20 m/s. Taking g = 10 m/s², what is the maximum height reached?',
+        options: ['5 m', '10 m', '15 m', '20 m'],
+        correctIndex: 1,
+        explanationText: 'H_max = (u² * sin²θ) / (2g) = (400 * 0.5) / 20 = 10 m.'
+      },
+      {
+        id: 'phy-02',
+        targetExam: 'JEE Main',
+        classLevel: 'Class 11',
+        subject: 'Physics',
+        chapter: 'Laws of Motion',
+        type: 'numerical',
+        text: 'A block of mass m = 2 kg rests on a floor with coefficient of friction μ = 0.4. What is the minimum horizontal force in Newtons required to move it? (g = 10 m/s²)',
+        numericalAnswer: 8,
+        explanationText: 'f_lim = μ * m * g = 0.4 * 2 * 10 = 8 N.'
+      },
+      {
+        id: 'chem-01',
+        targetExam: 'JEE Main',
+        classLevel: 'Class 11',
+        subject: 'Chemistry',
+        chapter: 'Atomic Structure',
+        type: 'single_choice',
+        text: 'What is the maximum number of electrons in an atom that can have quantum numbers n = 4 and m_s = +1/2?',
+        options: ['16', '32', '8', '4'],
+        correctIndex: 0,
+        explanationText: 'For n = 4, number of orbitals = n² = 16. Each orbital can have at most one electron with spin +1/2. Hence 16.'
+      },
+      {
+        id: 'chem-02',
+        targetExam: 'JEE Main',
+        classLevel: 'Class 12',
+        subject: 'Chemistry',
+        chapter: 'Chemical Kinetics',
+        type: 'numerical',
+        text: 'For a first-order reaction with rate constant k = 0.0693 min⁻¹, what is the half-life t_1/2 in minutes? (ln 2 = 0.693)',
+        numericalAnswer: 10,
+        explanationText: 't_1/2 = 0.693 / k = 0.693 / 0.0693 = 10 min.'
+      },
+      {
+        id: 'math-01',
+        targetExam: 'JEE Main',
+        classLevel: 'Class 11',
+        subject: 'Mathematics',
+        chapter: 'Quadratic Equations',
+        type: 'single_choice',
+        text: 'If α and β are roots of x² - 5x + 6 = 0, what is the value of (α³ + β³)?',
+        options: ['35', '40', '45', '50'],
+        correctIndex: 0,
+        explanationText: 'Roots are 2 and 3. 2³ + 3³ = 8 + 27 = 35.'
+      },
+      {
+        id: 'bio-01',
+        targetExam: 'NEET',
+        classLevel: 'Class 11',
+        subject: 'Biology',
+        chapter: 'Cell: The Unit of Life',
+        type: 'single_choice',
+        text: 'Which organelle is semi-autonomous with circular DNA and 70S ribosomes?',
+        options: ['Golgi Apparatus', 'Mitochondria', 'Lysosome', 'Ribosome'],
+        correctIndex: 1,
+        explanationText: 'Mitochondria generate ATP and contain circular DNA and 70S ribosomes.'
+      }
+    ];
+
+    const DEFAULT_MATERIALS = [
+      {
+        id: 'mat-1',
+        title: 'Kinematics & Mechanics High-Yield Handwritten Notes',
+        category: 'notes',
+        subject: 'Physics',
+        classLevel: 'Class 11 / JEE & NEET',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        description: 'Complete formulas, relative velocity shortcuts, projectile derivations and graph tricks.'
+      },
+      {
+        id: 'mat-2',
+        title: 'Organic Chemistry Reaction Mechanisms & Named Reactions Cheat Sheet',
+        category: 'formula_sheet',
+        subject: 'Chemistry',
+        classLevel: 'Class 12 / JEE',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        description: 'All 32 named reactions, electrophilic additions, Aldol, Cannizzaro, and reagents table.'
+      },
+      {
+        id: 'mat-3',
+        title: 'JEE Main 2021-2025 Physics Chapter-wise PYQs Solved',
+        category: 'pyq',
+        subject: 'Physics',
+        classLevel: 'JEE Main',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        description: 'Every shift question categorized with short elimination methods.'
+      },
+      {
+        id: 'mat-4',
+        title: 'How to Clear 100 Hours of JEE/NEET Backlog in 3 Weeks',
+        category: 'video',
+        subject: 'Physics',
+        classLevel: 'JEE / NEET Droppers',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        pdfTitle: 'Backlog_3_Week_Planner_Template.pdf',
+        description: 'Sumit shares the exact scheduling framework to balance current chapters with backlog.'
+      }
+    ];
+
+    const DEFAULT_BACKLOGS = [
+      { id: 'bl-1', subject: 'Physics', chapter: 'Rotational Motion & Moment of Inertia', priority: 'high', status: 'in_progress', targetDate: '2026-11-10' },
+      { id: 'bl-2', subject: 'Chemistry', chapter: 'Thermodynamics & Thermochemistry', priority: 'high', status: 'pending', targetDate: '2026-11-14' },
+      { id: 'bl-3', subject: 'Mathematics', chapter: 'Definite Integration & King Property', priority: 'medium', status: 'cleared', targetDate: '2026-11-02' },
+      { id: 'bl-4', subject: 'Physics', chapter: 'Ray Optics & Optical Instruments', priority: 'medium', status: 'pending', targetDate: '2026-11-18' }
+    ];
+
+    const ALL_CHAPTERS = [
+      'Kinematics', 'Laws of Motion', 'Work Energy and Power', 'Rotational Motion', 'Gravitation',
+      'Atomic Structure', 'Chemical Bonding', 'Thermodynamics', 'Chemical Kinetics', 'Organic Chemistry',
+      'Quadratic Equations', 'Definite Integration', 'Matrices & Determinants', 'Vector Algebra',
+      'Cell: The Unit of Life', 'Genetics & Molecular Basis', 'Human Physiology'
+    ];
+
+    // State
+    let currentTab = 'tracker';
+    let currentStudent = { name: 'Aspirant', targetExam: 'JEE Main', classLevel: 'Class 12', streak: 5 };
+    let currentUser = null; // null or { email: '...' }
+    let questions = JSON.parse(localStorage.getItem('prepskm_db_questions') || 'null') || DEFAULT_QUESTIONS;
+    let materials = JSON.parse(localStorage.getItem('prepskm_db_materials') || 'null') || DEFAULT_MATERIALS;
+    let backlogs = JSON.parse(localStorage.getItem('prepskm_db_backlogs') || 'null') || DEFAULT_BACKLOGS;
+    let tokens = JSON.parse(localStorage.getItem('prepskm_db_tokens') || 'null') || [];
+    let mentorDuration = 30;
+    let cropperInstance = null;
+    let croppedBase64 = null;
+
+    // CBT active state
+    let activeTest = null;
+    let testTimerInterval = null;
+
+    // Initialize App
+    function initApp() {
+      // Load saved profile
+      const savedProfile = localStorage.getItem('prepskm_student_profile');
+      if (savedProfile) {
+        currentStudent = JSON.parse(savedProfile);
+      }
+      updateStudentUI();
+      renderBacklogs();
+      renderMaterials();
+      renderTestChapters();
+      lucide.createIcons();
+    }
+
+    function updateStudentUI() {
+      document.getElementById('nav-student-name').innerText = currentStudent.name;
+      document.getElementById('nav-student-exam').innerText = currentStudent.targetExam;
+      document.getElementById('nav-avatar').innerText = currentStudent.name.charAt(0).toUpperCase();
+      document.getElementById('greeting-target-badge').innerText = `Target: ${currentStudent.targetExam} (${currentStudent.classLevel || 'Class 12'})`;
+      document.getElementById('greeting-heading').innerText = `Welcome back, ${currentStudent.name}! Ready to conquer ${currentStudent.targetExam} today?`;
+      document.getElementById('streak-counter').innerText = currentStudent.streak || 5;
+    }
+
+    // ==================== TABS ROUTING ====================
+    function switchTab(tabId) {
+      if (tabId === 'admin' && (!currentUser || !isUserAdmin(currentUser.email))) {
+        openAuthModal();
+        return;
+      }
+      currentTab = tabId;
+      ['tracker', 'materials', 'mock_tests', 'mentorship', 'admin'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (view) {
+          if (t === tabId) view.classList.remove('hidden');
+          else view.classList.add('hidden');
+        }
+        if (btn) {
+          if (t === tabId) {
+            btn.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 transition shrink-0";
+          } else {
+            btn.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0";
+          }
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function isUserAdmin(email) {
+      if (!email) return false;
+      const lower = email.toLowerCase().trim();
+      return lower === 'sumitiitan58@gmail.com' || lower === 'admin@prepskm.com';
+    }
+
+    // ==================== BACKLOG DESTROYER ====================
+    function renderBacklogs() {
+      const list = document.getElementById('backlog-list');
+      const total = backlogs.length;
+      const cleared = backlogs.filter(b => b.status === 'cleared').length;
+      const percent = total > 0 ? Math.round((cleared / total) * 100) : 0;
+
+      document.getElementById('backlog-percent-text').innerText = `${percent}%`;
+      document.getElementById('backlog-progress-bar').style.width = `${percent}%`;
+      document.getElementById('backlog-cleared-text').innerText = `${cleared} Cleared`;
+      document.getElementById('backlog-remaining-text').innerText = `${total - cleared} Remaining`;
+      document.getElementById('backlog-total-count').innerText = `${total} Chapters`;
+
+      list.innerHTML = backlogs.map(item => `
+        <div class="p-4 rounded-2xl border ${item.status === 'cleared' ? 'bg-slate-900/40 border-slate-800 opacity-70' : 'bg-slate-900 border-slate-800'} flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <button onclick="toggleBacklogStatus('${item.id}')" class="p-2 rounded-xl border ${item.status === 'cleared' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-800 border-slate-700 text-slate-400'}">
+              <i data-lucide="${item.status === 'cleared' ? 'check-circle-2' : 'clock'}" class="w-5 h-5"></i>
+            </button>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400">${item.subject}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.priority === 'high' ? 'bg-rose-500/10 text-rose-400' : 'bg-amber-500/10 text-amber-400'}">${item.priority}</span>
+              </div>
+              <h4 class="font-bold text-sm ${item.status === 'cleared' ? 'line-through text-slate-500' : 'text-white'}">${item.chapter}</h4>
+            </div>
+          </div>
+          <button onclick="deleteBacklogItem('${item.id}')" class="p-2 text-slate-500 hover:text-rose-400">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function toggleBacklogStatus(id) {
+      const item = backlogs.find(b => b.id === id);
+      if (item) {
+        item.status = item.status === 'cleared' ? 'pending' : 'cleared';
+        localStorage.setItem('prepskm_db_backlogs', JSON.stringify(backlogs));
+        renderBacklogs();
+      }
+    }
+
+    function deleteBacklogItem(id) {
+      backlogs = backlogs.filter(b => b.id !== id);
+      localStorage.setItem('prepskm_db_backlogs', JSON.stringify(backlogs));
+      renderBacklogs();
+    }
+
+    function openAddBacklogModal() {
+      document.getElementById('modal-add-backlog').classList.remove('hidden');
+    }
+    function closeAddBacklogModal() {
+      document.getElementById('modal-add-backlog').classList.add('hidden');
+    }
+
+    function handleSaveBacklog(e) {
+      e.preventDefault();
+      const sub = document.getElementById('bl-subject').value;
+      const ch = document.getElementById('bl-chapter').value;
+      const prio = document.getElementById('bl-priority').value;
+      backlogs.unshift({ id: 'bl-' + Date.now(), subject: sub, chapter: ch, priority: prio, status: 'pending' });
+      localStorage.setItem('prepskm_db_backlogs', JSON.stringify(backlogs));
+      renderBacklogs();
+      closeAddBacklogModal();
+    }
+
+    // ==================== MATERIALS HUB ====================
+    let activeMaterialFilter = 'all';
+    function renderMaterials() {
+      const grid = document.getElementById('materials-grid');
+      const filtered = materials.filter(m => activeMaterialFilter === 'all' || m.category === activeMaterialFilter);
+      grid.innerHTML = filtered.map(mat => `
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase">${mat.subject}</span>
+              <span class="text-xs text-slate-400 capitalize">${mat.category.replace('_', ' ')}</span>
+            </div>
+            <h4 class="font-bold text-white text-base">${mat.title}</h4>
+            <p class="text-xs text-slate-400 line-clamp-2">${mat.description}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end">
+            ${mat.category === 'video'
+              ? `<a href="${mat.videoUrl}" target="_blank" class="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1"><i data-lucide="play" class="w-3.5 h-3.5"></i> Watch Lecture</a>`
+              : `<a href="${mat.pdfUrl}" target="_blank" download class="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Download PDF</a>`
+            }
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function filterMaterialCategory(cat) {
+      activeMaterialFilter = cat;
+      renderMaterials();
+    }
+
+    // ==================== NTA CBT MOCK ENGINE ====================
+    function renderTestChapters() {
+      const list = document.getElementById('test-chapters-list');
+      list.innerHTML = ALL_CHAPTERS.map(ch => `
+        <label class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 text-xs flex items-center justify-between cursor-pointer">
+          <span class="font-medium text-slate-200">${ch}</span>
+          <input type="checkbox" checked value="${ch}" class="test-ch-cb accent-indigo-500">
+        </label>
+      `).join('');
+    }
+
+    function selectAllTestChapters() {
+      const cbs = document.querySelectorAll('.test-ch-cb');
+      const allChecked = Array.from(cbs).every(c => c.checked);
+      cbs.forEach(c => c.checked = !allChecked);
+    }
+
+    function updateQCountSlider(val) {
+      document.getElementById('test-qcount-display').innerText = val;
+      const count = Number(val);
+      const nat = Math.round(count * 0.2); // 20%
+      const mcq = count - nat; // 80%
+      document.getElementById('test-mcq-count').innerText = mcq;
+      document.getElementById('test-nat-count').innerText = nat;
+      document.getElementById('test-max-marks').innerText = `+${count * 4} Marks`;
+      document.getElementById('test-duration-est').innerText = `Time: ${Math.round(count * 1.5)} Mins`;
+    }
+
+    function launchNtaTest() {
+      const count = Number(document.getElementById('test-qcount-slider').value);
+      const natCount = Math.round(count * 0.2);
+      const mcqCount = count - natCount;
+
+      // Construct questions
+      const selected = [];
+      for (let i = 0; i < count; i++) {
+        const isNat = i >= mcqCount;
+        const sub = i % 3 === 0 ? 'Physics' : i % 3 === 1 ? 'Chemistry' : 'Mathematics';
+        const candidate = questions.find(q => (isNat ? q.type === 'numerical' : q.type !== 'numerical') && q.subject === sub) || questions[0];
+        selected.push({
+          ...candidate,
+          testQId: 'tq-' + i,
+          type: isNat ? 'numerical' : 'single_choice',
+          options: candidate.options || ['Option A', 'Option B', 'Option C', 'Option D'],
+          correctIndex: candidate.correctIndex ?? 0,
+          numericalAnswer: candidate.numericalAnswer ?? 10
+        });
+      }
+
+      activeTest = {
+        questions: selected,
+        currentIndex: 0,
+        userAnswers: {},
+        statuses: {}, // 'not_visited', 'answered', 'not_answered', 'marked'
+        timeRemaining: count * 90
+      };
+
+      selected.forEach((q, idx) => {
+        activeTest.statuses[q.testQId] = idx === 0 ? 'not_answered' : 'not_visited';
+      });
+
+      document.getElementById('test-generator-container').classList.add('hidden');
+      document.getElementById('cbt-exam-engine').classList.remove('hidden');
+      document.getElementById('cbt-exam-engine').classList.add('flex');
+
+      startTestTimer();
+      loadCbtQuestion(0);
+    }
+
+    function startTestTimer() {
+      clearInterval(testTimerInterval);
+      testTimerInterval = setInterval(() => {
+        if (!activeTest) return;
+        activeTest.timeRemaining--;
+        if (activeTest.timeRemaining <= 0) {
+          clearInterval(testTimerInterval);
+          submitExamNow();
+          return;
+        }
+        const m = Math.floor(activeTest.timeRemaining / 60);
+        const s = activeTest.timeRemaining % 60;
+        document.getElementById('cbt-time-remaining').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function loadCbtQuestion(index) {
+      if (!activeTest) return;
+      activeTest.currentIndex = index;
+      const q = activeTest.questions[index];
+
+      document.getElementById('cbt-question-number-badge').innerText = `Q ${index + 1} of ${activeTest.questions.length}`;
+      document.getElementById('cbt-question-subject-badge').innerText = q.subject;
+      document.getElementById('cbt-question-type-badge').innerText = q.type === 'numerical' ? 'Numerical (NAT)' : 'MCQ (+4, -1)';
+      document.getElementById('cbt-question-text').innerText = q.text;
+
+      const optContainer = document.getElementById('cbt-options-container');
+      if (q.type === 'numerical') {
+        optContainer.innerHTML = `
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 max-w-sm space-y-2">
+            <label class="text-xs font-bold text-amber-400 uppercase">Enter Numerical Answer (NAT):</label>
+            <input type="number" step="any" id="nat-input" value="${activeTest.userAnswers[q.testQId] || ''}" oninput="activeTest.userAnswers['${q.testQId}'] = this.value" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 font-mono text-white text-lg">
+          </div>
+        `;
+      } else {
+        optContainer.innerHTML = q.options.map((opt, oIdx) => `
+          <label class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-850 text-sm flex items-center gap-3 cursor-pointer">
+            <input type="radio" name="cbt-opt" value="${oIdx}" ${activeTest.userAnswers[q.testQId] == oIdx ? 'checked' : ''} onchange="activeTest.userAnswers['${q.testQId}'] = this.value" class="accent-indigo-500 w-4 h-4">
+            <span>${opt}</span>
+          </label>
+        `).join('');
+      }
+
+      renderPalette();
+    }
+
+    function saveAndNext() {
+      if (!activeTest) return;
+      const q = activeTest.questions[activeTest.currentIndex];
+      const hasAns = activeTest.userAnswers[q.testQId] !== undefined && activeTest.userAnswers[q.testQId] !== '';
+      activeTest.statuses[q.testQId] = hasAns ? 'answered' : 'not_answered';
+
+      if (activeTest.currentIndex < activeTest.questions.length - 1) {
+        loadCbtQuestion(activeTest.currentIndex + 1);
+      } else {
+        renderPalette();
+      }
+    }
+
+    function markForReviewAndNext() {
+      if (!activeTest) return;
+      const q = activeTest.questions[activeTest.currentIndex];
+      activeTest.statuses[q.testQId] = 'marked';
+      if (activeTest.currentIndex < activeTest.questions.length - 1) {
+        loadCbtQuestion(activeTest.currentIndex + 1);
+      } else {
+        renderPalette();
+      }
+    }
+
+    function clearResponse() {
+      if (!activeTest) return;
+      const q = activeTest.questions[activeTest.currentIndex];
+      delete activeTest.userAnswers[q.testQId];
+      activeTest.statuses[q.testQId] = 'not_answered';
+      loadCbtQuestion(activeTest.currentIndex);
+    }
+
+    function renderPalette() {
+      if (!activeTest) return;
+      let ans = 0, notans = 0, marked = 0, notvis = 0;
+      const grid = document.getElementById('cbt-palette-grid');
+
+      grid.innerHTML = activeTest.questions.map((q, idx) => {
+        const st = activeTest.statuses[q.testQId] || 'not_visited';
+        if (st === 'answered') ans++;
+        else if (st === 'not_answered') notans++;
+        else if (st === 'marked') marked++;
+        else notvis++;
+
+        let bg = 'bg-slate-800 text-slate-400';
+        if (st === 'answered') bg = 'bg-emerald-600 text-white font-bold';
+        if (st === 'not_answered') bg = 'bg-rose-600 text-white font-bold';
+        if (st === 'marked') bg = 'bg-purple-600 text-white font-bold';
+
+        return `<button onclick="loadCbtQuestion(${idx})" class="h-9 rounded-lg border border-slate-700 text-xs ${bg} ${idx === activeTest.currentIndex ? 'ring-2 ring-indigo-400 scale-105' : ''}">${idx + 1}</button>`;
+      }).join('');
+
+      document.getElementById('count-ans').innerText = ans;
+      document.getElementById('count-notans').innerText = notans;
+      document.getElementById('count-marked').innerText = marked;
+      document.getElementById('count-notvis').innerText = notvis;
+    }
+
+    function submitExamNow() {
+      clearInterval(testTimerInterval);
+      let score = 0, correct = 0, incorrect = 0, unattempted = 0;
+
+      activeTest.questions.forEach(q => {
+        const userVal = activeTest.userAnswers[q.testQId];
+        if (userVal === undefined || userVal === '') {
+          unattempted++;
+        } else {
+          let isCorr = false;
+          if (q.type === 'numerical') {
+            isCorr = Math.abs(parseFloat(userVal) - q.numericalAnswer) <= 0.1;
+          } else {
+            isCorr = parseInt(userVal) === q.correctIndex;
+          }
+          if (isCorr) {
+            correct++;
+            score += 4;
+          } else {
+            incorrect++;
+            score -= 1;
+          }
+        }
+      });
+
+      const maxScore = activeTest.questions.length * 4;
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+      document.getElementById('cbt-exam-engine').classList.remove('flex');
+      document.getElementById('cbt-exam-engine').classList.add('hidden');
+
+      const card = document.getElementById('cbt-scorecard-container');
+      card.classList.remove('hidden');
+      card.innerHTML = `
+        <div class="p-6 rounded-3xl bg-slate-900 border border-indigo-500/30 space-y-4">
+          <h3 class="text-2xl font-black text-white">NTA CBT Scorecard</h3>
+          <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <span class="text-4xl font-black text-emerald-400">${score}</span>
+              <span class="text-slate-400 text-sm">/ ${maxScore} Marks</span>
+            </div>
+            <div class="text-right text-xs text-slate-300 space-y-1">
+              <p>Correct: <span class="text-emerald-400 font-bold">${correct}</span></p>
+              <p>Incorrect: <span class="text-rose-400 font-bold">${incorrect}</span></p>
+              <p>Unattempted: <span class="text-slate-400 font-bold">${unattempted}</span></p>
+            </div>
+          </div>
+          <button onclick="document.getElementById('cbt-scorecard-container').classList.add('hidden'); document.getElementById('test-generator-container').classList.remove('hidden');" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs">Create Another Test</button>
+        </div>
+      `;
+      activeTest = null;
+    }
+
+    // ==================== MENTORSHIP BOOKING ====================
+    function setMentorDuration(mins) {
+      mentorDuration = mins;
+      const amt = mins * 5;
+      document.getElementById('mentor-duration-label').innerText = `${mins} Mins = ₹${amt}`;
+      document.getElementById('upi-qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?data=upi://pay?pa=prepskm@upi&pn=Prepskm&am=${amt}&size=140x140`;
+      document.querySelectorAll('.mentor-dur-btn').forEach(btn => {
+        btn.className = btn.innerText.includes(`${mins}m`)
+          ? 'mentor-dur-btn p-2.5 rounded-xl border text-center text-xs font-bold bg-indigo-600 border-indigo-500 text-white'
+          : 'mentor-dur-btn p-2.5 rounded-xl border text-center text-xs font-bold bg-slate-950 border-slate-800 text-slate-400';
+      });
+    }
+
+    function handleMentorshipSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('mentor-name').value;
+      const phone = document.getElementById('mentor-phone').value;
+      const exam = document.getElementById('mentor-exam').value;
+      const slot = document.getElementById('mentor-slot').value;
+      const amt = mentorDuration * 5;
+      const token = `PSKM-${exam.includes('NEET') ? 'NEET' : 'JEE'}-${Math.floor(10000 + Math.random()*90000)}-VERIFIED`;
+
+      const tokenObj = { tokenCode: token, studentName: name, phoneOrWhatsApp: phone, targetExam: exam, minutesBooked: mentorDuration, amountPaid: amt, timeSlot: slot, issuedAt: new Date().toISOString() };
+      tokens.unshift(tokenObj);
+      localStorage.setItem('prepskm_db_tokens', JSON.stringify(tokens));
+
+      confetti({ particleCount: 80, spread: 60 });
+
+      const tgMsg = encodeURIComponent(`Bhaiya! Booked 1:1 Mentorship pass.\nPass Code: ${token}\nName: ${name}\nExam: ${exam}\nDuration: ${mentorDuration}m (Paid ₹${amt})\nSlot: ${slot}`);
+
+      document.getElementById('pass-card-display-container').innerHTML = `
+        <div class="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border-2 border-indigo-500/40 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-indigo-500/30">
+            <span class="font-black text-white text-base">PREPSKM PASS</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-xs">VERIFIED</span>
+          </div>
+          <div class="p-3 bg-slate-950 rounded-xl text-center">
+            <span class="text-[10px] uppercase text-slate-400 block font-bold">Token Code</span>
+            <span class="font-mono font-black text-indigo-300 text-lg">${token}</span>
+          </div>
+          <div class="text-xs text-slate-300 space-y-1">
+            <p>Aspirant: <span class="font-bold text-white">${name}</span></p>
+            <p>Exam: <span class="font-bold text-white">${exam}</span></p>
+            <p>Duration: <span class="font-bold text-emerald-400">${mentorDuration} Mins (₹${amt})</span></p>
+            <p>Slot: <span class="font-bold text-white">${slot}</span></p>
+          </div>
+          <a href="https://t.me/unfiltreddsumit?text=${tgMsg}" target="_blank" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg">
+            <i data-lucide="send" class="w-4 h-4"></i> Send Pass to Telegram Chat (@unfiltreddsumit)
+          </a>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // ==================== PREP AI CHAT ENGINE ====================
+    let isAIOpen = false;
+    function togglePrepAI() {
+      isAIOpen = !isAIOpen;
+      const win = document.getElementById('prep-ai-window');
+      if (isAIOpen) win.classList.remove('hidden');
+      else win.classList.add('hidden');
+    }
+
+    function sendQuickPrompt(prompt) {
+      document.getElementById('ai-chat-input').value = prompt;
+      handleAIChatSubmit(new Event('submit'));
+    }
+
+    async function handleAIChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const container = document.getElementById('ai-chat-messages');
+      container.innerHTML += `<div class="p-3 rounded-2xl bg-indigo-600 text-white max-w-[85%] ml-auto">${text}</div>`;
+      input.value = '';
+
+      // Check strict scolding triggers
+      const lower = text.toLowerCase();
+      if (lower.includes('mann nahi') || lower.includes('kal se') || lower.includes('procrastinat') || lower.includes('khelne') || lower.includes('girlfriend') || lower.includes('gossip') || lower.includes('bore')) {
+        setTimeout(() => {
+          container.innerHTML += `
+            <div class="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-200 max-w-[85%] space-y-1">
+              <span class="text-[10px] font-bold text-rose-400 block uppercase">Strict Reality Check 🔥</span>
+              <p>Arey padhai par dhyan do! NEET/JEE ka competition dekha hai? Lakhon bacche din-raat padh rahe hain aur tum yahan faltu baaton me time waste kar rahe ho? Phone side rakho aur agle 2 ghante padho! Prepskm Backlog tracker kholo aur agla chapter solve karo!</p>
+            </div>
+          `;
+          container.scrollTop = container.scrollHeight;
+        }, 300);
+        return;
+      }
+
+      // Try server endpoint
+      try {
+        const res = await fetch('/api/prep-ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await res.json();
+        container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%] whitespace-pre-wrap">${data.reply || 'Padhai shuru karo!'}</div>`;
+      } catch (err) {
+        container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%]">Bhai formulas revise karo aur test series attempt karo!</div>`;
+      }
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ==================== CROPPER JS MODAL ====================
+    function openCropper(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('cropper-target-img').src = reader.result;
+        document.getElementById('modal-cropper').classList.remove('hidden');
+        if (cropperInstance) cropperInstance.destroy();
+        cropperInstance = new Cropper(document.getElementById('cropper-target-img'), {
+          aspectRatio: NaN,
+          viewMode: 1
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+    function closeCropper() {
+      document.getElementById('modal-cropper').classList.add('hidden');
+      if (cropperInstance) cropperInstance.destroy();
+    }
+    function applyCrop() {
+      if (cropperInstance) {
+        croppedBase64 = cropperInstance.getCroppedCanvas({ maxWidth: 800 }).toDataURL();
+        const prev = document.getElementById('cropped-img-preview');
+        prev.classList.remove('hidden');
+        prev.innerHTML = `<img src="${croppedBase64}" class="max-h-32 rounded border border-slate-700">`;
+        closeCropper();
+      }
+    }
+
+    // ==================== ADMIN ACTIONS ====================
+    function switchAdminSubTab(sub) {
+      ['add_q', 'verify_token', 'firebase_cfg'].forEach(s => {
+        document.getElementById(`admin-sub-${s}`).classList.toggle('hidden', s !== sub);
+      });
+    }
+
+    function handleAdminQTypeChange(val) {
+      document.getElementById('aq-options-box').classList.toggle('hidden', val === 'numerical');
+      document.getElementById('aq-nat-box').classList.toggle('hidden', val !== 'numerical');
+    }
+
+    function handleAdminSaveQuestion(e) {
+      e.preventDefault();
+      const exam = document.getElementById('aq-exam').value;
+      const sub = document.getElementById('aq-subject').value;
+      const type = document.getElementById('aq-type').value;
+      const ch = document.getElementById('aq-chapter').value;
+      const text = document.getElementById('aq-text').value;
+      const exp = document.getElementById('aq-explanation').value;
+
+      const newQ = {
+        id: 'q-' + Date.now(),
+        targetExam: exam,
+        subject: sub,
+        type,
+        chapter: ch,
+        text,
+        explanationText: exp,
+        imageBase64: croppedBase64 || undefined
+      };
+
+      if (type === 'numerical') {
+        newQ.numericalAnswer = parseFloat(document.getElementById('aq-nat-val').value) || 0;
+      } else {
+        newQ.options = [
+          document.getElementById('aq-opt-0').value,
+          document.getElementById('aq-opt-1').value,
+          document.getElementById('aq-opt-2').value,
+          document.getElementById('aq-opt-3').value
+        ];
+        const radios = document.getElementsByName('correct-opt');
+        for (let r of radios) { if (r.checked) newQ.correctIndex = parseInt(r.value); }
+      }
+
+      questions.unshift(newQ);
+      localStorage.setItem('prepskm_db_questions', JSON.stringify(questions));
+      alert('Question saved to question bank successfully!');
+      e.target.reset();
+      document.getElementById('cropped-img-preview').classList.add('hidden');
+      croppedBase64 = null;
+    }
+
+    function verifyAdminToken() {
+      const code = document.getElementById('admin-token-input').value.trim().toUpperCase();
+      const found = tokens.find(t => t.tokenCode.toUpperCase() === code);
+      const res = document.getElementById('admin-token-result');
+      res.classList.remove('hidden');
+      if (found) {
+        res.innerHTML = `
+          <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs space-y-1">
+            <p class="font-bold">AUTHENTIC & VALID TOKEN</p>
+            <p>Student: ${found.studentName} (${found.phoneOrWhatsApp})</p>
+            <p>Exam: ${found.targetExam} • ${found.minutesBooked} Mins (₹${found.amountPaid})</p>
+            <p>Slot: ${found.timeSlot}</p>
+          </div>
+        `;
+      } else {
+        res.innerHTML = `
+          <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs font-bold">
+            FAKE / INVALID TOKEN CODE
+          </div>
+        `;
+      }
+    }
+
+    function saveFirebaseCredentials() {
+      const cfg = {
+        apiKey: document.getElementById('fb-apiKey').value,
+        projectId: document.getElementById('fb-projectId').value,
+        authDomain: document.getElementById('fb-authDomain').value,
+        storageBucket: document.getElementById('fb-storageBucket').value
+      };
+      localStorage.setItem('prepskm_firebase_config', JSON.stringify(cfg));
+      alert('Firebase credentials saved!');
+    }
+
+    // ==================== AUTH & ONBOARDING MODALS ====================
+    function openAuthModal() { document.getElementById('modal-auth').classList.remove('hidden'); }
+    function closeAuthModal() { document.getElementById('modal-auth').classList.add('hidden'); }
+    function openOnboardingModal() { document.getElementById('modal-onboarding').classList.remove('hidden'); }
+    function closeOnboardingModal() { document.getElementById('modal-onboarding').classList.add('hidden'); }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value;
+      currentUser = { email };
+      updateAuthUI();
+      closeAuthModal();
+    }
+
+    function quickDemoLogin(email) {
+      currentUser = { email };
+      updateAuthUI();
+      closeAuthModal();
+      if (isUserAdmin(email)) {
+        switchTab('admin');
+      }
+    }
+
+    function updateAuthUI() {
+      const adminBtn = document.getElementById('admin-panel-btn');
+      const authCont = document.getElementById('auth-btn-container');
+      if (currentUser) {
+        const isAdmin = isUserAdmin(currentUser.email);
+        if (isAdmin) adminBtn.classList.remove('hidden');
+        else adminBtn.classList.add('hidden');
+        authCont.innerHTML = `
+          <button onclick="handleLogout()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold text-xs border border-slate-700">
+            Sign Out (${currentUser.email.split('@')[0]})
+          </button>
+        `;
+      } else {
+        adminBtn.classList.add('hidden');
+        authCont.innerHTML = `
+          <button onclick="openAuthModal()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition">
+            Sign In
+          </button>
+        `;
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      updateAuthUI();
+      if (currentTab === 'admin') switchTab('tracker');
+    }
+
+    function handleOnboardingSubmit(e) {
+      e.preventDefault();
+      currentStudent.name = document.getElementById('onboard-name').value;
+      currentStudent.targetExam = document.getElementById('onboard-exam').value;
+      localStorage.setItem('prepskm_student_profile', JSON.stringify(currentStudent));
+      updateStudentUI();
+      closeOnboardingModal();
+    }
+
+    // ==================== UNIVERSAL SEARCH ====================
+    function openSearchModal() { document.getElementById('modal-search').classList.remove('hidden'); }
+    function closeSearchModal() { document.getElementById('modal-search').classList.add('hidden'); }
+    function handleUniversalSearch(val) {
+      const q = val.toLowerCase().trim();
+      const res = document.getElementById('universal-search-results');
+      if (!q) {
+        res.innerHTML = '<p class="text-xs text-slate-500 py-4 text-center">Search chapters, formula sheets, notes, or PYQs...</p>';
+        return;
+      }
+      const matchedCh = ALL_CHAPTERS.filter(c => c.toLowerCase().includes(q));
+      const matchedMat = materials.filter(m => m.title.toLowerCase().includes(q));
+
+      res.innerHTML = `
+        <div class="space-y-2">
+          ${matchedCh.map(c => `
+            <div onclick="closeSearchModal(); switchTab('mock_tests');" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 flex items-center justify-between text-xs cursor-pointer">
+              <span class="font-bold text-white">${c}</span>
+              <span class="text-indigo-400 font-bold">Practice Mock →</span>
+            </div>
+          `).join('')}
+          ${matchedMat.map(m => `
+            <div onclick="closeSearchModal(); switchTab('materials');" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 flex items-center justify-between text-xs cursor-pointer">
+              <span class="font-bold text-white">${m.title}</span>
+              <span class="text-cyan-400 font-bold">Open Material →</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // ==================== PROMO SCRIPTS ====================
+    const SCRIPTS = {
+      yt: `TITLE: Maine banaya India ka sabse disciplined JEE & NEET study platform! (Prepskm Launch)\n\n"Bhai agar tum JEE ya NEET aspirant ho aur backlog ki wajah se darr lag raha hai, toh Prepskm is live!\n1. Real NTA CBT Mock Engine with exact 20% numerical ratio.\n2. Chapter-wise Notes & Formula Sheets in PDF.\n3. Prep AI jo time waste karne par real mentor ki tarah daat lagayega!\n4. 1:1 Mentorship at flat ₹5/min with instant token pass!\nTelegram @prepskm join karo!"`,
+      reel: `AUDIO / VOICEOVER (30 SECONDS):\n"JEE aur NEET aspirants, suno! 🚨\nBacklog kab tak taaloge?\nLaunching Prepskm by @unfiltereddsumit!\n🔹 Real NTA CBT Mock Tests (Exact timer & 20% numerical ratio)\n🔹 Chapter-wise Notes & Formula Sheets in PDF\n🔹 1:1 Personal Mentorship at flat ₹5/min via UPI\n🔹 Aur 'Prep AI' jo padhai ke beech time waste karne par seedha daat lagayega!\nLink bio mein hai. Telegram channel join karo: @prepskm!"`,
+      tg: `🚀 ANNOUNCING THE OFFICIAL LAUNCH OF PREPSKM! 🚀\n\nAspirants, tumhari JEE/NEET aur Boards prep ko track pe laane ke liye Prepskm is live! 🔥\n\n1️⃣ NTA-Style CBT Mock Tests: Real timer & 20% numericals!\n2️⃣ Free Resources Vault: Notes, Formula Sheets, PYQs in PDF.\n3️⃣ Backlog Destroyer: Daily targets & streak counter.\n4️⃣ 1:1 Personal Mentorship: Flat ₹5/minute via UPI!\n5️⃣ Prep AI: Our in-house mentor that solves doubts and scolds procrastination!\n\n📢 Telegram Channel: @prepskm\n💬 Personal Chat: @unfiltreddsumit\n📺 YouTube & Instagram: @unfiltereddsumit`
+    };
+    let activePromo = 'yt';
+    function openCampaignModal() {
+      document.getElementById('modal-campaign').classList.remove('hidden');
+      switchCampaignTab('yt');
+    }
+    function closeCampaignModal() {
+      document.getElementById('modal-campaign').classList.add('hidden');
+    }
+    function switchCampaignTab(tab) {
+      activePromo = tab;
+      document.getElementById('campaign-script-text').innerText = SCRIPTS[tab];
+    }
+    function copyCampaignScript() {
+      navigator.clipboard.writeText(SCRIPTS[activePromo]);
+      alert('Promotional script copied to clipboard!');
+    }
+
+    // Keyboard shortcut (Cmd+K)
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSearchModal();
+      }
+    });
+
+    // Run on boot
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
 </html>
