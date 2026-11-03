@@ -82,64 +82,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors">
-      {/* Top micro announcement bar - Hidden on mobile screens to save screen space, dismissible on desktop */}
-      {!isBannerDismissed && (
-        <div className="hidden sm:flex bg-gradient-to-r from-indigo-900/90 via-purple-950/80 to-slate-950 border-b border-indigo-500/15 px-4 py-1.5 items-center justify-between text-[11px] text-slate-200">
-          <div className="flex items-center gap-2 truncate">
-            <span className="font-extrabold text-indigo-400">{brandName}</span>
-            <span className="text-slate-500">|</span>
-            <span className="truncate">{bannerText}</span>
-          </div>
-
-          {/* Creator social links */}
-          <div className="flex items-center gap-3 shrink-0">
-            <a
-              href="https://t.me/prepskm"
-              target="_blank"
-              rel="noreferrer"
-              title="Telegram Channel @prepskm"
-              className="flex items-center gap-1 hover:text-sky-400 transition"
-            >
-              <Send className="w-3.5 h-3.5" /> <span className="hidden md:inline">@prepskm</span>
-            </a>
-            <a
-              href="https://t.me/unfiltreddsumit"
-              target="_blank"
-              rel="noreferrer"
-              title="Telegram Chat @unfiltreddsumit"
-              className="flex items-center gap-1 hover:text-sky-300 transition"
-            >
-              <MessageSquare className="w-3.5 h-3.5" /> <span className="hidden md:inline">@unfiltreddsumit</span>
-            </a>
-            <a
-              href="https://youtube.com/@unfiltereddsumit"
-              target="_blank"
-              rel="noreferrer"
-              title="YouTube @unfiltereddsumit"
-              className="hover:text-rose-400 transition"
-            >
-              <Youtube className="w-3.5 h-3.5" />
-            </a>
-            <a
-              href="https://instagram.com/unfiltereddsumit"
-              target="_blank"
-              rel="noreferrer"
-              title="Instagram @unfiltereddsumit"
-              className="hover:text-pink-400 transition"
-            >
-              <Instagram className="w-3.5 h-3.5" />
-            </a>
-            <button
-              onClick={() => setIsBannerDismissed(true)}
-              className="ml-1 text-slate-400 hover:text-white p-0.5"
-              title="Dismiss banner"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
         {/* Brand */}
@@ -370,6 +312,26 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>About Prepskm</span>
         </button>
       </div>
+
+      {/* Announcement Banner - Positioned Underneath Header ("banner header ke neeche") */}
+      {!isBannerDismissed && (
+        <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-950 text-white px-4 py-2 border-t border-indigo-500/20 shadow-inner">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-2 truncate">
+              <span className="font-extrabold text-amber-300 tracking-wide shrink-0">{brandName}</span>
+              <span className="text-indigo-400 shrink-0">•</span>
+              <span className="truncate text-indigo-100 font-medium">{bannerText}</span>
+            </div>
+            <button
+              onClick={() => setIsBannerDismissed(true)}
+              className="text-indigo-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition shrink-0"
+              title="Dismiss announcement banner"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Icon-First Bottom Navigation Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/80 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-pb">

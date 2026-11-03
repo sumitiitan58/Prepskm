@@ -14,7 +14,8 @@ import {
   Target,
   Award,
   Info,
-  PenTool
+  PenTool,
+  Globe
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { UniversalSearchModal } from './components/UniversalSearchModal';
@@ -369,59 +370,74 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950 py-8 px-4 sm:px-6 transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500 dark:text-slate-400">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <span className="font-extrabold text-slate-900 dark:text-white text-sm">PREPSKM</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                Engineered for Aspirants
+      {/* Footer with Website & Social Community Channels with Official Logos */}
+      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950 py-10 px-4 sm:px-6 transition-colors">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2.5">
+              <span className="font-black text-slate-900 dark:text-white text-base tracking-tight">PREPSKM</span>
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                Official JEE & NEET Platform
               </span>
             </div>
-            <p className="text-slate-500">
-              Created by Sumit (@unfiltereddsumit) • Purely Distraction-Free JEE, NEET & Boards Preparation.
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Created by Sumit (<span className="font-bold text-indigo-600 dark:text-indigo-400">@unfiltereddsumit</span>) • Purely Distraction-Free Preparation.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold">
+          {/* Social Links with Logos */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 text-xs font-semibold">
             <button
               onClick={() => setCurrentTab('about')}
-              className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-800 transition flex items-center gap-1.5"
             >
-              <Info className="w-3.5 h-3.5" /> About Us
+              <Info className="w-4 h-4 text-sky-500" />
+              <span>About Us</span>
             </button>
             <a
-              href="https://t.me/prepskm"
+              href="https://prepskm.in"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-sky-500 dark:hover:text-sky-400 transition flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-850 text-indigo-600 dark:text-indigo-400 border border-slate-300 dark:border-slate-800 transition flex items-center gap-1.5"
             >
-              <Send className="w-3.5 h-3.5" /> Telegram @prepskm
-            </a>
-            <a
-              href="https://t.me/unfiltreddsumit"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-sky-500 dark:hover:text-sky-300 transition flex items-center gap-1"
-            >
-              <MessageSquare className="w-3.5 h-3.5" /> Chat @unfiltreddsumit
+              <Globe className="w-4 h-4 text-indigo-500" />
+              <span>prepskm.in</span>
             </a>
             <a
               href="https://youtube.com/@unfiltereddsumit"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-rose-500 dark:hover:text-rose-400 transition flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 transition flex items-center gap-1.5"
             >
-              <Youtube className="w-3.5 h-3.5" /> YouTube
+              <Youtube className="w-4 h-4 text-rose-500" />
+              <span>YouTube</span>
+            </a>
+            <a
+              href="https://t.me/prepskm"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 dark:hover:bg-sky-900/40 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-900/60 transition flex items-center gap-1.5"
+            >
+              <Send className="w-4 h-4 text-sky-500" />
+              <span>Telegram Channel</span>
+            </a>
+            <a
+              href="https://t.me/unfiltreddsumit"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3.5 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/40 dark:hover:bg-sky-900/40 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-900/60 transition flex items-center gap-1.5"
+            >
+              <MessageSquare className="w-4 h-4 text-sky-500" />
+              <span>Direct Chat</span>
             </a>
             <a
               href="https://instagram.com/unfiltereddsumit"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-pink-500 dark:hover:text-pink-400 transition flex items-center gap-1"
+              className="px-3.5 py-2 rounded-xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 dark:hover:bg-pink-900/40 text-pink-600 dark:text-pink-400 border border-pink-200 dark:border-pink-900/60 transition flex items-center gap-1.5"
             >
-              <Instagram className="w-3.5 h-3.5" /> Instagram
+              <Instagram className="w-4 h-4 text-pink-500" />
+              <span>Instagram</span>
             </a>
           </div>
         </div>

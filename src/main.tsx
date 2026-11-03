@@ -70,11 +70,20 @@ class RootErrorBoundary extends Component<Props, State> {
   }
 }
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  createRoot(rootElement).render(
-    <RootErrorBoundary>
-      <App />
-    </RootErrorBoundary>
-  );
+function mountApp() {
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    createRoot(rootElement).render(
+      <RootErrorBoundary>
+        <App />
+      </RootErrorBoundary>
+    );
+  }
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mountApp);
+} else {
+  mountApp();
+}
+
