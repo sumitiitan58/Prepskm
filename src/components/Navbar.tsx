@@ -14,13 +14,15 @@ import {
   GraduationCap,
   Layers,
   Megaphone,
+  History,
+  X,
 } from 'lucide-react';
 import { StudentProfile } from '../types';
 import { isUserAdmin } from '../lib/firebase';
 
 interface NavbarProps {
-  currentTab: 'tracker' | 'materials' | 'mock_tests' | 'mentorship' | 'admin';
-  onSelectTab: (tab: 'tracker' | 'materials' | 'mock_tests' | 'mentorship' | 'admin') => void;
+  currentTab: 'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'admin';
+  onSelectTab: (tab: 'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'admin') => void;
   studentProfile: StudentProfile;
   currentUser: any;
   onOpenSearch: () => void;
@@ -42,57 +44,67 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
 }) => {
   const isAdmin = currentUser && isUserAdmin(currentUser.email);
+  const [isBannerDismissed, setIsBannerDismissed] = React.useState(false);
 
   return (
     <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
-      {/* Top micro announcement bar */}
-      <div className="bg-gradient-to-r from-indigo-900/60 via-purple-900/40 to-slate-950 border-b border-indigo-500/10 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-300">
-        <div className="flex items-center gap-2 truncate">
-          <span className="font-extrabold text-indigo-400">PREPSKM</span>
-          <span className="text-slate-500 hidden sm:inline">|</span>
-          <span className="truncate">Founded by @unfiltereddsumit for JEE & NEET Aspirants</span>
-        </div>
+      {/* Top micro announcement bar - Hidden on mobile screens to save screen space, dismissible on desktop */}
+      {!isBannerDismissed && (
+        <div className="hidden sm:flex bg-gradient-to-r from-indigo-950/80 via-purple-950/60 to-slate-950 border-b border-indigo-500/10 px-4 py-1.5 items-center justify-between text-[11px] text-slate-300">
+          <div className="flex items-center gap-2 truncate">
+            <span className="font-extrabold text-indigo-400">PREPSKM</span>
+            <span className="text-slate-500">|</span>
+            <span className="truncate">Founded by @unfiltereddsumit for JEE & NEET Aspirants</span>
+          </div>
 
-        {/* Creator social links */}
-        <div className="flex items-center gap-3 shrink-0">
-          <a
-            href="https://t.me/prepskm"
-            target="_blank"
-            rel="noreferrer"
-            title="Telegram Channel @prepskm"
-            className="flex items-center gap-1 hover:text-sky-400 transition"
-          >
-            <Send className="w-3.5 h-3.5" /> <span className="hidden md:inline">@prepskm</span>
-          </a>
-          <a
-            href="https://t.me/unfiltreddsumit"
-            target="_blank"
-            rel="noreferrer"
-            title="Telegram Chat @unfiltreddsumit"
-            className="flex items-center gap-1 hover:text-sky-300 transition"
-          >
-            <MessageSquare className="w-3.5 h-3.5" /> <span className="hidden md:inline">@unfiltreddsumit</span>
-          </a>
-          <a
-            href="https://youtube.com/@unfiltereddsumit"
-            target="_blank"
-            rel="noreferrer"
-            title="YouTube @unfiltereddsumit"
-            className="hover:text-rose-400 transition"
-          >
-            <Youtube className="w-3.5 h-3.5" />
-          </a>
-          <a
-            href="https://instagram.com/unfiltereddsumit"
-            target="_blank"
-            rel="noreferrer"
-            title="Instagram @unfiltereddsumit"
-            className="hover:text-pink-400 transition"
-          >
-            <Instagram className="w-3.5 h-3.5" />
-          </a>
+          {/* Creator social links */}
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="https://t.me/prepskm"
+              target="_blank"
+              rel="noreferrer"
+              title="Telegram Channel @prepskm"
+              className="flex items-center gap-1 hover:text-sky-400 transition"
+            >
+              <Send className="w-3.5 h-3.5" /> <span className="hidden md:inline">@prepskm</span>
+            </a>
+            <a
+              href="https://t.me/unfiltreddsumit"
+              target="_blank"
+              rel="noreferrer"
+              title="Telegram Chat @unfiltreddsumit"
+              className="flex items-center gap-1 hover:text-sky-300 transition"
+            >
+              <MessageSquare className="w-3.5 h-3.5" /> <span className="hidden md:inline">@unfiltreddsumit</span>
+            </a>
+            <a
+              href="https://youtube.com/@unfiltereddsumit"
+              target="_blank"
+              rel="noreferrer"
+              title="YouTube @unfiltereddsumit"
+              className="hover:text-rose-400 transition"
+            >
+              <Youtube className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href="https://instagram.com/unfiltereddsumit"
+              target="_blank"
+              rel="noreferrer"
+              title="Instagram @unfiltereddsumit"
+              className="hover:text-pink-400 transition"
+            >
+              <Instagram className="w-3.5 h-3.5" />
+            </a>
+            <button
+              onClick={() => setIsBannerDismissed(true)}
+              className="ml-1 text-slate-400 hover:text-white p-0.5"
+              title="Dismiss banner"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -204,8 +216,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Navigation Sub-Tabs Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-2 overflow-x-auto py-2 border-t border-slate-800/40 text-xs sm:text-sm font-semibold">
+      {/* Desktop Navigation Sub-Tabs Bar (Hidden on Mobile) */}
+      <div className="hidden md:flex max-w-7xl mx-auto px-4 sm:px-6 items-center gap-2 overflow-x-auto py-2 border-t border-slate-800/40 text-xs sm:text-sm font-semibold">
         <button
           onClick={() => onSelectTab('tracker')}
           className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition shrink-0 ${
@@ -243,6 +255,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         <button
+          onClick={() => onSelectTab('history')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition shrink-0 ${
+            currentTab === 'history'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'
+          }`}
+        >
+          <History className="w-4 h-4 text-purple-400" />
+          <span>Test History & Marksheets</span>
+        </button>
+
+        <button
           onClick={() => onSelectTab('mentorship')}
           className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition shrink-0 ${
             currentTab === 'mentorship'
@@ -254,6 +278,89 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>1:1 Mentorship (₹5/min)</span>
         </button>
       </div>
+
+      {/* Mobile Icon-First Bottom Navigation Bar (Minimal text, prominent icons for thumb-friendly navigation) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-2xl border-t border-slate-800/80 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-pb">
+        <button
+          onClick={() => onSelectTab('tracker')}
+          className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+            currentTab === 'tracker'
+              ? 'text-indigo-400 bg-indigo-500/10 font-bold scale-105'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="Backlog"
+        >
+          <Flame className={`w-5 h-5 ${currentTab === 'tracker' ? 'text-amber-400 fill-amber-400/20' : ''}`} />
+          <span className="text-[10px] mt-0.5 tracking-tight">Backlogs</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('materials')}
+          className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+            currentTab === 'materials'
+              ? 'text-indigo-400 bg-indigo-500/10 font-bold scale-105'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="Notes & Materials"
+        >
+          <BookOpen className={`w-5 h-5 ${currentTab === 'materials' ? 'text-cyan-400' : ''}`} />
+          <span className="text-[10px] mt-0.5 tracking-tight">Notes</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('mock_tests')}
+          className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+            currentTab === 'mock_tests'
+              ? 'text-indigo-400 bg-indigo-500/10 font-bold scale-105'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="NTA CBT Tests"
+        >
+          <GraduationCap className={`w-5 h-5 ${currentTab === 'mock_tests' ? 'text-emerald-400' : ''}`} />
+          <span className="text-[10px] mt-0.5 tracking-tight">CBT Test</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('history')}
+          className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+            currentTab === 'history'
+              ? 'text-indigo-400 bg-indigo-500/10 font-bold scale-105'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="Test History & Progression"
+        >
+          <History className={`w-5 h-5 ${currentTab === 'history' ? 'text-purple-400' : ''}`} />
+          <span className="text-[10px] mt-0.5 tracking-tight">History</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('mentorship')}
+          className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+            currentTab === 'mentorship'
+              ? 'text-indigo-400 bg-indigo-500/10 font-bold scale-105'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+          title="Mentorship"
+        >
+          <Sparkles className={`w-5 h-5 ${currentTab === 'mentorship' ? 'text-amber-400' : ''}`} />
+          <span className="text-[10px] mt-0.5 tracking-tight">Mentor</span>
+        </button>
+
+        {isAdmin && (
+          <button
+            onClick={() => onSelectTab('admin')}
+            className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+              currentTab === 'admin'
+                ? 'text-amber-400 bg-amber-500/10 font-bold scale-105'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Admin"
+          >
+            <ShieldCheck className="w-5 h-5 text-amber-400" />
+            <span className="text-[10px] mt-0.5 tracking-tight">Admin</span>
+          </button>
+        )}
+      </nav>
     </header>
   );
 };

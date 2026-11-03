@@ -94,8 +94,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-  <!-- TOP CREATOR BANNER -->
-  <aside class="bg-gradient-to-r from-indigo-950 via-slate-950 to-indigo-950 border-b border-indigo-500/15 px-4 py-1.5 text-xs text-slate-300">
+  <!-- TOP CREATOR BANNER (Hidden on mobile to save vertical space) -->
+  <aside id="top-creator-banner" class="hidden sm:block bg-gradient-to-r from-indigo-950 via-slate-950 to-indigo-950 border-b border-indigo-500/15 px-4 py-1.5 text-xs text-slate-300">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <span class="font-extrabold text-indigo-400">PREPSKM</span>
@@ -686,9 +686,22 @@
               </div>
             </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Chapter Name</label>
-              <input id="aq-chapter" type="text" required placeholder="e.g. Kinematics or Organic Chemistry" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Select Chapter</label>
+                <select id="aq-chapter" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <!-- Populated dynamically by renderAdminChapterSelect() -->
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Or Add New Chapter (Saved for all questions)</label>
+                <div class="flex gap-2">
+                  <input id="aq-new-custom-chapter" type="text" placeholder="e.g. Semiconductors & Logic Gates" class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <button type="button" onclick="addNewChapterDirectly()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0 shadow-md">
+                    + Add Chapter
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Question Statement & Cropped Preview -->
@@ -796,14 +809,21 @@
                 <input id="amat-title" type="text" required placeholder="e.g. Modern Physics 1-Shot High Yield Notes" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
               </div>
 
+              <!-- Direct PDF / MP4 File Upload from device -->
+              <div class="p-3.5 rounded-xl bg-slate-900 border border-dashed border-indigo-500/40 space-y-2">
+                <span class="text-xs font-bold text-white block">Upload File from Device (PDF or MP4 Video)</span>
+                <input type="file" accept=".pdf,video/mp4" onchange="handleAmatFileUpload(event)" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer">
+                <div id="amat-file-selected-badge" class="hidden text-xs font-bold text-emerald-400 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20"></div>
+              </div>
+
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">PDF File URL / Attachment Link</label>
-                  <input id="amat-pdf-url" type="url" placeholder="https://...pdf (or left blank for sample dummy PDF)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Or PDF File URL / Attachment Link</label>
+                  <input id="amat-pdf-url" type="url" placeholder="https://...pdf (optional if file uploaded)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">MP4 Video URL / Stream Link (Optional)</label>
-                  <input id="amat-video-url" type="url" placeholder="https://...mp4 or YouTube link" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Or MP4 Video URL (Optional)</label>
+                  <input id="amat-video-url" type="url" placeholder="https://...mp4 (optional if file uploaded)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
                 </div>
               </div>
 
@@ -1338,12 +1358,22 @@
       { id: 'bl-4', subject: 'Physics', chapter: 'Ray Optics & Optical Instruments', priority: 'medium', status: 'pending', targetDate: '2026-11-18' }
     ];
 
-    const ALL_CHAPTERS = [
+    let ALL_CHAPTERS = [
       'Kinematics', 'Laws of Motion', 'Work Energy and Power', 'Rotational Motion', 'Gravitation',
       'Atomic Structure', 'Chemical Bonding', 'Thermodynamics', 'Chemical Kinetics', 'Organic Chemistry',
       'Quadratic Equations', 'Definite Integration', 'Matrices & Determinants', 'Vector Algebra',
       'Cell: The Unit of Life', 'Genetics & Molecular Basis', 'Human Physiology'
     ];
+
+    // Load custom chapters from storage
+    try {
+      const storedChs = JSON.parse(localStorage.getItem('prepskm_custom_chapters') || '[]');
+      if (Array.isArray(storedChs)) {
+        storedChs.forEach(c => {
+          if (!ALL_CHAPTERS.includes(c)) ALL_CHAPTERS.push(c);
+        });
+      }
+    } catch (e) {}
 
     // State
     let currentTab = 'tracker';
@@ -1379,8 +1409,38 @@
       renderMaterialTabs();
       renderMaterials();
       renderTestChapters();
+      renderAdminChapterSelect();
       renderTestHistory();
+      initWakeWordListener();
       lucide.createIcons();
+    }
+
+    function renderAdminChapterSelect() {
+      const sel = document.getElementById('aq-chapter');
+      if (sel) {
+        sel.innerHTML = ALL_CHAPTERS.map(ch => `<option value="${ch}">${ch}</option>`).join('');
+      }
+    }
+
+    function addNewChapterDirectly() {
+      const input = document.getElementById('aq-new-custom-chapter');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+      if (!ALL_CHAPTERS.includes(val)) {
+        ALL_CHAPTERS.push(val);
+        const stored = JSON.parse(localStorage.getItem('prepskm_custom_chapters') || '[]');
+        if (!stored.includes(val)) {
+          stored.push(val);
+          localStorage.setItem('prepskm_custom_chapters', JSON.stringify(stored));
+        }
+      }
+      renderAdminChapterSelect();
+      renderTestChapters();
+      const sel = document.getElementById('aq-chapter');
+      if (sel) sel.value = val;
+      input.value = '';
+      alert(`New chapter "${val}" saved! It is now permanently available across all questions and mock tests.`);
     }
 
     function updateStudentUI() {
@@ -1551,6 +1611,25 @@
       }
     }
 
+    let amatUploadedData = null;
+    let amatUploadedName = null;
+    let amatUploadedType = 'pdf';
+
+    function handleAmatFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      amatUploadedName = file.name;
+      amatUploadedType = file.type.includes('video') || file.name.endsWith('.mp4') ? 'mp4' : 'pdf';
+      const reader = new FileReader();
+      reader.onload = () => {
+        amatUploadedData = reader.result;
+        const badge = document.getElementById('amat-file-selected-badge');
+        badge.innerText = `File Selected: ${amatUploadedName} (${amatUploadedType.toUpperCase()})`;
+        badge.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
     function handleAdminSaveMaterial(e) {
       e.preventDefault();
       let cat = document.getElementById('amat-category-select').value;
@@ -1564,17 +1643,42 @@
 
       const sub = document.getElementById('amat-subject').value;
       const title = document.getElementById('amat-title').value.trim();
-      const pdf = document.getElementById('amat-pdf-url').value.trim() || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
-      const video = document.getElementById('amat-video-url').value.trim();
+      let pdf = document.getElementById('amat-pdf-url').value.trim();
+      let video = document.getElementById('amat-video-url').value.trim();
       const desc = document.getElementById('amat-desc').value.trim();
 
-      materials.unshift({ id: 'mat-' + Date.now(), title, category: cat, subject: sub, pdfUrl: pdf, videoUrl: video, description: desc });
+      if (amatUploadedData) {
+        if (amatUploadedType === 'mp4') {
+          video = amatUploadedData;
+        } else {
+          pdf = amatUploadedData;
+        }
+      }
+
+      if (!pdf && !video) {
+        pdf = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+      }
+
+      materials.unshift({
+        id: 'mat-' + Date.now(),
+        title,
+        category: cat,
+        subject: sub,
+        pdfUrl: pdf,
+        videoUrl: video,
+        fileName: amatUploadedName,
+        fileType: amatUploadedType,
+        description: desc
+      });
       localStorage.setItem('prepskm_db_materials', JSON.stringify(materials));
 
-      alert('Material published successfully to Study Vault!');
+      alert('Material published successfully to Study Vault & Custom Section!');
       renderMaterialTabs();
       renderMaterials();
       e.target.reset();
+      amatUploadedData = null;
+      amatUploadedName = null;
+      document.getElementById('amat-file-selected-badge').classList.add('hidden');
       document.getElementById('amat-custom-section-box').classList.add('hidden');
     }
 
@@ -1835,10 +1939,17 @@
       document.getElementById('cbt-question-type-badge').innerText = q.type === 'numerical' ? 'Numerical (NAT)' : 'MCQ (+4, -1)';
       document.getElementById('cbt-question-text').innerText = q.text;
 
-      // Question Diagram preview if present
+      // Question Diagram preview if present - Large, high resolution
       const diagCont = document.getElementById('cbt-question-diagram-container');
       if (q.questionImage) {
-        diagCont.innerHTML = `<img src="${q.questionImage}" class="max-h-56 rounded-xl border border-slate-700 block">`;
+        diagCont.innerHTML = `
+          <div class="p-3 rounded-2xl bg-slate-900 border-2 border-indigo-500/30 inline-block max-w-full shadow-lg">
+            <span class="text-[11px] font-bold text-indigo-400 block mb-1.5 flex items-center gap-1">
+              <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> High-Resolution Diagram
+            </span>
+            <img src="${q.questionImage}" class="max-h-80 sm:max-h-96 w-auto max-w-full rounded-xl object-contain bg-slate-950 p-2 block">
+          </div>
+        `;
       } else {
         diagCont.innerHTML = '';
       }
@@ -1853,10 +1964,16 @@
         `;
       } else {
         optContainer.innerHTML = q.options.map((opt, oIdx) => `
-          <label class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-850 text-sm flex items-center gap-3 cursor-pointer">
-            <input type="radio" name="cbt-opt" value="${oIdx}" ${activeTest.userAnswers[q.testQId] == oIdx ? 'checked' : ''} onchange="activeTest.userAnswers['${q.testQId}'] = this.value" class="accent-indigo-500 w-4 h-4">
-            <span>${opt}</span>
-            ${q.optionImages && q.optionImages[oIdx] ? `<img src="${q.optionImages[oIdx]}" class="h-8 rounded ml-auto">` : ''}
+          <label class="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 hover:bg-slate-850 text-sm flex flex-col gap-3 cursor-pointer transition">
+            <div class="flex items-center gap-3">
+              <input type="radio" name="cbt-opt" value="${oIdx}" ${activeTest.userAnswers[q.testQId] == oIdx ? 'checked' : ''} onchange="activeTest.userAnswers['${q.testQId}'] = this.value" class="accent-indigo-500 w-4 h-4">
+              <span class="font-semibold text-white">${opt}</span>
+            </div>
+            ${q.optionImages && q.optionImages[oIdx] ? `
+              <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center">
+                <img src="${q.optionImages[oIdx]}" class="max-h-40 sm:max-h-56 w-auto max-w-full rounded-lg object-contain">
+              </div>
+            ` : ''}
           </label>
         `).join('');
       }
@@ -2285,11 +2402,83 @@
           body: JSON.stringify({ message: text })
         });
         const data = await res.json();
-        container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%] whitespace-pre-wrap">${data.reply || 'Padhai shuru karo!'}</div>`;
+        const replyText = data.reply || 'Padhai shuru karo!';
+        container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%] whitespace-pre-wrap">${replyText}</div>`;
+        speakResponseText(replyText);
       } catch (err) {
         container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%]">Bhai formulas revise karo aur test series attempt karo!</div>`;
       }
       container.scrollTop = container.scrollHeight;
+    }
+
+    function speakResponseText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const clean = text.replace(/[*#_`]/g, '').slice(0, 280);
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.rate = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function playWakeChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    let wakeRecognizer = null;
+    function initWakeWordListener() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+
+      try {
+        wakeRecognizer = new SpeechRecognition();
+        wakeRecognizer.continuous = true;
+        wakeRecognizer.interimResults = false;
+        wakeRecognizer.lang = 'en-IN';
+
+        wakeRecognizer.onresult = (e) => {
+          const transcript = (e.results[e.results.length - 1][0].transcript || '').toLowerCase();
+          console.log('[Wake word listener heard]:', transcript);
+          if (
+            transcript.includes('hello prep') ||
+            transcript.includes('hey prep') ||
+            transcript.includes('he prep') ||
+            transcript.includes('hi prep') ||
+            transcript.includes('prep ai') ||
+            transcript.includes('suno prep')
+          ) {
+            playWakeChime();
+            isAIOpen = true;
+            const win = document.getElementById('prep-ai-window');
+            if (win) win.classList.remove('hidden');
+            const inp = document.getElementById('ai-chat-input');
+            if (inp) {
+              inp.focus();
+              inp.placeholder = 'Hello Prep activated! Type or speak your doubt...';
+            }
+          }
+        };
+
+        wakeRecognizer.onerror = () => {
+          setTimeout(initWakeWordListener, 3000);
+        };
+
+        wakeRecognizer.start();
+      } catch (err) {}
     }
 
     // ==================== ADMIN ACTIONS ====================

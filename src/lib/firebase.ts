@@ -28,9 +28,11 @@ import {
   BacklogItem,
   MentorshipToken,
   MockTestAttempt,
-  StudentProfile
+  StudentProfile,
+  CustomSection,
+  SubjectName
 } from '../types';
-import { INITIAL_QUESTIONS, INITIAL_MATERIALS, INITIAL_BACKLOG } from '../data/initialData';
+import { INITIAL_QUESTIONS, INITIAL_MATERIALS, INITIAL_BACKLOG, AVAILABLE_CHAPTERS } from '../data/initialData';
 
 const CONFIG_STORAGE_KEY = 'prepskm_firebase_config';
 const ADMIN_EMAILS_KEY = 'prepskm_admin_emails';
@@ -45,6 +47,8 @@ const STORAGE_KEYS = {
   mockResults: 'prepskm_db_mock_results',
   profile: 'prepskm_student_profile',
   mockUser: 'prepskm_mock_user',
+  customSections: 'prepskm_custom_sections',
+  customChapters: 'prepskm_custom_chapters',
 };
 
 // Global Firebase instance references
@@ -398,6 +402,108 @@ export async function saveMaterialToFirestore(material: StudyMaterial): Promise<
   localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'materials' } }));
   return true;
+}
+
+export async function deleteMaterialFromFirestore(materialId: string): Promise<boolean> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      await deleteDoc(doc(db, 'materials', materialId));
+    } catch (e) {
+      console.warn('Failed to delete material from Firestore', e);
+    }
+  }
+
+  const list = await getMaterials();
+  const updated = list.filter((m) => m.id !== materialId);
+  localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'materials' } }));
+  return true;
+}
+
+// ==================== CUSTOM SECTIONS (MATERIALS HUB) ====================
+
+export function getCustomSections(): CustomSection[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.customSections);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error('Error loading custom sections', e);
+  }
+  return [];
+}
+
+export function saveCustomSection(name: string, description?: string): CustomSection {
+  const normalizedName = name.trim();
+  const id = 'sec-' + normalizedName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const newSection: CustomSection = {
+    id,
+    name: normalizedName,
+    description: description || `Study resources and files for ${normalizedName}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  const current = getCustomSections();
+  const exists = current.find((s) => s.id === id || s.name.toLowerCase() === normalizedName.toLowerCase());
+  if (!exists) {
+    const updated = [...current, newSection];
+    localStorage.setItem(STORAGE_KEYS.customSections, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('prepskm_sections_updated', { detail: updated }));
+  }
+  return exists || newSection;
+}
+
+export function deleteCustomSection(sectionId: string): void {
+  const current = getCustomSections();
+  const updated = current.filter((s) => s.id !== sectionId);
+  localStorage.setItem(STORAGE_KEYS.customSections, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_sections_updated', { detail: updated }));
+}
+
+// ==================== DYNAMIC CHAPTERS MANAGEMENT ====================
+
+export function getCustomChapters(): Record<string, string[]> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.customChapters);
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error('Error loading custom chapters', e);
+  }
+  return { Physics: [], Chemistry: [], Mathematics: [], Biology: [] };
+}
+
+export function saveCustomChapter(subject: SubjectName, chapterName: string): boolean {
+  const trimmed = chapterName.trim();
+  if (!trimmed) return false;
+
+  const current = getCustomChapters();
+  const subChapters = current[subject] || [];
+  
+  // Also check default chapters
+  const defaultList = AVAILABLE_CHAPTERS[subject] || [];
+  if (defaultList.includes(trimmed) || subChapters.includes(trimmed)) {
+    return true; // Already exists
+  }
+
+  const updatedSub = [...subChapters, trimmed];
+  const updated = {
+    ...current,
+    [subject]: updatedSub,
+  };
+  localStorage.setItem(STORAGE_KEYS.customChapters, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_chapters_updated', { detail: { subject, chapter: trimmed } }));
+  return true;
+}
+
+export function getAllChaptersForSubject(subject: SubjectName): string[] {
+  const defaultList = AVAILABLE_CHAPTERS[subject] || [];
+  const customMap = getCustomChapters();
+  const customList = customMap[subject] || [];
+  return Array.from(new Set([...defaultList, ...customList]));
 }
 
 // ==================== BACKLOGS CRUD ====================

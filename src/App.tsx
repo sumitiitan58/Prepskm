@@ -25,12 +25,14 @@ import { MentorshipBooking } from './components/MentorshipBooking';
 import { AdminPanel } from './components/AdminPanel';
 import { PrepAIAssistant } from './components/PrepAIAssistant';
 import { CampaignHubModal } from './components/CampaignHubModal';
+import { TestHistory } from './components/TestHistory';
 
 import {
   Question,
   StudyMaterial,
   BacklogItem,
   StudentProfile,
+  MockTestAttempt,
 } from './types';
 import {
   getQuestions,
@@ -43,9 +45,11 @@ import {
 } from './lib/firebase';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mock_tests' | 'mentorship' | 'admin'>('tracker');
+  const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'admin'>('tracker');
   const [studentProfile, setStudentProfile] = useState<StudentProfile>(getStudentProfile());
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [reattemptData, setReattemptData] = useState<MockTestAttempt | null>(null);
+  const [isGreetingDismissed, setIsGreetingDismissed] = useState(false);
 
   // Data states
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -163,38 +167,45 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* Dynamic Personalized Greeting Banner */}
-        {activeView !== 'admin' && (
-          <div className="p-5 sm:p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="space-y-1">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-6 pb-24 md:pb-8">
+        {/* Dynamic Personalized Greeting Banner - Dismissible to save vertical space on mobile screens */}
+        {activeView !== 'admin' && !isGreetingDismissed && (
+          <div className="p-4 sm:p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative">
+            <div className="space-y-1 pr-6 md:pr-0">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
                   Target: {studentProfile.targetExam} ({studentProfile.classLevel})
                 </span>
-                <span className="text-slate-600">•</span>
-                <span className="text-xs text-slate-400">Daily Study Engine</span>
+                <span className="text-slate-600 hidden sm:inline">•</span>
+                <span className="text-xs text-slate-400 hidden sm:inline">Daily Study Engine</span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              <h1 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
                 Welcome back, {studentProfile.name}! Ready to conquer {studentProfile.targetExam} today?
               </h1>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 hidden sm:block">
                 Discipline beat talent every time. Clear your pending backlogs and take a balanced mock test.
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-start">
               <button
                 onClick={() => setCurrentTab('mock_tests')}
-                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition active:scale-95 flex items-center gap-1.5"
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition active:scale-95 flex items-center justify-center gap-1.5"
               >
                 <GraduationCap className="w-4 h-4" /> Start Mock Test
               </button>
               <button
-                onClick={() => setCurrentTab('mentorship')}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-amber-300 border border-amber-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-1.5"
+                onClick={() => setCurrentTab('history')}
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-indigo-300 border border-indigo-500/30 font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1.5"
               >
-                <Sparkles className="w-4 h-4 text-amber-400" /> 1:1 Mentorship
+                <TrendingUp className="w-4 h-4" /> Score Progress
+              </button>
+              <button
+                onClick={() => setIsGreetingDismissed(true)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                title="Hide greeting banner"
+              >
+                ✕
               </button>
             </div>
           </div>
@@ -222,10 +233,26 @@ export default function App() {
             defaultExamTarget={studentProfile.targetExam}
             preselectedChapter={preselectedChapter}
             onClearPreselectedChapter={() => setPreselectedChapter(null)}
+            reattemptData={reattemptData}
+            onClearReattempt={() => setReattemptData(null)}
+            onViewHistory={() => setCurrentTab('history')}
           />
         )}
 
-        {/* Tab 4: 1:1 Mentorship Booking */}
+        {/* Tab 4: Mock Test History & Recharts Visualization */}
+        {activeView === 'history' && (
+          <TestHistory
+            studentName={studentProfile.name}
+            targetExam={studentProfile.targetExam}
+            onReattemptTest={(attempt) => {
+              setReattemptData(attempt);
+              setCurrentTab('mock_tests');
+            }}
+            onStartNewTest={() => setCurrentTab('mock_tests')}
+          />
+        )}
+
+        {/* Tab 5: 1:1 Mentorship Booking */}
         {activeView === 'mentorship' && (
           <MentorshipBooking
             initialStudentName={studentProfile.name}
@@ -233,7 +260,7 @@ export default function App() {
           />
         )}
 
-        {/* Tab 5: Secure Admin Panel (Protected) */}
+        {/* Tab 6: Secure Admin Panel (Protected) */}
         {activeView === 'admin' && isAdmin && (
           <AdminPanel
             questions={questions}

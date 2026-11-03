@@ -17,6 +17,7 @@ import {
   Cpu,
   Key,
   Radio,
+  Zap,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -34,10 +35,31 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-1',
     sender: 'assistant',
-    text: "Radhe Radhe! Main hoon Prep AI — official academic mentor of Prepskm by @unfiltereddsumit. Physics, Chemistry, Biology ya Maths ka koi bhi conceptual doubt pucho, ya latest NTA JEE/NEET exam dates & syllabus updates search karo. Par dhyan rahe: faltu timepass ya procrastination kiya toh seedha reality check aur daat milegi!",
+    text: "Radhe Radhe! Main hoon Prep AI — official academic mentor of Prepskm by @unfiltereddsumit. Physics, Chemistry, Biology ya Maths ka koi bhi conceptual doubt pucho, ya bolo 'Hey Prep' / 'Hello Prep' aur hands-free doubt solve karo! Par dhyan rahe: faltu timepass ya procrastination kiya toh seedha reality check aur daat milegi!",
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   },
 ];
+
+function playWakeChime() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.3);
+  } catch (e) {
+    // Audio context may require initial user click
+  }
+}
 
 export const PrepAIAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,15 +70,18 @@ export const PrepAIAssistant: React.FC = () => {
   const [customApiKey, setCustomApiKey] = useState(localStorage.getItem('prepskm_gemini_key') || '');
   const [hasUnread, setHasUnread] = useState(false);
 
-  // New Features: Model Selection, Search Grounding, Voice Mode
+  // Model Selection, Search Grounding, Voice Mode & Wake Word
   const [selectedModel, setSelectedModel] = useState<'gemini-3.8-flash' | 'gemini-4-argon' | 'gemini-3.1-flash-lite'>('gemini-3.8-flash');
   const [useSearchGrounding, setUseSearchGrounding] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voiceAutoRead, setVoiceAutoRead] = useState(false);
+  const [voiceAutoRead, setVoiceAutoRead] = useState(true);
+  const [isWakeWordEnabled, setIsWakeWordEnabled] = useState(true);
+  const [wakeStatusNotice, setWakeStatusNotice] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const wakeWordRecognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -74,8 +99,108 @@ export const PrepAIAssistant: React.FC = () => {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
+      if (wakeWordRecognitionRef.current) {
+        wakeWordRecognitionRef.current.abort();
+      }
     };
   }, []);
+
+  // Background Wake Word Detection ("Hey Prep" / "Hello Prep" / "He Prep")
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition || !isWakeWordEnabled) {
+      if (wakeWordRecognitionRef.current) {
+        try {
+          wakeWordRecognitionRef.current.abort();
+        } catch {}
+      }
+      return;
+    }
+
+    let isDestroyed = false;
+
+    function startWakeWordListener() {
+      if (isDestroyed || isListening) return;
+
+      try {
+        const recognizer = new SpeechRecognition();
+        wakeWordRecognitionRef.current = recognizer;
+        recognizer.continuous = false;
+        recognizer.interimResults = false;
+        recognizer.lang = 'en-IN'; // Will detect English and Indian accents
+
+        recognizer.onresult = (event: any) => {
+          const text = (event.results[0][0].transcript || '').toLowerCase().trim();
+          console.log('[Wake Word Listener heard]:', text);
+
+          // Check wake word triggers
+          const isWakeTrigger =
+            text.includes('hey prep') ||
+            text.includes('hello prep') ||
+            text.includes('he prep') ||
+            text.includes('hi prep') ||
+            text.includes('prep ai') ||
+            text.includes('suno prep') ||
+            text.includes('prep bhaiya');
+
+          if (isWakeTrigger) {
+            playWakeChime();
+            setIsOpen(true);
+            setWakeStatusNotice('Wake Word Detected! "Hello Prep" active 🎙️');
+            setTimeout(() => setWakeStatusNotice(null), 3500);
+
+            // Extract any query spoken right after wake word
+            const cleanQuery = text
+              .replace(/hey prep/g, '')
+              .replace(/hello prep/g, '')
+              .replace(/he prep/g, '')
+              .replace(/hi prep/g, '')
+              .replace(/prep ai/g, '')
+              .replace(/suno prep/g, '')
+              .trim();
+
+            if (cleanQuery.length > 5) {
+              handleSendMessage(cleanQuery);
+            } else {
+              // Open listening mic to take their doubt
+              setTimeout(() => {
+                startDirectSpeechInput();
+              }, 400);
+            }
+          }
+        };
+
+        recognizer.onerror = () => {
+          // Restart listener after brief delay
+          if (!isDestroyed && isWakeWordEnabled && !isListening) {
+            setTimeout(startWakeWordListener, 1200);
+          }
+        };
+
+        recognizer.onend = () => {
+          // Loop listener if still enabled and not active in direct mic
+          if (!isDestroyed && isWakeWordEnabled && !isListening) {
+            setTimeout(startWakeWordListener, 800);
+          }
+        };
+
+        recognizer.start();
+      } catch (err) {
+        // Can fail if permissions not yet granted or already running
+      }
+    }
+
+    startWakeWordListener();
+
+    return () => {
+      isDestroyed = true;
+      if (wakeWordRecognitionRef.current) {
+        try {
+          wakeWordRecognitionRef.current.abort();
+        } catch {}
+      }
+    };
+  }, [isWakeWordEnabled, isListening]);
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,17 +212,15 @@ export const PrepAIAssistant: React.FC = () => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
 
-    // Clean text of markdown asterisks and URLs for cleaner speech
     const clean = text
       .replace(/[*#_`]/g, '')
       .replace(/https?:\/\/\S+/g, '')
-      .slice(0, 300);
+      .slice(0, 350);
 
     const utterance = new SpeechSynthesisUtterance(clean);
     utterance.rate = 1.05;
     utterance.pitch = 1.0;
 
-    // Try Hindi or Indian English voice if available
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(
       (v) => v.lang.includes('hi') || v.lang.includes('IN') || v.name.includes('India')
@@ -118,17 +241,18 @@ export const PrepAIAssistant: React.FC = () => {
     }
   };
 
-  const toggleSpeechRecognition = () => {
+  const startDirectSpeechInput = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Speech Recognition is not supported in this browser. Please type your query.');
       return;
     }
 
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
+    // Stop wake word recognizer to prevent microphone conflicts
+    if (wakeWordRecognitionRef.current) {
+      try {
+        wakeWordRecognitionRef.current.abort();
+      } catch {}
     }
 
     try {
@@ -146,10 +270,9 @@ export const PrepAIAssistant: React.FC = () => {
         const transcript = event.results[0][0].transcript;
         if (transcript) {
           setInputMessage(transcript);
-          // Auto submit after voice
           setTimeout(() => {
             handleSendMessage(transcript);
-          }, 400);
+          }, 350);
         }
       };
 
@@ -163,8 +286,17 @@ export const PrepAIAssistant: React.FC = () => {
 
       recognition.start();
     } catch (err) {
-      console.warn('Speech recognition start failed', err);
+      console.warn('Speech recognition start note:', err);
       setIsListening(false);
+    }
+  };
+
+  const toggleSpeechRecognition = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      startDirectSpeechInput();
     }
   };
 
@@ -205,7 +337,6 @@ export const PrepAIAssistant: React.FC = () => {
       const data = await response.json();
       const assistantText = data.reply || "Bhai, padhai par dhyan do aur doubts solve karo!";
 
-      // Check if scolding keywords are triggered in reply
       const isScolded =
         data.isScolded ||
         assistantText.includes('padhai par dhyan do') ||
@@ -255,29 +386,31 @@ export const PrepAIAssistant: React.FC = () => {
   return (
     <>
       {/* Floating Widget Toggle Bubble */}
-      <div className="fixed bottom-5 right-5 z-40">
+      <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2">
         {!isOpen && (
-          <button
-            onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-indigo-500/40 border border-indigo-400/30 transition transform hover:scale-105 active:scale-95"
-          >
-            <div className="relative">
-              <Bot className="w-5 h-5 text-indigo-200" />
-              {hasUnread && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
-              )}
-            </div>
-            <span>Prep AI Mentor</span>
-            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-black uppercase">
-              <Sparkles className="w-2.5 h-2.5" /> Live Voice
-            </span>
-          </button>
+          <>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="group relative flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-indigo-500/40 border border-indigo-400/30 transition transform hover:scale-105 active:scale-95"
+            >
+              <div className="relative">
+                <Bot className="w-5 h-5 text-indigo-200" />
+                {hasUnread && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
+                )}
+              </div>
+              <span>Prep AI Mentor</span>
+              <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/20 text-[10px] font-black uppercase">
+                <Sparkles className="w-2.5 h-2.5" /> "Hello Prep"
+              </span>
+            </button>
+          </>
         )}
       </div>
 
       {/* Slide-Up Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-5 right-5 z-50 w-[94vw] sm:w-[450px] h-[620px] max-h-[88vh] rounded-3xl bg-slate-900 border border-indigo-500/30 shadow-2xl flex flex-col overflow-hidden animate-slide-up">
+        <div className="fixed bottom-5 right-5 z-50 w-[94vw] sm:w-[460px] h-[630px] max-h-[88vh] rounded-3xl bg-slate-900 border border-indigo-500/30 shadow-2xl flex flex-col overflow-hidden animate-slide-up">
           {/* Header */}
           <div className="p-3.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -287,8 +420,8 @@ export const PrepAIAssistant: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5">
                   <h4 className="font-bold text-white text-sm">Prep AI Mentor</h4>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">
-                    Live
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-400">Strict Mentor by @unfiltereddsumit</p>
@@ -296,6 +429,20 @@ export const PrepAIAssistant: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1">
+              {/* Wake Word Indicator & Toggle */}
+              <button
+                onClick={() => setIsWakeWordEnabled(!isWakeWordEnabled)}
+                className={`p-2 rounded-xl transition text-xs flex items-center gap-1 ${
+                  isWakeWordEnabled
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                    : 'text-slate-500 hover:text-slate-300'
+                }`}
+                title={isWakeWordEnabled ? 'Wake Word "Hello Prep" is ACTIVE' : 'Enable "Hello Prep" Wake Word'}
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span className="text-[10px] font-bold hidden sm:inline">"Hello Prep"</span>
+              </button>
+
               {/* Voice Read Aloud Toggle */}
               <button
                 onClick={() => {
@@ -340,6 +487,18 @@ export const PrepAIAssistant: React.FC = () => {
             </div>
           </div>
 
+          {/* Wake Word Notice Banner */}
+          {wakeStatusNotice && (
+            <div className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-between animate-fade-in shadow-md">
+              <span className="flex items-center gap-1.5">
+                <Radio className="w-4 h-4 animate-spin" /> {wakeStatusNotice}
+              </span>
+              <button onClick={() => setWakeStatusNotice(null)} className="text-white/80 hover:text-white">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {/* Model Selector & Search Grounding Bar */}
           <div className="px-3.5 py-2 bg-slate-950 border-b border-slate-800/80 flex items-center justify-between text-xs gap-2">
             <div className="flex items-center gap-1.5">
@@ -375,7 +534,7 @@ export const PrepAIAssistant: React.FC = () => {
             <div className="p-4 bg-slate-950 border-b border-indigo-500/30 space-y-3 text-xs animate-fade-in">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-white flex items-center gap-1.5">
-                  <Key className="w-3.5 h-3.5 text-indigo-400" /> Gemini API Settings
+                  <Key className="w-3.5 h-3.5 text-indigo-400" /> Gemini API & Wake Word Settings
                 </span>
                 <button
                   onClick={() => setShowSettings(false)}
@@ -385,14 +544,14 @@ export const PrepAIAssistant: React.FC = () => {
                 </button>
               </div>
               <p className="text-slate-400 text-[11px]">
-                Prepskm is already connected to server-side Gemini models with Google Search Grounding. You can optionally enter your custom Gemini API key.
+                Prepskm is connected to server-side Gemini models with Google Search Grounding. Say <strong>"Hey Prep"</strong> or <strong>"Hello Prep"</strong> anytime to talk hands-free!
               </p>
               <form onSubmit={handleSaveApiKey} className="flex gap-2">
                 <input
                   type="password"
                   value={customApiKey}
                   onChange={(e) => setCustomApiKey(e.target.value)}
-                  placeholder="AIzaSy..."
+                  placeholder="Custom Gemini API Key: AIzaSy..."
                   className="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 <button
@@ -537,7 +696,7 @@ export const PrepAIAssistant: React.FC = () => {
             {isListening && (
               <div className="mb-2 px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs flex items-center justify-between animate-pulse">
                 <span className="flex items-center gap-1.5">
-                  <Radio className="w-3.5 h-3.5 text-rose-400 animate-spin" /> Listening... Speak in Hindi or English
+                  <Radio className="w-3.5 h-3.5 text-rose-400 animate-spin" /> Listening... Speak doubt in Hindi or English
                 </span>
                 <button
                   onClick={toggleSpeechRecognition}
@@ -560,7 +719,7 @@ export const PrepAIAssistant: React.FC = () => {
                 onClick={toggleSpeechRecognition}
                 className={`p-2.5 rounded-xl transition ${
                   isListening
-                    ? 'bg-rose-600 text-white animate-bounce'
+                    ? 'bg-rose-600 text-white animate-bounce shadow-lg shadow-rose-600/40'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                 }`}
                 title={isListening ? 'Stop Listening' : 'Voice doubt input (Speech to text)'}
@@ -572,7 +731,7 @@ export const PrepAIAssistant: React.FC = () => {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask doubt, NTA exam dates, or speak via mic..."
+                placeholder="Ask doubt, say 'Hello Prep', or use mic..."
                 className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
 

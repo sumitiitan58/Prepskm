@@ -31,7 +31,20 @@ export interface Question {
   createdAt: string;
 }
 
-export type MaterialCategory = 'notes' | 'pyq' | 'formula_sheet' | 'video';
+export type MaterialCategory = 'notes' | 'pyq' | 'formula_sheet' | 'video' | string;
+
+export interface CustomSection {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt?: string;
+}
+
+export interface CustomChapter {
+  id: string;
+  subject: SubjectName;
+  name: string;
+}
 
 export interface StudyMaterial {
   id: string;
@@ -42,6 +55,9 @@ export interface StudyMaterial {
   pdfUrl?: string;
   pdfTitle?: string;
   videoUrl?: string;
+  fileData?: string; // Base64 or object URL of uploaded PDF or MP4
+  fileName?: string;
+  fileType?: 'pdf' | 'mp4' | 'other';
   description: string;
   downloadsCount: number;
   createdAt: string;

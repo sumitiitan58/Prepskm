@@ -38,6 +38,10 @@ import {
   getSavedFirebaseConfig,
   getAdminEmails,
   addAdminEmail,
+  saveCustomChapter,
+  getAllChaptersForSubject,
+  getCustomSections,
+  saveCustomSection,
 } from '../lib/firebase';
 import { ImageCropperModal } from './ImageCropperModal';
 import { AVAILABLE_CHAPTERS } from '../data/initialData';
@@ -59,12 +63,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [qExamTarget, setQExamTarget] = useState<ExamTarget>('JEE Main');
   const [qClassLevel, setQClassLevel] = useState('Class 12');
   const [qSubject, setQSubject] = useState<SubjectName>('Physics');
+  const [availableChapters, setAvailableChapters] = useState<string[]>(getAllChaptersForSubject('Physics'));
   const [qChapter, setQChapter] = useState('');
   const [newCustomChapter, setNewCustomChapter] = useState('');
   const [qType, setQType] = useState<QuestionType>('single_choice');
   const [qDifficulty, setQDifficulty] = useState<DifficultyLevel>('medium');
   const [qText, setQText] = useState('');
   const [qImageBase64, setQImageBase64] = useState<string | undefined>(undefined);
+
+  // Sync available chapters whenever subject changes or chapters are updated
+  React.useEffect(() => {
+    setAvailableChapters(getAllChaptersForSubject(qSubject));
+  }, [qSubject]);
+
+  React.useEffect(() => {
+    const handleChaptersUpdated = () => {
+      setAvailableChapters(getAllChaptersForSubject(qSubject));
+    };
+    window.addEventListener('prepskm_chapters_updated', handleChaptersUpdated);
+    return () => {
+      window.removeEventListener('prepskm_chapters_updated', handleChaptersUpdated);
+    };
+  }, [qSubject]);
 
   // Options state
   const [qOptions, setQOptions] = useState<
@@ -96,15 +116,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // ==================== TAB 2: MATERIAL UPLOADER STATE ====================
   const [matTitle, setMatTitle] = useState('');
-  const [matCategory, setMatCategory] = useState<'notes' | 'pyq' | 'formula_sheet' | 'video'>('notes');
+  const [matCategory, setMatCategory] = useState<string>('notes');
+  const [matCustomSectionName, setMatCustomSectionName] = useState('');
   const [matSubject, setMatSubject] = useState<SubjectName>('Physics');
   const [matClassLevel, setMatClassLevel] = useState('Class 12 / JEE');
   const [matPdfUrl, setMatPdfUrl] = useState('');
   const [matPdfTitle, setMatPdfTitle] = useState('');
   const [matVideoUrl, setMatVideoUrl] = useState('');
   const [matDescription, setMatDescription] = useState('');
+  const [matUploadedFile, setMatUploadedFile] = useState<string | null>(null);
+  const [matUploadedFileName, setMatUploadedFileName] = useState<string | null>(null);
+  const [matUploadedFileType, setMatUploadedFileType] = useState<'pdf' | 'mp4' | 'other'>('pdf');
+  const [customSectionsList, setCustomSectionsList] = useState(getCustomSections());
   const [savingMaterial, setSavingMaterial] = useState(false);
   const [materialNotice, setMaterialNotice] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    const handleSecUpdate = () => {
+      setCustomSectionsList(getCustomSections());
+    };
+    window.addEventListener('prepskm_sections_updated', handleSecUpdate);
+    return () => {
+      window.removeEventListener('prepskm_sections_updated', handleSecUpdate);
+    };
+  }, []);
 
   // ==================== TAB 3: TOKEN VERIFIER STATE ====================
   const [tokenInput, setTokenInput] = useState('');
@@ -244,6 +279,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setQOptions((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const handleAddChapterClick = () => {
+    const trimmed = newCustomChapter.trim();
+    if (!trimmed) return;
+    saveCustomChapter(qSubject, trimmed);
+    const updated = getAllChaptersForSubject(qSubject);
+    setAvailableChapters(updated);
+    setQChapter(trimmed);
+    setNewCustomChapter('');
+    setQuestionNotice(`Chapter "${trimmed}" saved! It is now permanently selectable for every question.`);
+    setTimeout(() => setQuestionNotice(null), 3500);
+  };
+
   // Submit Question to Firestore
   const handleSaveQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,7 +302,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setSavingQuestion(true);
     setQuestionNotice(null);
 
-    const finalChapter = newCustomChapter.trim() || qChapter || AVAILABLE_CHAPTERS[qSubject]?.[0] || 'General';
+    let finalChapter = qChapter;
+    if (newCustomChapter.trim()) {
+      saveCustomChapter(qSubject, newCustomChapter.trim());
+      setAvailableChapters(getAllChaptersForSubject(qSubject));
+      finalChapter = newCustomChapter.trim();
+    } else if (!finalChapter) {
+      finalChapter = availableChapters[0] || 'General';
+    }
 
     const newQ: Question = {
       id: 'q-' + Date.now(),
@@ -277,7 +331,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
     await saveQuestionToFirestore(newQ);
     setSavingQuestion(false);
-    setQuestionNotice('Question saved to Firestore "questions" collection successfully!');
+    setQuestionNotice(`Question for "${finalChapter}" saved to Firestore "questions" collection successfully!`);
 
     // Reset form fields
     setQText('');
@@ -296,21 +350,53 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setTimeout(() => setQuestionNotice(null), 4000);
   };
 
+  const handleMaterialFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMatUploadedFileName(file.name);
+    const isVideo = file.type.includes('video') || file.name.endsWith('.mp4');
+    const isPdf = file.type.includes('pdf') || file.name.endsWith('.pdf');
+    setMatUploadedFileType(isVideo ? 'mp4' : isPdf ? 'pdf' : 'other');
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setMatUploadedFile(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Submit Material to Firestore
   const handleSaveMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!matTitle.trim()) return;
 
     setSavingMaterial(true);
+    let finalCategory = matCategory;
+    if (matCategory === 'custom' && matCustomSectionName.trim()) {
+      saveCustomSection(matCustomSectionName.trim());
+      finalCategory = matCustomSectionName.trim();
+      setCustomSectionsList(getCustomSections());
+    }
+
+    const isVideo = matUploadedFileType === 'mp4' || finalCategory === 'video';
+    const finalPdfUrl = matUploadedFileType === 'pdf' ? (matUploadedFile || '') : matPdfUrl.trim();
+    const finalVideoUrl = isVideo ? (matUploadedFile || matVideoUrl.trim()) : undefined;
+
     const newMat: StudyMaterial = {
       id: 'mat-' + Date.now(),
       title: matTitle.trim(),
-      category: matCategory,
+      category: finalCategory,
       subject: matSubject,
       classLevel: matClassLevel,
-      pdfUrl: matPdfUrl.trim() || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-      pdfTitle: matPdfTitle.trim(),
-      videoUrl: matVideoUrl.trim(),
+      pdfUrl: finalPdfUrl || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+      pdfTitle: matPdfTitle.trim() || undefined,
+      videoUrl: finalVideoUrl,
+      fileData: matUploadedFile || undefined,
+      fileName: matUploadedFileName || undefined,
+      fileType: matUploadedFileType,
       description: matDescription.trim(),
       downloadsCount: Math.floor(100 + Math.random() * 500),
       createdAt: new Date().toISOString(),
@@ -318,13 +404,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
     await saveMaterialToFirestore(newMat);
     setSavingMaterial(false);
-    setMaterialNotice('Study material published to Firestore "materials" collection!');
+    setMaterialNotice(`Study material published to section "${finalCategory}" in Firestore!`);
 
     setMatTitle('');
     setMatPdfUrl('');
     setMatPdfTitle('');
     setMatVideoUrl('');
     setMatDescription('');
+    setMatUploadedFile(null);
+    setMatUploadedFileName(null);
+    setMatCustomSectionName('');
     setTimeout(() => setMaterialNotice(null), 4000);
   };
 
@@ -449,31 +538,44 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               </div>
 
-              {/* Row 2: Chapter & Custom Chapter */}
+              {/* Row 2: Dynamic Chapter Selection with Permanent Custom Chapters */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Select Chapter</label>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                    Select Chapter ({availableChapters.length} Available)
+                  </label>
                   <select
                     value={qChapter}
                     onChange={(e) => setQChapter(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-medium"
                   >
-                    <option value="">-- Choose Existing Chapter --</option>
-                    {AVAILABLE_CHAPTERS[qSubject]?.map((ch) => (
+                    <option value="">-- Choose Chapter --</option>
+                    {availableChapters.map((ch) => (
                       <option key={ch} value={ch}>{ch}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Or Add New Chapter Dynamically</label>
-                  <input
-                    type="text"
-                    value={newCustomChapter}
-                    onChange={(e) => setNewCustomChapter(e.target.value)}
-                    placeholder="Type custom chapter name..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
-                  />
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                    Or Add New Chapter (Shows up for all questions)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCustomChapter}
+                      onChange={(e) => setNewCustomChapter(e.target.value)}
+                      placeholder="e.g. Semiconductors & Logic Gates"
+                      className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddChapterClick}
+                      className="px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shrink-0 flex items-center gap-1.5 shadow-md shadow-indigo-600/30"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Chapter
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -764,18 +866,38 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <form onSubmit={handleSaveMaterial} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Category</label>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Section / Category</label>
                 <select
                   value={matCategory}
-                  onChange={(e) => setMatCategory(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
+                  onChange={(e) => setMatCategory(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-medium"
                 >
                   <option value="notes">Handwritten Revision Notes (PDF)</option>
                   <option value="formula_sheet">Formula Sheet (PDF)</option>
                   <option value="pyq">Previous Year Questions (PYQs)</option>
-                  <option value="video">Strategy & Concept Video Lecture</option>
+                  <option value="video">Strategy & Video Lectures (MP4)</option>
+                  {customSectionsList.map((sec) => (
+                    <option key={sec.id} value={sec.id}>Custom: {sec.name}</option>
+                  ))}
+                  <option value="custom">+ Create New Custom Section...</option>
                 </select>
               </div>
+
+              {matCategory === 'custom' && (
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                    New Custom Section Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={matCustomSectionName}
+                    onChange={(e) => setMatCustomSectionName(e.target.value)}
+                    placeholder="e.g. Mindmaps & Fast Charts, Daily DPPs..."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-indigo-500/60 text-white text-xs"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Subject</label>
@@ -815,46 +937,62 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               />
             </div>
 
-            {matCategory === 'video' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Direct File Upload (PDF or MP4 Video) */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-dashed border-indigo-500/30 space-y-2.5">
+              <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
-                    MP4 Video URL / Stream Link
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={matVideoUrl}
-                    onChange={(e) => setMatVideoUrl(e.target.value)}
-                    placeholder="https://...mp4 or CDN video"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
-                    Companion PDF Attachment Link
-                  </label>
-                  <input
-                    type="url"
-                    value={matPdfUrl}
-                    onChange={(e) => setMatPdfUrl(e.target.value)}
-                    placeholder="Companion PDF link..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
-                  />
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Upload className="w-4 h-4 text-indigo-400" /> Upload File (PDF or MP4 Video)
+                  </span>
+                  <p className="text-[11px] text-slate-400">
+                    Upload your document or video file directly so students can stream or download it
+                  </p>
                 </div>
               </div>
-            ) : (
+
+              <input
+                type="file"
+                accept=".pdf,video/mp4"
+                onChange={handleMaterialFileSelect}
+                className="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
+              />
+
+              {matUploadedFileName && (
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20">
+                  <CheckCircle className="w-4 h-4 shrink-0" />
+                  <span>File Selected: {matUploadedFileName} ({matUploadedFileType.toUpperCase()})</span>
+                </div>
+              )}
+            </div>
+
+            {/* Optional Fallback URLs & Companion PDF */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">PDF File URL / Cloud Link</label>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                  Or External Cloud/Video/PDF Link (Optional)
+                </label>
                 <input
                   type="url"
                   value={matPdfUrl}
                   onChange={(e) => setMatPdfUrl(e.target.value)}
-                  placeholder="https://...pdf (or left blank for sample dummy PDF)"
+                  placeholder="https://... (if not uploading directly)"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
                 />
               </div>
-            )}
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                  Companion PDF Title (For Video Lectures)
+                </label>
+                <input
+                  type="text"
+                  value={matPdfTitle}
+                  onChange={(e) => setMatPdfTitle(e.target.value)}
+                  placeholder="e.g. Formula Sheet PDF for this lecture"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"
+                />
+              </div>
+            </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Description / Summary</label>
@@ -872,7 +1010,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               disabled={savingMaterial}
               className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30"
             >
-              {savingMaterial ? 'Uploading...' : 'Publish to Study Materials Hub'}
+              {savingMaterial ? 'Uploading & Publishing...' : 'Publish to Study Materials Hub'}
             </button>
           </form>
         </div>

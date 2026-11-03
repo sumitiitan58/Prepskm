@@ -19,7 +19,10 @@ import {
   ArrowRight,
   Check,
   X,
-  FileText
+  FileText,
+  ZoomIn,
+  ZoomOut,
+  History,
 } from 'lucide-react';
 import { Question, SubjectName, ExamTarget, MockTestAttempt } from '../types';
 import { AVAILABLE_CHAPTERS } from '../data/initialData';
@@ -31,6 +34,9 @@ interface MockTestPortalProps {
   defaultExamTarget: ExamTarget;
   preselectedChapter?: { subject: string; chapter: string } | null;
   onClearPreselectedChapter?: () => void;
+  reattemptData?: MockTestAttempt | null;
+  onClearReattempt?: () => void;
+  onViewHistory?: () => void;
 }
 
 type PaletteStatus = 'not_visited' | 'not_answered' | 'answered' | 'marked_for_review' | 'answered_and_marked';
@@ -41,6 +47,9 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
   defaultExamTarget,
   preselectedChapter,
   onClearPreselectedChapter,
+  reattemptData,
+  onClearReattempt,
+  onViewHistory,
 }) => {
   // Test generator state
   const [examTarget, setExamTarget] = useState<ExamTarget>(defaultExamTarget || 'JEE Main');
@@ -51,6 +60,9 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
     preselectedChapter ? [preselectedChapter.chapter] : []
   );
   const [totalQuestionsRequested, setTotalQuestionsRequested] = useState<number>(20);
+
+  // Lightbox Zoom State for large diagrams & options
+  const [zoomedImage, setZoomedImage] = useState<{ src: string; title: string } | null>(null);
 
   // CBT Mode states
   const [isTestActive, setIsTestActive] = useState(false);
@@ -94,6 +106,17 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
       }
     }
   }, [preselectedChapter]);
+
+  // Handle re-attempt test request from Test History
+  useEffect(() => {
+    if (reattemptData) {
+      if (reattemptData.examTarget) setExamTarget(reattemptData.examTarget);
+      if (reattemptData.selectedSubjects?.length) setSelectedSubjects(reattemptData.selectedSubjects);
+      if (reattemptData.selectedChapters?.length) setSelectedChapters(reattemptData.selectedChapters);
+      if (reattemptData.totalQuestions) setTotalQuestionsRequested(reattemptData.totalQuestions);
+      if (onClearReattempt) onClearReattempt();
+    }
+  }, [reattemptData, onClearReattempt]);
 
   // Intelligent Question Count Minimum Constraints:
   // - 10 chapters selected -> minimum 10 questions
@@ -516,7 +539,7 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
     return (
       <div className="space-y-6">
         {/* Generator Card Header */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 shadow-xl relative overflow-hidden">
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/30 to-slate-900 border border-indigo-500/20 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="max-w-2xl space-y-3 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold">
               <Zap className="w-3.5 h-3.5" /> NTA-Standard CBT Mock Test Engine
@@ -530,6 +553,17 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
               NTA order with official +4 / -1 marking scheme.
             </p>
           </div>
+
+          {onViewHistory && (
+            <button
+              type="button"
+              onClick={onViewHistory}
+              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition flex items-center gap-2 shrink-0 shadow-lg relative z-10 active:scale-95"
+            >
+              <History className="w-4 h-4 text-indigo-400" />
+              <span>Score Progression & History</span>
+            </button>
+          )}
         </div>
 
         {/* Test Configuration Grid */}
@@ -802,14 +836,41 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                 {currentQuestion.text}
               </div>
 
-              {/* Cropped Question Image if provided */}
+              {/* Cropped Question Image if provided - Large, crystal clear & zoomable */}
               {currentQuestion.imageBase64 && (
-                <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 inline-block max-w-full">
-                  <img
-                    src={currentQuestion.imageBase64}
-                    alt="Question Diagram"
-                    className="max-h-72 max-w-full rounded-lg object-contain"
-                  />
+                <div className="p-3 sm:p-4 rounded-2xl bg-slate-900 border-2 border-indigo-500/30 max-w-4xl shadow-xl group">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px] text-slate-400">
+                    <span className="font-bold text-indigo-400 flex items-center gap-1.5">
+                      <ZoomIn className="w-3.5 h-3.5" /> High-Resolution Question Diagram (Click to Expand)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setZoomedImage({
+                          src: currentQuestion.imageBase64!,
+                          title: `Question ${activeQuestionIndex + 1} Diagram`,
+                        })
+                      }
+                      className="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30 font-semibold text-xs transition"
+                    >
+                      Enlarge / Inspect
+                    </button>
+                  </div>
+                  <div
+                    onClick={() =>
+                      setZoomedImage({
+                        src: currentQuestion.imageBase64!,
+                        title: `Question ${activeQuestionIndex + 1} Diagram`,
+                      })
+                    }
+                    className="cursor-zoom-in overflow-hidden rounded-xl bg-slate-950 flex items-center justify-center p-3"
+                  >
+                    <img
+                      src={currentQuestion.imageBase64}
+                      alt="Question Diagram"
+                      className="max-h-80 sm:max-h-96 md:max-h-[460px] w-auto max-w-full rounded-lg object-contain transition-transform duration-300 group-hover:scale-[1.01]"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -833,37 +894,67 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2.5 max-w-2xl">
+                  <div className="space-y-3 max-w-3xl">
                     {currentQuestion.options.map((opt, oIdx) => {
                       const isSelected = qAns?.selectedOptionIds?.includes(opt.id);
                       return (
                         <div
                           key={opt.id}
                           onClick={() => handleSelectOption(opt.id)}
-                          className={`p-3.5 rounded-xl border text-sm cursor-pointer transition flex items-center justify-between ${
+                          className={`p-4 rounded-2xl border cursor-pointer transition flex flex-col gap-3 ${
                             isSelected
-                              ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-sm shadow-indigo-500/20'
-                              : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-850'
+                              ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/20 ring-1 ring-indigo-500'
+                              : 'bg-slate-900/70 border-slate-800 text-slate-300 hover:bg-slate-850 hover:border-slate-700'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center shrink-0 ${
-                                isSelected
-                                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                                  : 'border-slate-700 text-slate-400'
-                              }`}
-                            >
-                              {String.fromCharCode(65 + oIdx)}
-                            </span>
-                            <span>{opt.text}</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={`w-7 h-7 rounded-xl border text-xs font-black flex items-center justify-center shrink-0 ${
+                                  isSelected
+                                    ? 'bg-indigo-600 border-indigo-500 text-white'
+                                    : 'border-slate-700 text-slate-400 bg-slate-950'
+                                }`}
+                              >
+                                {String.fromCharCode(65 + oIdx)}
+                              </span>
+                              <span className="font-semibold text-sm sm:text-base">{opt.text}</span>
+                            </div>
+                            {opt.imageBase64 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setZoomedImage({
+                                    src: opt.imageBase64!,
+                                    title: `Option ${String.fromCharCode(65 + oIdx)} Diagram`,
+                                  });
+                                }}
+                                className="text-[11px] text-indigo-400 hover:text-indigo-300 px-2 py-1 rounded bg-slate-950 border border-slate-800 flex items-center gap-1 shrink-0"
+                              >
+                                <ZoomIn className="w-3 h-3" /> Zoom
+                              </button>
+                            )}
                           </div>
+
+                          {/* Large, High-Legibility Option Diagram */}
                           {opt.imageBase64 && (
-                            <img
-                              src={opt.imageBase64}
-                              alt="Option"
-                              className="max-h-16 rounded object-contain"
-                            />
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setZoomedImage({
+                                  src: opt.imageBase64!,
+                                  title: `Option ${String.fromCharCode(65 + oIdx)} Diagram`,
+                                });
+                              }}
+                              className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-center overflow-hidden cursor-zoom-in hover:border-indigo-500/40 transition"
+                            >
+                              <img
+                                src={opt.imageBase64}
+                                alt={`Option ${String.fromCharCode(65 + oIdx)}`}
+                                className="max-h-40 sm:max-h-56 md:max-h-64 w-auto max-w-full rounded-lg object-contain"
+                              />
+                            </div>
                           )}
                         </div>
                       );
@@ -1149,22 +1240,35 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                   <div className="py-3 text-sm text-slate-200 whitespace-pre-wrap">{q.text}</div>
 
                   {q.imageBase64 && (
-                    <img
-                      src={q.imageBase64}
-                      alt="Question Diagram"
-                      className="max-h-48 rounded-lg mb-3"
-                    />
+                    <div
+                      onClick={() =>
+                        setZoomedImage({
+                          src: q.imageBase64!,
+                          title: `Question ${idx + 1} Diagram`,
+                        })
+                      }
+                      className="p-3 rounded-2xl bg-slate-950 border border-slate-800 cursor-zoom-in inline-block max-w-full mb-3 hover:border-indigo-500/40 transition"
+                    >
+                      <img
+                        src={q.imageBase64}
+                        alt="Question Diagram"
+                        className="max-h-72 sm:max-h-80 md:max-h-96 w-auto max-w-full rounded-lg object-contain"
+                      />
+                      <span className="text-[10px] text-indigo-400 mt-1 flex items-center gap-1 font-semibold">
+                        <ZoomIn className="w-3 h-3" /> Click to enlarge diagram
+                      </span>
+                    </div>
                   )}
 
                   {/* Options status */}
                   {q.type !== 'numerical' && (
-                    <div className="space-y-1.5 mb-3 text-xs">
-                      {q.options.map((opt) => {
+                    <div className="space-y-2 mb-3 text-xs">
+                      {q.options.map((opt, oIdx) => {
                         const userPicked = res?.selectedOptionIds?.includes(opt.id);
                         return (
                           <div
                             key={opt.id}
-                            className={`p-2.5 rounded-lg border flex items-center justify-between ${
+                            className={`p-3 rounded-xl border flex flex-col gap-2 ${
                               opt.isCorrect
                                 ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 font-semibold'
                                 : userPicked
@@ -1172,16 +1276,42 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                                 : 'bg-slate-950/40 border-slate-800 text-slate-400'
                             }`}
                           >
-                            <span>{opt.text}</span>
-                            {opt.isCorrect && (
-                              <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                                <Check className="w-3 h-3" /> Correct Answer
-                              </span>
-                            )}
-                            {userPicked && !opt.isCorrect && (
-                              <span className="text-[10px] font-bold text-rose-400 flex items-center gap-1">
-                                <X className="w-3 h-3" /> Your Response
-                              </span>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 rounded-md bg-slate-900 border border-slate-700 flex items-center justify-center font-bold text-[10px]">
+                                  {String.fromCharCode(65 + oIdx)}
+                                </span>
+                                <span>{opt.text}</span>
+                              </div>
+                              {opt.isCorrect && (
+                                <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+                                  <Check className="w-3 h-3" /> Correct Answer
+                                </span>
+                              )}
+                              {userPicked && !opt.isCorrect && (
+                                <span className="text-[10px] font-bold text-rose-400 flex items-center gap-1">
+                                  <X className="w-3 h-3" /> Your Response
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Option Diagram if present */}
+                            {opt.imageBase64 && (
+                              <div
+                                onClick={() =>
+                                  setZoomedImage({
+                                    src: opt.imageBase64!,
+                                    title: `Option ${String.fromCharCode(65 + oIdx)} Diagram`,
+                                  })
+                                }
+                                className="p-2 rounded-lg bg-slate-950 border border-slate-800/80 cursor-zoom-in flex items-center justify-center"
+                              >
+                                <img
+                                  src={opt.imageBase64}
+                                  alt={`Option ${String.fromCharCode(65 + oIdx)}`}
+                                  className="max-h-36 sm:max-h-48 w-auto max-w-full rounded object-contain"
+                                />
+                              </div>
                             )}
                           </div>
                         );
@@ -1208,12 +1338,23 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                       {q.explanationText}
                     </p>
                     {q.explanationImageBase64 && (
-                      <div className="pt-2">
+                      <div
+                        onClick={() =>
+                          setZoomedImage({
+                            src: q.explanationImageBase64!,
+                            title: `Question ${idx + 1} Solution Explanation`,
+                          })
+                        }
+                        className="pt-2 cursor-zoom-in"
+                      >
                         <img
                           src={q.explanationImageBase64}
                           alt="Explanation Solution"
-                          className="max-h-56 rounded-lg object-contain"
+                          className="max-h-72 sm:max-h-80 md:max-h-96 rounded-xl border border-indigo-500/30 object-contain bg-slate-950 p-2"
                         />
+                        <span className="text-[10px] text-indigo-400 mt-1 flex items-center gap-1 font-semibold">
+                          <ZoomIn className="w-3 h-3" /> Click to enlarge explanation
+                        </span>
                       </div>
                     )}
                   </div>
@@ -1222,9 +1363,85 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
             })}
           </div>
         </div>
+
+        {/* Global Lightbox Zoom Modal for Diagrams and Options */}
+        {zoomedImage && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md animate-fade-in"
+            onClick={() => setZoomedImage(null)}
+          >
+            <div
+              className="relative max-w-5xl max-h-[92vh] w-full flex flex-col bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+                <span className="font-bold text-white flex items-center gap-2">
+                  <ZoomIn className="w-4 h-4 text-indigo-400" />
+                  {zoomedImage.title}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setZoomedImage(null)}
+                  className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-bold px-2.5"
+                >
+                  ✕ Close (Esc)
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-slate-950/90">
+                <img
+                  src={zoomedImage.src}
+                  alt={zoomedImage.title}
+                  className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl transition-transform"
+                />
+              </div>
+
+              <div className="p-2.5 bg-slate-950 border-t border-slate-800 text-[11px] text-slate-400 text-center">
+                Pinch or zoom on mobile • Click outside or Close button to dismiss
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
-  return null;
+  return (
+    <>
+      {/* Global Lightbox Zoom Modal */}
+      {zoomedImage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md animate-fade-in"
+          onClick={() => setZoomedImage(null)}
+        >
+          <div
+            className="relative max-w-5xl max-h-[92vh] w-full flex flex-col bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+              <span className="font-bold text-white flex items-center gap-2">
+                <ZoomIn className="w-4 h-4 text-indigo-400" />
+                {zoomedImage.title}
+              </span>
+              <button
+                type="button"
+                onClick={() => setZoomedImage(null)}
+                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-bold px-2.5"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-slate-950/90">
+              <img
+                src={zoomedImage.src}
+                alt={zoomedImage.title}
+                className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
