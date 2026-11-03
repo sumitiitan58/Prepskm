@@ -161,10 +161,15 @@ app.get('/api/health', (_req: Request, res: Response) => {
 });
 
 async function startServer() {
+  const server = (await import('http')).createServer(app);
+
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: { server },
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -175,7 +180,7 @@ async function startServer() {
     });
   }
 
-  app.listen(port, '0.0.0.0', () => {
+  server.listen(port, '0.0.0.0', () => {
     console.log(`Prepskm server listening on http://0.0.0.0:${port}`);
   });
 }

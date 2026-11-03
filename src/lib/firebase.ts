@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAnalytics, isSupported, Analytics } from 'firebase/analytics';
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -61,6 +62,7 @@ const STORAGE_KEYS = {
 let firebaseAppInstance: FirebaseApp | null = null;
 let authInstance: Auth | null = null;
 let firestoreInstance: Firestore | null = null;
+let analyticsInstance: Analytics | null = null;
 
 // Initialize Firebase with stored config, provisioned config, or fallback
 export function getSavedFirebaseConfig(): FirebaseConfig | null {
@@ -89,11 +91,16 @@ export function saveFirebaseConfig(config: FirebaseConfig): boolean {
   }
 }
 
-export function initializeFirebaseApp(customConfig?: FirebaseConfig): { app: FirebaseApp | null; auth: Auth | null; db: Firestore | null } {
+export function initializeFirebaseApp(customConfig?: FirebaseConfig): {
+  app: FirebaseApp | null;
+  auth: Auth | null;
+  db: Firestore | null;
+  analytics: Analytics | null;
+} {
   try {
     const config = customConfig || getSavedFirebaseConfig();
     if (!config || !config.apiKey || !config.projectId) {
-      return { app: null, auth: null, db: null };
+      return { app: null, auth: null, db: null, analytics: null };
     }
 
     if (getApps().length > 0) {
@@ -104,19 +111,35 @@ export function initializeFirebaseApp(customConfig?: FirebaseConfig): { app: Fir
 
     authInstance = getAuth(firebaseAppInstance);
     
-    // Check if named database ID is provided
+    // Check if named database ID is provided and non-empty
     const databaseId = (config as any).firestoreDatabaseId;
-    if (databaseId) {
-      firestoreInstance = getFirestore(firebaseAppInstance, databaseId);
+    if (databaseId && databaseId.trim() !== '' && databaseId !== '(default)') {
+      firestoreInstance = getFirestore(firebaseAppInstance, databaseId.trim());
     } else {
       firestoreInstance = getFirestore(firebaseAppInstance);
     }
 
-    return { app: firebaseAppInstance, auth: authInstance, db: firestoreInstance };
+    // Initialize Firebase Analytics if running in browser and supported
+    if (typeof window !== 'undefined' && config.measurementId) {
+      isSupported().then((supported) => {
+        if (supported && firebaseAppInstance) {
+          analyticsInstance = getAnalytics(firebaseAppInstance);
+          console.log('Firebase Analytics initialized with measurementId:', config.measurementId);
+        }
+      }).catch((e) => {
+        console.debug('Firebase Analytics initialization skipped:', e);
+      });
+    }
+
+    return { app: firebaseAppInstance, auth: authInstance, db: firestoreInstance, analytics: analyticsInstance };
   } catch (err) {
     console.warn('Firebase initialization note (running in local synced mode):', err);
-    return { app: null, auth: null, db: null };
+    return { app: null, auth: null, db: null, analytics: null };
   }
+}
+
+export function getFirebaseAnalytics(): Analytics | null {
+  return analyticsInstance;
 }
 
 // Initial setup on file load
@@ -137,24 +160,31 @@ async function testConnection() {
 }
 testConnection();
 
-// Admin Email management
+// Admin & Owner Email management
+export const OWNER_EMAIL = 'skylaneexperiment@gmail.com';
+
 export function getAdminEmails(): string[] {
   try {
     const saved = localStorage.getItem(ADMIN_EMAILS_KEY);
     if (saved) {
       const list = JSON.parse(saved);
-      return Array.from(new Set([...DEFAULT_ADMINS, ...list]));
+      return Array.from(new Set([OWNER_EMAIL, ...DEFAULT_ADMINS, ...list]));
     }
   } catch {
     // fallback
   }
-  return DEFAULT_ADMINS;
+  return Array.from(new Set([OWNER_EMAIL, ...DEFAULT_ADMINS]));
 }
 
 export function isUserAdmin(email?: string | null): boolean {
   if (!email) return false;
   const adminList = getAdminEmails().map((e) => e.toLowerCase().trim());
   return adminList.includes(email.toLowerCase().trim());
+}
+
+export function isOwner(email?: string | null): boolean {
+  if (!email) return false;
+  return email.toLowerCase().trim() === OWNER_EMAIL.toLowerCase();
 }
 
 export function addAdminEmail(email: string) {

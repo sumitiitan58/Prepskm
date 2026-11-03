@@ -42,6 +42,8 @@ import {
   getAllChaptersForSubject,
   getCustomSections,
   saveCustomSection,
+  isOwner,
+  OWNER_EMAIL,
 } from '../lib/firebase';
 import { ImageCropperModal } from './ImageCropperModal';
 import { AVAILABLE_CHAPTERS } from '../data/initialData';
@@ -171,6 +173,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [fbStorageBucket, setFbStorageBucket] = useState('');
   const [fbMessagingSenderId, setFbMessagingSenderId] = useState('');
   const [fbAppId, setFbAppId] = useState('');
+  const [fbMeasurementId, setFbMeasurementId] = useState('');
   const [firebaseNotice, setFirebaseNotice] = useState<string | null>(null);
   const [newAdminEmailInput, setNewAdminEmailInput] = useState('');
 
@@ -183,6 +186,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       setFbStorageBucket(existing.storageBucket || '');
       setFbMessagingSenderId(existing.messagingSenderId || '');
       setFbAppId(existing.appId || '');
+      setFbMeasurementId(existing.measurementId || '');
     }
   }, []);
 
@@ -195,6 +199,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       storageBucket: fbStorageBucket.trim(),
       messagingSenderId: fbMessagingSenderId.trim(),
       appId: fbAppId.trim(),
+      measurementId: fbMeasurementId.trim(),
     };
     const ok = saveFirebaseConfig(config);
     if (ok) {
@@ -422,10 +427,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* Admin Panel Header */}
       <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 font-bold text-xs border border-indigo-500/30">
               Admin Control Center
             </span>
+            {isOwner(currentAdminEmail) && (
+              <span className="px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/40 flex items-center gap-1 shadow-sm shadow-amber-500/20">
+                👑 Platform Owner ({currentAdminEmail})
+              </span>
+            )}
             <span className="text-xs text-slate-400">Secure Administrator Access</span>
           </div>
           <h2 className="text-2xl font-black text-white mt-1">Prepskm Super Admin Panel</h2>
@@ -1225,6 +1235,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+                  measurementId (Firebase Analytics)
+                </label>
+                <input
+                  type="text"
+                  value={fbMeasurementId}
+                  onChange={(e) => setFbMeasurementId(e.target.value)}
+                  placeholder="G-HYL8GGSTZ2"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-xs"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
               className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-md shadow-indigo-600/30"
@@ -1239,14 +1264,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               Authorized Admin Accounts
             </h4>
             <div className="flex flex-wrap gap-2">
-              {getAdminEmails().map((em) => (
-                <span
-                  key={em}
-                  className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs text-indigo-300 font-mono"
-                >
-                  {em}
-                </span>
-              ))}
+              {getAdminEmails().map((em) => {
+                const isPlatformOwner = isOwner(em);
+                return (
+                  <span
+                    key={em}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono border ${
+                      isPlatformOwner
+                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 font-bold shadow-sm shadow-amber-500/20'
+                        : 'bg-slate-950 border-slate-700 text-indigo-300'
+                    }`}
+                  >
+                    {isPlatformOwner && <span>👑 Owner:</span>}
+                    <span>{em}</span>
+                  </span>
+                );
+              })}
             </div>
             <div className="flex gap-2 max-w-md pt-2">
               <input

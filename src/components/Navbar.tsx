@@ -22,7 +22,7 @@ import {
   Radio
 } from 'lucide-react';
 import { StudentProfile } from '../types';
-import { isUserAdmin } from '../lib/firebase';
+import { isUserAdmin, isOwner } from '../lib/firebase';
 import { getStoredTheme, toggleTheme, applyTheme, ThemeMode } from '../lib/theme';
 
 interface NavbarProps {
@@ -51,6 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
 }) => {
   const isAdmin = currentUser && isUserAdmin(currentUser.email);
+  const isPlatformOwner = currentUser && isOwner(currentUser.email);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme());
 
@@ -244,7 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>Admin Panel</span>
+              <span>{isPlatformOwner ? '👑 Owner Console' : 'Admin Panel'}</span>
             </button>
           )}
 

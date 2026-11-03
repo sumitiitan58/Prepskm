@@ -4,6 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prepskm - JEE & NEET Study Platform</title>
+
+  <!-- Intercept and suppress harmless HMR WebSocket disconnect errors in proxy/iframe environment -->
+  <script>
+    window.addEventListener('error', function(event) {
+      if (
+        (event.filename && event.filename.includes('@vite/client')) ||
+        (event.message && (
+          event.message.includes('WebSocket') ||
+          event.message.includes('vite') ||
+          event.message.includes('HMR')
+        ))
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return true;
+      }
+    }, true);
+
+    window.addEventListener('unhandledrejection', function(event) {
+      var reasonStr = String(event.reason || '');
+      var stackStr = String(event.reason && event.reason.stack || '');
+      if (
+        reasonStr.includes('WebSocket') ||
+        reasonStr.includes('vite') ||
+        stackStr.includes('@vite/client')
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, true);
+  </script>
   <meta name="description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />
   <meta property="og:title" content="Prepskm - JEE & NEET Study Platform" />
   <meta property="og:description" content="Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor." />

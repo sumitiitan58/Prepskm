@@ -1,12 +1,12 @@
 {
-  "projectId": "notional-courage-b2w8r",
-  "appId": "1:626360655151:web:7ea9fd976dbf5f71af15da",
-  "apiKey": "AIzaSyCPXTB7gYpxxwiqriwGt7OhpuCh9Vnlwbg",
-  "authDomain": "notional-courage-b2w8r.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-prepskm-eaeb857a-1d86-46a6-8a51-d3c33e30313d",
-  "storageBucket": "notional-courage-b2w8r.firebasestorage.app",
-  "messagingSenderId": "626360655151",
-  "measurementId": "",
-  "oAuthClientId": "626360655151-seubo0kg2d5p9ci2923mbg2jbm69ft04.apps.googleusercontent.com",
+  "projectId": "prepskm-ad1ce",
+  "appId": "1:1033326786252:web:199494f2628703d07ff469",
+  "apiKey": "AIzaSyDBP0nnOKLP3dk4or8xblLjZmIUKwRosjM",
+  "authDomain": "prepskm-ad1ce.firebaseapp.com",
+  "firestoreDatabaseId": "",
+  "storageBucket": "prepskm-ad1ce.firebasestorage.app",
+  "messagingSenderId": "1033326786252",
+  "measurementId": "G-HYL8GGSTZ2",
+  "oAuthClientId": "",
   "recaptchaSiteKey": ""
 }
