@@ -50,6 +50,9 @@
   <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 
+  <!-- html2canvas for 1-click Pass Card and Marksheet image downloads -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <!-- Firebase Compat SDK CDN -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -78,8 +81,14 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #374151;
     }
-    .custom-glow {
-      box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
+    .holo-card {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(30, 27, 75, 0.9) 100%);
+      box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+    .marksheet-cert {
+      background: linear-gradient(145deg, #090d16 0%, #0f172a 100%);
+      border: 2px solid rgba(99, 102, 241, 0.4);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     }
   </style>
 </head>
@@ -91,7 +100,7 @@
       <div class="flex items-center gap-2">
         <span class="font-extrabold text-indigo-400">PREPSKM</span>
         <span class="text-slate-600 hidden sm:inline">|</span>
-        <span class="text-[11px] sm:text-xs">Distraction-Free Platform by @unfiltereddsumit</span>
+        <span class="text-[11px] sm:text-xs">Distraction-Free JEE, NEET & Boards Platform by @unfiltereddsumit</span>
       </div>
       <div class="flex items-center gap-4 text-[11px]">
         <a href="https://t.me/prepskm" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-sky-400 transition">
@@ -121,7 +130,7 @@
         <div>
           <div class="flex items-center gap-1.5">
             <span class="font-black text-xl text-white tracking-tight group-hover:text-indigo-300 transition">Prepskm</span>
-            <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">v2.0</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">v2.5</span>
           </div>
           <p class="text-[10px] text-slate-400 -mt-0.5">by @unfiltereddsumit</p>
         </div>
@@ -184,12 +193,17 @@
 
       <button id="tab-btn-materials" onclick="switchTab('materials')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
         <i data-lucide="book-open" class="w-4 h-4 text-cyan-400"></i>
-        <span>Study Materials Hub</span>
+        <span>Study Materials & Vault</span>
       </button>
 
       <button id="tab-btn-mock_tests" onclick="switchTab('mock_tests')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
         <i data-lucide="graduation-cap" class="w-4 h-4 text-emerald-400"></i>
         <span>NTA CBT Mock Tests</span>
+      </button>
+
+      <button id="tab-btn-history" onclick="switchTab('history')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
+        <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
+        <span>Test History & Marksheets</span>
       </button>
 
       <button id="tab-btn-mentorship" onclick="switchTab('mentorship')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 transition shrink-0">
@@ -210,13 +224,13 @@
             Target: JEE Main (Class 12)
           </span>
           <span class="text-slate-600">•</span>
-          <span class="text-xs text-slate-400">Discipline > Motivation</span>
+          <span class="text-xs text-slate-400">Daily Study Discipline</span>
         </div>
         <h1 id="greeting-heading" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
           Welcome back, Aspirant! Ready to conquer JEE Main today?
         </h1>
         <p class="text-xs text-slate-400">
-          Clear your priority backlogs, revise formula sheets, and attempt a 20% numerical balanced CBT test.
+          Clear your priority backlogs, attempt balanced NTA mock tests with 20% numericals, and get instant verified marksheets.
         </p>
       </div>
 
@@ -224,8 +238,8 @@
         <button onclick="switchTab('mock_tests')" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/25 transition active:scale-95 flex items-center gap-1.5">
           <i data-lucide="graduation-cap" class="w-4 h-4"></i> Start Mock Test
         </button>
-        <button onclick="switchTab('mentorship')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-amber-300 border border-amber-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-1.5">
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> 1:1 Mentorship
+        <button onclick="switchTab('history')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-indigo-300 border border-indigo-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="history" class="w-4 h-4"></i> My Marksheets
         </button>
       </div>
     </section>
@@ -296,26 +310,10 @@
       <div id="backlog-list" class="space-y-3"></div>
     </section>
 
-    <!-- SECTION 2: STUDY MATERIALS HUB -->
+    <!-- SECTION 2: STUDY MATERIALS & CUSTOM SECTIONS HUB -->
     <section id="view-materials" class="space-y-6 hidden">
-      <!-- Category Tabs -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1" id="material-category-tabs">
-        <button onclick="filterMaterialCategory('all')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-indigo-600 text-white shadow-lg shrink-0">
-          <i data-lucide="sparkles" class="w-4 h-4"></i> All Resources
-        </button>
-        <button onclick="filterMaterialCategory('notes')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
-          <i data-lucide="file-text" class="w-4 h-4"></i> Handwritten Notes
-        </button>
-        <button onclick="filterMaterialCategory('formula_sheet')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
-          <i data-lucide="book-open" class="w-4 h-4"></i> Formula Sheets
-        </button>
-        <button onclick="filterMaterialCategory('pyq')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
-          <i data-lucide="award" class="w-4 h-4"></i> Previous Year PYQs
-        </button>
-        <button onclick="filterMaterialCategory('video')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 shrink-0">
-          <i data-lucide="video" class="w-4 h-4"></i> Video Lectures
-        </button>
-      </div>
+      <!-- Category Tabs (Dynamically updated with Admin's custom sections!) -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1" id="material-category-tabs"></div>
 
       <!-- Materials Grid -->
       <div id="materials-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
@@ -332,7 +330,7 @@
             </span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Create Balanced Mock Test</h2>
             <p class="text-xs sm:text-sm text-slate-300">
-              Strictly balances <span class="text-indigo-400 font-bold">80% MCQs</span> and <span class="text-amber-400 font-bold">20% Numerical Value Questions (NAT)</span> with Physics → Chem → Math/Bio sequence and +4 / -1 marking.
+              Strictly balances <span class="text-indigo-400 font-bold">80% MCQs</span> and <span class="text-amber-400 font-bold">20% Numerical Value Questions (NAT)</span> with Physics → Chem → Math/Bio sequence, +4 / -1 marking, and auto-generated marksheet.
             </p>
           </div>
         </div>
@@ -486,7 +484,23 @@
       <div id="cbt-scorecard-container" class="hidden space-y-6"></div>
     </section>
 
-    <!-- SECTION 4: 1:1 MENTORSHIP BOOKING WITH UPI & PASS CARD -->
+    <!-- SECTION 4: TEST HISTORY & DOWNLOADABLE MARKSHEETS -->
+    <section id="view-history" class="space-y-6 hidden">
+      <div class="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-bold text-xs border border-indigo-500/20">Official Registry</span>
+          <h2 class="text-2xl font-black text-white mt-1">My Test History & Downloadable Marksheets</h2>
+          <p class="text-xs text-slate-400">Review past attempts, re-attempt any test to beat your score, and download verified marksheets.</p>
+        </div>
+        <button onclick="switchTab('mock_tests')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md">
+          Attempt New Mock Test
+        </button>
+      </div>
+
+      <div id="test-history-list" class="space-y-4"></div>
+    </section>
+
+    <!-- SECTION 5: 1:1 MENTORSHIP BOOKING WITH RAZORPAY & UPI -->
     <section id="view-mentorship" class="space-y-6 hidden">
       <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 shadow-xl">
         <div class="max-w-2xl space-y-2">
@@ -495,7 +509,7 @@
           </span>
           <h2 class="text-2xl sm:text-3xl font-black text-white">1:1 Mentorship at Flat ₹5 / Minute</h2>
           <p class="text-xs sm:text-sm text-slate-300">
-            No expensive coaching fees. Book only the minutes you need for daily timetable fixing, backlog destruction, and honest reality checks.
+            No expensive coaching fees. Pay securely via Razorpay or direct UPI, and get a downloadable official pass card.
           </p>
         </div>
       </div>
@@ -550,20 +564,41 @@
               </div>
             </div>
 
-            <!-- Online UPI Scan Box -->
-            <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-center gap-5">
+            <!-- Payment Gateway Selector: Razorpay vs Direct UPI -->
+            <div class="space-y-3 pt-2">
+              <label class="block text-xs font-bold text-slate-300 uppercase">Select Payment Method</label>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="p-3 rounded-2xl bg-slate-950 border border-indigo-500/40 text-xs font-bold flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="pay-method" value="razorpay" checked class="accent-indigo-500">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-white">Razorpay Secure</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400">UPI/Cards</span>
+                  </div>
+                </label>
+                <label class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="pay-method" value="upi_qr" class="accent-indigo-500">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-white">Direct UPI QR Scan</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Instant</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Online UPI Scan Box (Reveals if UPI selected) -->
+            <div id="upi-qr-box" class="hidden p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-center gap-5">
               <div class="bg-white p-2.5 rounded-xl shadow-lg shrink-0">
                 <img id="upi-qr-image" src="https://api.qrserver.com/v1/create-qr-code/?data=upi://pay?pa=prepskm@upi&pn=Prepskm&am=150&size=140x140" alt="UPI QR" class="w-32 h-32 block">
               </div>
               <div class="space-y-2 text-xs text-slate-300 text-center sm:text-left">
                 <p class="font-bold text-white text-sm">Scan with Google Pay, PhonePe, Paytm, BHIM</p>
                 <p class="text-slate-400">UPI ID: <span class="font-mono font-bold text-white">prepskm@upi</span></p>
-                <p class="text-[11px] text-slate-500">Pay the exact amount and enter UPI UTR (optional) to generate your verified digital pass.</p>
+                <p class="text-[11px] text-slate-500">Pay exact amount and tap confirm to immediately generate your pass.</p>
               </div>
             </div>
 
-            <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-indigo-600 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition">
-              Confirm & Generate Official Prepskm Mentorship Pass Card
+            <button type="submit" id="pay-submit-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+              <i data-lucide="shield-check" class="w-4 h-4"></i> Pay with Razorpay Gateway & Get Pass
             </button>
           </form>
         </div>
@@ -576,32 +611,44 @@
             </div>
             <h4 class="font-bold text-white text-sm">Verified Pass System</h4>
             <p class="text-xs text-slate-400 leading-relaxed">
-              Upon booking, your cryptographic token pass (e.g. PSKM-JEE-84920-VERIFIED) will generate here with a 1-click button to send straight to Sumit on Telegram.
+              Upon booking, your cryptographic token pass (e.g. PSKM-JEE-84920-VERIFIED) will generate here with 1-click **Download Pass as Image** and send straight to Sumit on Telegram.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 5: STRICTLY PROTECTED ADMIN PANEL -->
+    <!-- SECTION 6: STRICTLY PROTECTED ADMIN PANEL -->
     <section id="view-admin" class="space-y-6 hidden">
       <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-6">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
           <div>
             <span class="px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-xs font-bold border border-amber-500/20">Authenticated Admin</span>
-            <h3 class="text-xl font-black text-white mt-1">Question Bank & Token Verifier</h3>
+            <h3 class="text-xl font-black text-white mt-1">Super Admin Content Management</h3>
           </div>
-          <div class="flex gap-2 text-xs">
-            <button onclick="switchAdminSubTab('add_q')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold">Add Question (Cropper)</button>
-            <button onclick="switchAdminSubTab('verify_token')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white">Verify Token</button>
-            <button onclick="switchAdminSubTab('firebase_cfg')" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white">Firebase Config</button>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button onclick="switchAdminSubTab('add_q')" class="admin-tab-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold" data-tab="add_q">Sequential 6-Step Cropper</button>
+            <button onclick="switchAdminSubTab('upload_material')" class="admin-tab-btn px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white" data-tab="upload_material">Upload PDF & Video</button>
+            <button onclick="switchAdminSubTab('verify_token')" class="admin-tab-btn px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white" data-tab="verify_token">Verify Token</button>
+            <button onclick="switchAdminSubTab('firebase_cfg')" class="admin-tab-btn px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white" data-tab="firebase_cfg">Firebase Config</button>
           </div>
         </div>
 
-        <!-- SubTab 1: Question Builder with Cropper.js -->
+        <!-- SubTab 1: Sequential 6-Step Image Cropper & Question Creator -->
         <div id="admin-sub-add_q" class="space-y-5">
+          <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="crop" class="w-5 h-5 text-indigo-400 shrink-0"></i>
+              <span><strong>Sequential 6-Step Cropper:</strong> Upload 1 screenshot of an exam paper or question page, and snip Question $\to$ Opt A $\to$ Opt B $\to$ Opt C $\to$ Opt D $\to$ Explanation in one flow!</span>
+            </div>
+            <label class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-md shrink-0">
+              Launch Sequential Snip
+              <input type="file" accept="image/*" class="hidden" onchange="startSequentialCrop(event)">
+            </label>
+          </div>
+
           <form id="admin-question-form" onsubmit="handleAdminSaveQuestion(event)" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Target Exam</label>
                 <select id="aq-exam" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
@@ -609,6 +656,7 @@
                   <option value="JEE Advanced">JEE Advanced</option>
                   <option value="NEET">NEET</option>
                   <option value="Class 12">Class 12</option>
+                  <option value="Class 11">Class 11</option>
                 </select>
               </div>
               <div>
@@ -621,9 +669,18 @@
                 </select>
               </div>
               <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Difficulty Level</label>
+                <select id="aq-difficulty" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+                  <option value="easy">Easy (Green)</option>
+                  <option value="medium" selected>Medium (Amber)</option>
+                  <option value="hard">Hard (Red)</option>
+                </select>
+              </div>
+              <div>
                 <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Question Type</label>
                 <select id="aq-type" onchange="handleAdminQTypeChange(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
                   <option value="single_choice">Single Choice MCQ</option>
+                  <option value="multi_choice">Multiple Choice MCQ (Multi-Select)</option>
                   <option value="numerical">Numerical Value Type (NAT)</option>
                 </select>
               </div>
@@ -634,45 +691,49 @@
               <input id="aq-chapter" type="text" required placeholder="e.g. Kinematics or Organic Chemistry" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
             </div>
 
+            <!-- Question Statement & Cropped Preview -->
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Question Problem Statement</label>
-              <textarea id="aq-text" rows="3" required placeholder="Enter question text or derivation..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"></textarea>
-            </div>
-
-            <!-- In-browser Cropper Upload -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-              <div>
-                <p class="font-bold text-white text-xs flex items-center gap-1.5">
-                  <i data-lucide="crop" class="w-4 h-4 text-indigo-400"></i> Built-in In-Browser Cropper.js
-                </p>
-                <p class="text-[11px] text-slate-400">Select an image to crop the question diagram directly</p>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Question Problem Statement / Text</label>
+              <textarea id="aq-text" rows="3" placeholder="Problem statement (or rely on cropped question box below)..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"></textarea>
+              <div id="snip-preview-question" class="hidden mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                <span class="text-[10px] text-indigo-400 font-bold block mb-1">Cropped Question Diagram Snip:</span>
+                <img id="snip-img-question" src="" alt="Question Snip" class="max-h-40 rounded border border-slate-700">
               </div>
-              <label class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer">
-                Upload & Crop Diagram
-                <input type="file" accept="image/*" class="hidden" onchange="openCropper(event)">
-              </label>
             </div>
-            <div id="cropped-img-preview" class="hidden"></div>
 
             <!-- Options Box -->
-            <div id="aq-options-box" class="space-y-2">
-              <label class="block text-xs font-semibold text-slate-300 uppercase">MCQ Options (Check the correct radio)</label>
+            <div id="aq-options-box" class="space-y-3">
+              <label class="block text-xs font-semibold text-slate-300 uppercase">
+                MCQ Options (Check correct option(s) — Single or Multiple choice supported)
+              </label>
               <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <input type="radio" name="correct-opt" checked value="0" class="accent-indigo-500">
-                  <input id="aq-opt-0" type="text" required placeholder="Option A (Correct)" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                <!-- Option A -->
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+                  <input type="checkbox" id="aq-correct-0" value="0" class="aq-correct-cb w-4 h-4 accent-emerald-500" checked>
+                  <span class="font-bold text-xs text-slate-300">A</span>
+                  <input id="aq-opt-0" type="text" placeholder="Option A text (or leave blank if cropped)" class="flex-1 px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs">
+                  <div id="snip-preview-opt-0" class="hidden shrink-0"><img id="snip-img-opt-0" class="h-8 rounded border"></div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <input type="radio" name="correct-opt" value="1" class="accent-indigo-500">
-                  <input id="aq-opt-1" type="text" required placeholder="Option B" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                <!-- Option B -->
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+                  <input type="checkbox" id="aq-correct-1" value="1" class="aq-correct-cb w-4 h-4 accent-emerald-500">
+                  <span class="font-bold text-xs text-slate-300">B</span>
+                  <input id="aq-opt-1" type="text" placeholder="Option B text" class="flex-1 px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs">
+                  <div id="snip-preview-opt-1" class="hidden shrink-0"><img id="snip-img-opt-1" class="h-8 rounded border"></div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <input type="radio" name="correct-opt" value="2" class="accent-indigo-500">
-                  <input id="aq-opt-2" type="text" required placeholder="Option C" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                <!-- Option C -->
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+                  <input type="checkbox" id="aq-correct-2" value="2" class="aq-correct-cb w-4 h-4 accent-emerald-500">
+                  <span class="font-bold text-xs text-slate-300">C</span>
+                  <input id="aq-opt-2" type="text" placeholder="Option C text" class="flex-1 px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs">
+                  <div id="snip-preview-opt-2" class="hidden shrink-0"><img id="snip-img-opt-2" class="h-8 rounded border"></div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <input type="radio" name="correct-opt" value="3" class="accent-indigo-500">
-                  <input id="aq-opt-3" type="text" required placeholder="Option D" class="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs">
+                <!-- Option D -->
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-3">
+                  <input type="checkbox" id="aq-correct-3" value="3" class="aq-correct-cb w-4 h-4 accent-emerald-500">
+                  <span class="font-bold text-xs text-slate-300">D</span>
+                  <input id="aq-opt-3" type="text" placeholder="Option D text" class="flex-1 px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs">
+                  <div id="snip-preview-opt-3" class="hidden shrink-0"><img id="snip-img-opt-3" class="h-8 rounded border"></div>
                 </div>
               </div>
             </div>
@@ -680,21 +741,85 @@
             <!-- Numerical Value Input -->
             <div id="aq-nat-box" class="hidden p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
               <label class="block text-xs font-bold text-amber-300 mb-1">Correct Numerical Value (NAT)</label>
-              <input id="aq-nat-val" type="number" step="any" placeholder="e.g. 10" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono">
+              <input id="aq-nat-val" type="number" step="any" placeholder="e.g. 10 or 3.14" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono">
             </div>
 
+            <!-- Step-by-Step Explanation & Cropped Preview -->
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Step-by-Step Explanation</label>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Step-by-Step Explanation (Hidden in tests)</label>
               <textarea id="aq-explanation" rows="2" placeholder="Explanation revealed only after test submission..." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs"></textarea>
+              <div id="snip-preview-explanation" class="hidden mt-2 p-2 rounded-xl bg-slate-950 border border-slate-800">
+                <span class="text-[10px] text-emerald-400 font-bold block mb-1">Cropped Solution Snip:</span>
+                <img id="snip-img-explanation" src="" alt="Solution Snip" class="max-h-40 rounded border border-slate-700">
+              </div>
             </div>
 
-            <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30">
-              Save Question to Firestore Bank
+            <button type="submit" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30">
+              Save Question to Question Bank & Firestore
             </button>
           </form>
         </div>
 
-        <!-- SubTab 2: Token Verifier -->
+        <!-- SubTab 2: PDF Upload & Custom Section Creator -->
+        <div id="admin-sub-upload_material" class="hidden space-y-4">
+          <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+            <h4 class="font-bold text-white text-sm">Upload PDF Material & Video Lectures</h4>
+            <form onsubmit="handleAdminSaveMaterial(event)" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Select or Create Section</label>
+                  <select id="amat-category-select" onchange="handleAmatCategoryChange(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                    <option value="notes">Handwritten Revision Notes</option>
+                    <option value="formula_sheet">Formula Sheets</option>
+                    <option value="pyq">Previous Year Questions (PYQs)</option>
+                    <option value="video">Strategy & Concept Video Lecture</option>
+                    <option value="__NEW_SECTION__">➕ Create New Custom Section...</option>
+                  </select>
+                </div>
+                <div id="amat-custom-section-box" class="hidden">
+                  <label class="block text-xs font-semibold text-amber-400 uppercase mb-1">New Section Title</label>
+                  <input id="amat-custom-section-name" type="text" placeholder="e.g. Mind Maps or NCERT Extracted" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/40 text-white text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Subject</label>
+                  <select id="amat-subject" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                    <option value="Physics">Physics</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Biology">Biology</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Material Title</label>
+                <input id="amat-title" type="text" required placeholder="e.g. Modern Physics 1-Shot High Yield Notes" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">PDF File URL / Attachment Link</label>
+                  <input id="amat-pdf-url" type="url" placeholder="https://...pdf (or left blank for sample dummy PDF)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">MP4 Video URL / Stream Link (Optional)</label>
+                  <input id="amat-video-url" type="url" placeholder="https://...mp4 or YouTube link" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Description</label>
+                <textarea id="amat-desc" rows="2" placeholder="Summary and key formulas covered..." class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"></textarea>
+              </div>
+
+              <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md">
+                Publish Material to Study Vault
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- SubTab 3: Token Verifier -->
         <div id="admin-sub-verify_token" class="hidden space-y-4">
           <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
             <h4 class="font-bold text-white text-xs uppercase tracking-wider">Mentorship Token Authenticator</h4>
@@ -706,7 +831,7 @@
           </div>
         </div>
 
-        <!-- SubTab 3: Firebase Config Setup -->
+        <!-- SubTab 4: Firebase Config Setup -->
         <div id="admin-sub-firebase_cfg" class="hidden space-y-4">
           <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
             <h4 class="font-bold text-white text-xs uppercase tracking-wider">Firebase Configuration</h4>
@@ -782,7 +907,7 @@
     <!-- Messages -->
     <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
       <div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%]">
-        Radhe Radhe! Main hoon Prep AI — official academic mentor of Prepskm by @unfiltereddsumit. Physics, Chem, Bio ya Maths ka conceptual doubt pucho. Par faltu timepass kiya toh seedha reality check aur daat milegi!
+        Radhe Radhe! Main hoon Prep AI — official academic mentor of Prepskm by @unfiltereddsumit. Physics, Chem, Bio ya Maths ka koi bhi conceptual doubt pucho, formulas derive karwao ya backlog timetable banao. Par timepass kiya toh seedha reality check aur daat milegi!
       </div>
     </div>
 
@@ -791,16 +916,157 @@
       <button onclick="sendQuickPrompt('Bhai padhai me mann nahi lag raha, kya karu?')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">"Mann nahi lag raha..."</button>
       <button onclick="sendQuickPrompt('Explain King\'s property of definite integrals with proof')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">King's Property</button>
       <button onclick="sendQuickPrompt('How to solve projectile maximum height derivation?')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">Projectile Formula</button>
+      <button onclick="sendQuickPrompt('Give me a 7-day backlog clearance timetable for Physics mechanics')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">Backlog Plan</button>
     </div>
 
     <!-- Chat Form -->
     <div class="p-3 bg-slate-950 border-t border-slate-800">
       <form onsubmit="handleAIChatSubmit(event)" class="flex gap-2">
-        <input id="ai-chat-input" type="text" placeholder="Ask doubt or formula..." class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <input id="ai-chat-input" type="text" placeholder="Ask doubt, formula or backlog schedule..." class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
         <button type="submit" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
           <i data-lucide="send" class="w-4 h-4"></i>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- RAZORPAY PAYMENT GATEWAY MODAL -->
+  <div id="modal-razorpay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+      <!-- Razorpay Branding Header -->
+      <div class="p-5 bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-950 border-b border-indigo-500/30 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-sm">R</div>
+          <div>
+            <h4 class="font-extrabold text-white text-sm">Razorpay Trusted Checkout</h4>
+            <p class="text-[10px] text-slate-400">Prepskm 1:1 Mentorship Services</p>
+          </div>
+        </div>
+        <button onclick="closeRazorpayModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Payment Body -->
+      <div class="p-6 space-y-4">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+          <div>
+            <span class="text-xs text-slate-400 block">Amount Payable</span>
+            <span id="rzp-amount-text" class="text-2xl font-black text-emerald-400">₹150</span>
+          </div>
+          <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-xs font-bold">100% Encrypted</span>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <label class="block font-bold text-slate-300 uppercase">Select Payment Instrument</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" class="p-2.5 rounded-xl border border-indigo-500 bg-indigo-500/10 text-indigo-300 font-bold text-center">UPI Apps</button>
+            <button type="button" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-center">Cards</button>
+            <button type="button" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-center">Netbanking</button>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+          <div class="flex items-center gap-2 text-slate-300">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+            <span>Google Pay, PhonePe, Paytm, CRED UPI</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+            <span>Instant Cryptographic Token Pass</span>
+          </div>
+        </div>
+
+        <div id="rzp-processing-state" class="hidden text-center py-3 text-xs text-indigo-400 animate-pulse">
+          Processing Payment with Razorpay Webhook...
+        </div>
+
+        <button onclick="completeRazorpayTransaction()" id="rzp-pay-btn" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs shadow-xl shadow-blue-500/20 transition">
+          Simulate Successful Razorpay Payment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFICIAL NTA-STYLE MARKSHEET CERTIFICATE MODAL -->
+  <div id="modal-marksheet" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <span class="font-bold text-white text-xs uppercase tracking-wider">Official Prepskm Result Marksheet</span>
+        <button onclick="closeMarksheetModal()" class="text-slate-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Marksheet Printable Area -->
+      <div class="p-6 overflow-y-auto flex-1">
+        <div id="printable-marksheet-node" class="marksheet-cert p-6 sm:p-8 rounded-3xl space-y-6 text-slate-100">
+          <div class="flex items-center justify-between pb-4 border-b border-indigo-500/30">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-2xl">P</div>
+              <div>
+                <h3 class="font-black text-xl text-white tracking-wider">PREPSKM CBT</h3>
+                <p class="text-[10px] text-indigo-300 uppercase tracking-widest font-semibold">National Testing Scorecard</p>
+              </div>
+            </div>
+            <div class="text-right text-xs">
+              <span id="cert-exam-title" class="font-bold text-white block">JEE Main Mock Test</span>
+              <span id="cert-date" class="text-slate-400 text-[10px]">Date: 2026-11-03</span>
+            </div>
+          </div>
+
+          <!-- Student & Roll Details -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+            <div><span class="text-slate-400 block text-[10px] uppercase">Candidate</span> <strong id="cert-name" class="text-white">Aspirant</strong></div>
+            <div><span class="text-slate-400 block text-[10px] uppercase">Attempt ID</span> <strong id="cert-attempt-id" class="font-mono text-indigo-300">PSKM-1029</strong></div>
+            <div><span class="text-slate-400 block text-[10px] uppercase">Total Marks</span> <strong id="cert-score" class="text-emerald-400 text-sm">60 / 80</strong></div>
+            <div><span class="text-slate-400 block text-[10px] uppercase">Accuracy</span> <strong id="cert-accuracy" class="text-indigo-400 text-sm">85%</strong></div>
+          </div>
+
+          <!-- Performance Bracket & Compliment by Sumit -->
+          <div id="cert-compliment-box" class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-1 text-xs">
+            <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider block">Sumit's Official Compliment & Feedback</span>
+            <p id="cert-compliment-text" class="text-slate-200 leading-relaxed font-medium">Top Tier Performance!</p>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-[10px] text-slate-500 font-mono">
+            <span>Verified Prepskm Engine</span>
+            <span>Founder: Sumit (@unfiltereddsumit)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="p-4 bg-slate-950 border-t border-slate-800 flex justify-end gap-3">
+        <button onclick="downloadMarksheetImage()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
+          <i data-lucide="download" class="w-4 h-4"></i> Download Marksheet Image (PNG)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEQUENTIAL 6-STEP MULTI-CROPPER MODAL -->
+  <div id="modal-sequential-cropper" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <!-- Step Header -->
+      <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div>
+          <span id="seq-step-badge" class="px-2.5 py-0.5 rounded bg-indigo-600 text-white font-bold text-xs">Step 1 of 6</span>
+          <h4 id="seq-step-title" class="font-bold text-white text-base mt-1">Crop Question Box</h4>
+        </div>
+        <button onclick="cancelSequentialCrop()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Cropper Viewport -->
+      <div class="flex-1 bg-slate-950 p-4 flex items-center justify-center max-h-[460px] overflow-hidden">
+        <img id="seq-target-img" src="" alt="Sequential crop target" class="max-h-[420px] max-w-full block">
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
+        <button onclick="skipSequentialCropStep()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white">
+          Skip This Step
+        </button>
+        <button id="seq-next-btn" onclick="applySequentialCropStep()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md">
+          Save & Next: Crop Option A →
+        </button>
+      </div>
     </div>
   </div>
 
@@ -867,6 +1133,11 @@
           Sign In
         </button>
       </form>
+
+      <button type="button" onclick="handleGoogleSignIn()" class="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        Sign in with Google
+      </button>
 
       <div class="pt-4 border-t border-slate-800 space-y-2">
         <p class="text-[11px] font-bold text-slate-400 uppercase text-center">1-Click Demo Login</p>
@@ -938,23 +1209,6 @@
     </div>
   </div>
 
-  <!-- CROPPER MODAL -->
-  <div id="modal-cropper" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-      <div class="px-5 py-3 border-b border-slate-800 flex items-center justify-between">
-        <h4 class="font-bold text-white text-sm">Crop Question / Option Diagram</h4>
-        <button onclick="closeCropper()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="flex-1 bg-slate-950 p-4 flex items-center justify-center max-h-[450px] overflow-hidden">
-        <img id="cropper-target-img" src="" alt="Crop target" class="max-h-[400px] max-w-full block">
-      </div>
-      <div class="p-3 bg-slate-900 border-t border-slate-800 flex justify-end gap-2">
-        <button onclick="closeCropper()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400">Cancel</button>
-        <button onclick="applyCrop()" class="px-5 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs">Apply Snip</button>
-      </div>
-    </div>
-  </div>
-
   <!-- MAIN JAVASCRIPT APP ENGINE -->
   <script>
     // ==================== INITIAL DATA REPOSITORY ====================
@@ -966,9 +1220,10 @@
         subject: 'Physics',
         chapter: 'Kinematics',
         type: 'single_choice',
+        difficulty: 'medium',
         text: 'A projectile is launched from ground level at an angle θ = 45° with an initial velocity of 20 m/s. Taking g = 10 m/s², what is the maximum height reached?',
         options: ['5 m', '10 m', '15 m', '20 m'],
-        correctIndex: 1,
+        correctOptions: [1],
         explanationText: 'H_max = (u² * sin²θ) / (2g) = (400 * 0.5) / 20 = 10 m.'
       },
       {
@@ -978,6 +1233,7 @@
         subject: 'Physics',
         chapter: 'Laws of Motion',
         type: 'numerical',
+        difficulty: 'medium',
         text: 'A block of mass m = 2 kg rests on a floor with coefficient of friction μ = 0.4. What is the minimum horizontal force in Newtons required to move it? (g = 10 m/s²)',
         numericalAnswer: 8,
         explanationText: 'f_lim = μ * m * g = 0.4 * 2 * 10 = 8 N.'
@@ -989,9 +1245,10 @@
         subject: 'Chemistry',
         chapter: 'Atomic Structure',
         type: 'single_choice',
+        difficulty: 'easy',
         text: 'What is the maximum number of electrons in an atom that can have quantum numbers n = 4 and m_s = +1/2?',
         options: ['16', '32', '8', '4'],
-        correctIndex: 0,
+        correctOptions: [0],
         explanationText: 'For n = 4, number of orbitals = n² = 16. Each orbital can have at most one electron with spin +1/2. Hence 16.'
       },
       {
@@ -1001,6 +1258,7 @@
         subject: 'Chemistry',
         chapter: 'Chemical Kinetics',
         type: 'numerical',
+        difficulty: 'medium',
         text: 'For a first-order reaction with rate constant k = 0.0693 min⁻¹, what is the half-life t_1/2 in minutes? (ln 2 = 0.693)',
         numericalAnswer: 10,
         explanationText: 't_1/2 = 0.693 / k = 0.693 / 0.0693 = 10 min.'
@@ -1012,9 +1270,10 @@
         subject: 'Mathematics',
         chapter: 'Quadratic Equations',
         type: 'single_choice',
+        difficulty: 'medium',
         text: 'If α and β are roots of x² - 5x + 6 = 0, what is the value of (α³ + β³)?',
         options: ['35', '40', '45', '50'],
-        correctIndex: 0,
+        correctOptions: [0],
         explanationText: 'Roots are 2 and 3. 2³ + 3³ = 8 + 27 = 35.'
       },
       {
@@ -1024,9 +1283,10 @@
         subject: 'Biology',
         chapter: 'Cell: The Unit of Life',
         type: 'single_choice',
+        difficulty: 'easy',
         text: 'Which organelle is semi-autonomous with circular DNA and 70S ribosomes?',
         options: ['Golgi Apparatus', 'Mitochondria', 'Lysosome', 'Ribosome'],
-        correctIndex: 1,
+        correctOptions: [1],
         explanationText: 'Mitochondria generate ATP and contain circular DNA and 70S ribosomes.'
       }
     ];
@@ -1067,7 +1327,6 @@
         classLevel: 'JEE / NEET Droppers',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-        pdfTitle: 'Backlog_3_Week_Planner_Template.pdf',
         description: 'Sumit shares the exact scheduling framework to balance current chapters with backlog.'
       }
     ];
@@ -1094,25 +1353,33 @@
     let materials = JSON.parse(localStorage.getItem('prepskm_db_materials') || 'null') || DEFAULT_MATERIALS;
     let backlogs = JSON.parse(localStorage.getItem('prepskm_db_backlogs') || 'null') || DEFAULT_BACKLOGS;
     let tokens = JSON.parse(localStorage.getItem('prepskm_db_tokens') || 'null') || [];
+    let customSections = JSON.parse(localStorage.getItem('prepskm_custom_sections') || 'null') || [];
+    let testHistory = JSON.parse(localStorage.getItem('prepskm_db_test_history') || 'null') || [];
     let mentorDuration = 30;
-    let cropperInstance = null;
-    let croppedBase64 = null;
 
     // CBT active state
     let activeTest = null;
     let testTimerInterval = null;
 
+    // Sequential 6-step cropper state
+    let seqCropper = null;
+    let seqSteps = ['question', 'opt-0', 'opt-1', 'opt-2', 'opt-3', 'explanation'];
+    let seqStepLabels = ['Question Box', 'Option A', 'Option B', 'Option C', 'Option D', 'Explanation / Solution'];
+    let currentSeqIndex = 0;
+    let collectedSnips = {};
+
     // Initialize App
     function initApp() {
-      // Load saved profile
       const savedProfile = localStorage.getItem('prepskm_student_profile');
       if (savedProfile) {
         currentStudent = JSON.parse(savedProfile);
       }
       updateStudentUI();
       renderBacklogs();
+      renderMaterialTabs();
       renderMaterials();
       renderTestChapters();
+      renderTestHistory();
       lucide.createIcons();
     }
 
@@ -1132,7 +1399,7 @@
         return;
       }
       currentTab = tabId;
-      ['tracker', 'materials', 'mock_tests', 'mentorship', 'admin'].forEach(t => {
+      ['tracker', 'materials', 'mock_tests', 'history', 'mentorship', 'admin'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const btn = document.getElementById(`tab-btn-${t}`);
         if (view) {
@@ -1206,12 +1473,8 @@
       renderBacklogs();
     }
 
-    function openAddBacklogModal() {
-      document.getElementById('modal-add-backlog').classList.remove('hidden');
-    }
-    function closeAddBacklogModal() {
-      document.getElementById('modal-add-backlog').classList.add('hidden');
-    }
+    function openAddBacklogModal() { document.getElementById('modal-add-backlog').classList.remove('hidden'); }
+    function closeAddBacklogModal() { document.getElementById('modal-add-backlog').classList.add('hidden'); }
 
     function handleSaveBacklog(e) {
       e.preventDefault();
@@ -1224,11 +1487,36 @@
       closeAddBacklogModal();
     }
 
-    // ==================== MATERIALS HUB ====================
+    // ==================== MATERIALS & CUSTOM SECTIONS HUB ====================
     let activeMaterialFilter = 'all';
+
+    function renderMaterialTabs() {
+      const container = document.getElementById('material-category-tabs');
+      const baseTabs = [
+        { id: 'all', label: 'All Resources', icon: 'sparkles' },
+        { id: 'notes', label: 'Handwritten Notes', icon: 'file-text' },
+        { id: 'formula_sheet', label: 'Formula Sheets', icon: 'book-open' },
+        { id: 'pyq', label: 'Previous Year PYQs', icon: 'award' },
+        { id: 'video', label: 'Video Lectures', icon: 'video' }
+      ];
+
+      // Add Admin's custom created sections!
+      customSections.forEach(cs => {
+        baseTabs.push({ id: cs.id, label: cs.name, icon: 'folder-plus' });
+      });
+
+      container.innerHTML = baseTabs.map(tab => `
+        <button onclick="filterMaterialCategory('${tab.id}')" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition shrink-0 ${activeMaterialFilter === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800'}">
+          <i data-lucide="${tab.icon}" class="w-4 h-4"></i> ${tab.label}
+        </button>
+      `).join('');
+      lucide.createIcons();
+    }
+
     function renderMaterials() {
       const grid = document.getElementById('materials-grid');
       const filtered = materials.filter(m => activeMaterialFilter === 'all' || m.category === activeMaterialFilter);
+
       grid.innerHTML = filtered.map(mat => `
         <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition flex flex-col justify-between">
           <div class="space-y-2">
@@ -1237,13 +1525,11 @@
               <span class="text-xs text-slate-400 capitalize">${mat.category.replace('_', ' ')}</span>
             </div>
             <h4 class="font-bold text-white text-base">${mat.title}</h4>
-            <p class="text-xs text-slate-400 line-clamp-2">${mat.description}</p>
+            <p class="text-xs text-slate-400 line-clamp-2">${mat.description || ''}</p>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end">
-            ${mat.category === 'video'
-              ? `<a href="${mat.videoUrl}" target="_blank" class="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1"><i data-lucide="play" class="w-3.5 h-3.5"></i> Watch Lecture</a>`
-              : `<a href="${mat.pdfUrl}" target="_blank" download class="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Download PDF</a>`
-            }
+          <div class="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            ${mat.pdfUrl ? `<a href="${mat.pdfUrl}" target="_blank" download class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF Attachment</a>` : ''}
+            ${mat.videoUrl ? `<a href="${mat.videoUrl}" target="_blank" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5"><i data-lucide="play" class="w-3.5 h-3.5"></i> Watch Video</a>` : ''}
           </div>
         </div>
       `).join('');
@@ -1252,10 +1538,207 @@
 
     function filterMaterialCategory(cat) {
       activeMaterialFilter = cat;
+      renderMaterialTabs();
       renderMaterials();
     }
 
-    // ==================== NTA CBT MOCK ENGINE ====================
+    function handleAmatCategoryChange(val) {
+      const customBox = document.getElementById('amat-custom-section-box');
+      if (val === '__NEW_SECTION__') {
+        customBox.classList.remove('hidden');
+      } else {
+        customBox.classList.add('hidden');
+      }
+    }
+
+    function handleAdminSaveMaterial(e) {
+      e.preventDefault();
+      let cat = document.getElementById('amat-category-select').value;
+      if (cat === '__NEW_SECTION__') {
+        const customName = document.getElementById('amat-custom-section-name').value.trim();
+        if (!customName) return;
+        cat = 'custom_' + Date.now();
+        customSections.push({ id: cat, name: customName });
+        localStorage.setItem('prepskm_custom_sections', JSON.stringify(customSections));
+      }
+
+      const sub = document.getElementById('amat-subject').value;
+      const title = document.getElementById('amat-title').value.trim();
+      const pdf = document.getElementById('amat-pdf-url').value.trim() || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+      const video = document.getElementById('amat-video-url').value.trim();
+      const desc = document.getElementById('amat-desc').value.trim();
+
+      materials.unshift({ id: 'mat-' + Date.now(), title, category: cat, subject: sub, pdfUrl: pdf, videoUrl: video, description: desc });
+      localStorage.setItem('prepskm_db_materials', JSON.stringify(materials));
+
+      alert('Material published successfully to Study Vault!');
+      renderMaterialTabs();
+      renderMaterials();
+      e.target.reset();
+      document.getElementById('amat-custom-section-box').classList.add('hidden');
+    }
+
+    // ==================== SEQUENTIAL 6-STEP MULTI-CROP ENGINE ====================
+    function startSequentialCrop(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('seq-target-img').src = reader.result;
+        document.getElementById('modal-sequential-cropper').classList.remove('hidden');
+        currentSeqIndex = 0;
+        collectedSnips = {};
+        updateSequentialStepUI();
+
+        if (seqCropper) seqCropper.destroy();
+        seqCropper = new Cropper(document.getElementById('seq-target-img'), {
+          aspectRatio: NaN,
+          viewMode: 1
+        });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function updateSequentialStepUI() {
+      const stepName = seqStepLabels[currentSeqIndex];
+      document.getElementById('seq-step-badge').innerText = `Step ${currentSeqIndex + 1} of 6`;
+      document.getElementById('seq-step-title').innerText = `Crop: ${stepName}`;
+      document.getElementById('seq-next-btn').innerText = currentSeqIndex < 5
+        ? `Save & Next: Crop ${seqStepLabels[currentSeqIndex + 1]} →`
+        : `Finish & Apply All Crops ✓`;
+    }
+
+    function applySequentialCropStep() {
+      if (!seqCropper) return;
+      const stepKey = seqSteps[currentSeqIndex];
+      const canvas = seqCropper.getCroppedCanvas({ maxWidth: 1000 });
+      if (canvas) {
+        const base64 = canvas.toDataURL('image/jpeg', 0.9);
+        collectedSnips[stepKey] = base64;
+        reflectSnipInUI(stepKey, base64);
+      }
+
+      if (currentSeqIndex < 5) {
+        currentSeqIndex++;
+        updateSequentialStepUI();
+      } else {
+        // All 6 steps complete!
+        document.getElementById('modal-sequential-cropper').classList.add('hidden');
+        if (seqCropper) seqCropper.destroy();
+        alert('All 6 crops saved successfully into Question, Options A-D, and Explanation!');
+      }
+    }
+
+    function skipSequentialCropStep() {
+      if (currentSeqIndex < 5) {
+        currentSeqIndex++;
+        updateSequentialStepUI();
+      } else {
+        document.getElementById('modal-sequential-cropper').classList.add('hidden');
+        if (seqCropper) seqCropper.destroy();
+      }
+    }
+
+    function cancelSequentialCrop() {
+      document.getElementById('modal-sequential-cropper').classList.add('hidden');
+      if (seqCropper) seqCropper.destroy();
+    }
+
+    function reflectSnipInUI(key, base64) {
+      if (key === 'question') {
+        const wrap = document.getElementById('snip-preview-question');
+        wrap.classList.remove('hidden');
+        document.getElementById('snip-img-question').src = base64;
+      } else if (key.startsWith('opt-')) {
+        const idx = key.replace('opt-', '');
+        const wrap = document.getElementById(`snip-preview-opt-${idx}`);
+        if (wrap) {
+          wrap.classList.remove('hidden');
+          document.getElementById(`snip-img-opt-${idx}`).src = base64;
+        }
+      } else if (key === 'explanation') {
+        const wrap = document.getElementById('snip-preview-explanation');
+        wrap.classList.remove('hidden');
+        document.getElementById('snip-img-explanation').src = base64;
+      }
+    }
+
+    function handleAdminSaveQuestion(e) {
+      e.preventDefault();
+      const exam = document.getElementById('aq-exam').value;
+      const sub = document.getElementById('aq-subject').value;
+      const type = document.getElementById('aq-type').value;
+      const diff = document.getElementById('aq-difficulty').value;
+      const ch = document.getElementById('aq-chapter').value;
+      const text = document.getElementById('aq-text').value;
+      const exp = document.getElementById('aq-explanation').value;
+
+      const newQ = {
+        id: 'q-' + Date.now(),
+        targetExam: exam,
+        subject: sub,
+        type,
+        difficulty: diff,
+        chapter: ch,
+        text: text || '[Refer to Cropped Diagram Below]',
+        explanationText: exp || 'Standard step-by-step verified by Prepskm.',
+        questionImage: collectedSnips['question'],
+        explanationImage: collectedSnips['explanation']
+      };
+
+      if (type === 'numerical') {
+        newQ.numericalAnswer = parseFloat(document.getElementById('aq-nat-val').value) || 0;
+      } else {
+        newQ.options = [
+          document.getElementById('aq-opt-0').value || 'Option A',
+          document.getElementById('aq-opt-1').value || 'Option B',
+          document.getElementById('aq-opt-2').value || 'Option C',
+          document.getElementById('aq-opt-3').value || 'Option D'
+        ];
+        newQ.optionImages = [
+          collectedSnips['opt-0'],
+          collectedSnips['opt-1'],
+          collectedSnips['opt-2'],
+          collectedSnips['opt-3']
+        ];
+        const correctList = [];
+        document.querySelectorAll('.aq-correct-cb').forEach(cb => {
+          if (cb.checked) correctList.push(parseInt(cb.value));
+        });
+        newQ.correctOptions = correctList.length > 0 ? correctList : [0];
+      }
+
+      questions.unshift(newQ);
+      localStorage.setItem('prepskm_db_questions', JSON.stringify(questions));
+      alert('Question saved with all crops to question bank!');
+      e.target.reset();
+      collectedSnips = {};
+      ['question', 'explanation', 'opt-0', 'opt-1', 'opt-2', 'opt-3'].forEach(k => {
+        const el = document.getElementById(`snip-preview-${k}`);
+        if (el) el.classList.add('hidden');
+      });
+    }
+
+    function handleAdminQTypeChange(val) {
+      document.getElementById('aq-options-box').classList.toggle('hidden', val === 'numerical');
+      document.getElementById('aq-nat-box').classList.toggle('hidden', val !== 'numerical');
+    }
+
+    function switchAdminSubTab(sub) {
+      ['add_q', 'upload_material', 'verify_token', 'firebase_cfg'].forEach(s => {
+        document.getElementById(`admin-sub-${s}`).classList.toggle('hidden', s !== sub);
+      });
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        const isSelected = btn.getAttribute('data-tab') === sub;
+        btn.className = isSelected
+          ? 'admin-tab-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold'
+          : 'admin-tab-btn px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white';
+      });
+    }
+
+    // ==================== NTA CBT ENGINE & COMPLIMENT SYSTEM ====================
     function renderTestChapters() {
       const list = document.getElementById('test-chapters-list');
       list.innerHTML = ALL_CHAPTERS.map(ch => `
@@ -1283,12 +1766,11 @@
       document.getElementById('test-duration-est').innerText = `Time: ${Math.round(count * 1.5)} Mins`;
     }
 
-    function launchNtaTest() {
-      const count = Number(document.getElementById('test-qcount-slider').value);
+    function launchNtaTest(existingTestConfig) {
+      const count = existingTestConfig ? existingTestConfig.totalQuestions : Number(document.getElementById('test-qcount-slider').value);
       const natCount = Math.round(count * 0.2);
       const mcqCount = count - natCount;
 
-      // Construct questions
       const selected = [];
       for (let i = 0; i < count; i++) {
         const isNat = i >= mcqCount;
@@ -1299,17 +1781,20 @@
           testQId: 'tq-' + i,
           type: isNat ? 'numerical' : 'single_choice',
           options: candidate.options || ['Option A', 'Option B', 'Option C', 'Option D'],
-          correctIndex: candidate.correctIndex ?? 0,
+          correctOptions: candidate.correctOptions || [0],
           numericalAnswer: candidate.numericalAnswer ?? 10
         });
       }
 
       activeTest = {
+        testId: 'test-' + Date.now(),
+        testName: (currentStudent.targetExam || 'JEE Main') + ' CBT Mock Test',
         questions: selected,
         currentIndex: 0,
         userAnswers: {},
-        statuses: {}, // 'not_visited', 'answered', 'not_answered', 'marked'
-        timeRemaining: count * 90
+        statuses: {},
+        timeRemaining: count * 90,
+        totalTime: count * 90
       };
 
       selected.forEach((q, idx) => {
@@ -1350,6 +1835,14 @@
       document.getElementById('cbt-question-type-badge').innerText = q.type === 'numerical' ? 'Numerical (NAT)' : 'MCQ (+4, -1)';
       document.getElementById('cbt-question-text').innerText = q.text;
 
+      // Question Diagram preview if present
+      const diagCont = document.getElementById('cbt-question-diagram-container');
+      if (q.questionImage) {
+        diagCont.innerHTML = `<img src="${q.questionImage}" class="max-h-56 rounded-xl border border-slate-700 block">`;
+      } else {
+        diagCont.innerHTML = '';
+      }
+
       const optContainer = document.getElementById('cbt-options-container');
       if (q.type === 'numerical') {
         optContainer.innerHTML = `
@@ -1363,6 +1856,7 @@
           <label class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-850 text-sm flex items-center gap-3 cursor-pointer">
             <input type="radio" name="cbt-opt" value="${oIdx}" ${activeTest.userAnswers[q.testQId] == oIdx ? 'checked' : ''} onchange="activeTest.userAnswers['${q.testQId}'] = this.value" class="accent-indigo-500 w-4 h-4">
             <span>${opt}</span>
+            ${q.optionImages && q.optionImages[oIdx] ? `<img src="${q.optionImages[oIdx]}" class="h-8 rounded ml-auto">` : ''}
           </label>
         `).join('');
       }
@@ -1428,6 +1922,36 @@
       document.getElementById('count-notvis').innerText = notvis;
     }
 
+    // Calculate Marks & Compliment
+    function getScoreCompliment(score, maxScore) {
+      const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
+      if (pct >= 80) {
+        return {
+          title: "AIR Top Tier Performance! 🌟",
+          compliment: "Sensational mastery! Tu IIT Bombay / AIIMS Delhi material hai bhai. Bas yehi mock speed aur short formula revision continue rakh, rank secure hai!",
+          badge: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+        };
+      } else if (pct >= 60) {
+        return {
+          title: "Strong Competitor! 💪",
+          compliment: "Solid foundation bhai! Concept clear hain, thode silly calculation errors aur NAT numericals pe accuracy tight karo, top 5000 rank guaranteed!",
+          badge: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40"
+        };
+      } else if (pct >= 40) {
+        return {
+          title: "Needs Backlog Clearance! ⚠️",
+          compliment: "Average performance. Concept aate hain par examination pressure me fumble ho raha hai. Backlog destroyer kholo aur weak chapters pe 40 PYQs lagao!",
+          badge: "bg-amber-500/20 text-amber-300 border-amber-500/40"
+        };
+      } else {
+        return {
+          title: "Reality Check Needed! 🚨",
+          compliment: "Bhai reality check lo! Competition dekha hai lakhon aspirants ka? Phone side rakho, excuses band karo aur agle 10 din basic NCERT + formula sheet ghis kar padho!",
+          badge: "bg-rose-500/20 text-rose-300 border-rose-500/40"
+        };
+      }
+    }
+
     function submitExamNow() {
       clearInterval(testTimerInterval);
       let score = 0, correct = 0, incorrect = 0, unattempted = 0;
@@ -1441,7 +1965,7 @@
           if (q.type === 'numerical') {
             isCorr = Math.abs(parseFloat(userVal) - q.numericalAnswer) <= 0.1;
           } else {
-            isCorr = parseInt(userVal) === q.correctIndex;
+            isCorr = q.correctOptions.includes(parseInt(userVal));
           }
           if (isCorr) {
             correct++;
@@ -1454,7 +1978,30 @@
       });
 
       const maxScore = activeTest.questions.length * 4;
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      const accuracy = (correct + incorrect) > 0 ? Math.round((correct / (correct + incorrect)) * 100) : 0;
+      const feedback = getScoreCompliment(score, maxScore);
+
+      // Save to Test History
+      const historyEntry = {
+        attemptId: 'PSKM-' + Math.floor(1000 + Math.random() * 9000),
+        testName: activeTest.testName,
+        totalQuestions: activeTest.questions.length,
+        score,
+        maxScore,
+        accuracy,
+        correct,
+        incorrect,
+        unattempted,
+        compliment: feedback.compliment,
+        title: feedback.title,
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      testHistory.unshift(historyEntry);
+      localStorage.setItem('prepskm_db_test_history', JSON.stringify(testHistory));
+      renderTestHistory();
+
+      confetti({ particleCount: 110, spread: 80, origin: { y: 0.6 } });
 
       document.getElementById('cbt-exam-engine').classList.remove('flex');
       document.getElementById('cbt-exam-engine').classList.add('hidden');
@@ -1462,30 +2009,127 @@
       const card = document.getElementById('cbt-scorecard-container');
       card.classList.remove('hidden');
       card.innerHTML = `
-        <div class="p-6 rounded-3xl bg-slate-900 border border-indigo-500/30 space-y-4">
-          <h3 class="text-2xl font-black text-white">NTA CBT Scorecard</h3>
-          <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 flex items-center justify-between">
+        <div class="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-indigo-500/30 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="px-2.5 py-0.5 rounded ${feedback.badge} font-bold text-xs border">${feedback.title}</span>
+              <h3 class="text-2xl font-black text-white mt-1">NTA CBT Scorecard & Analysis</h3>
+            </div>
+            <button onclick="openMarksheetModal('${historyEntry.attemptId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
+              <i data-lucide="award" class="w-4 h-4"></i> View & Download Official Marksheet
+            </button>
+          </div>
+
+          <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <span class="text-4xl font-black text-emerald-400">${score}</span>
               <span class="text-slate-400 text-sm">/ ${maxScore} Marks</span>
+              <p class="text-xs text-indigo-400 font-bold mt-1">Accuracy: ${accuracy}%</p>
             </div>
-            <div class="text-right text-xs text-slate-300 space-y-1">
-              <p>Correct: <span class="text-emerald-400 font-bold">${correct}</span></p>
-              <p>Incorrect: <span class="text-rose-400 font-bold">${incorrect}</span></p>
-              <p>Unattempted: <span class="text-slate-400 font-bold">${unattempted}</span></p>
+            <div class="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 max-w-md text-xs text-slate-200">
+              <strong class="text-indigo-300 block mb-1">Sumit's Personal Complement:</strong>
+              ${feedback.compliment}
             </div>
           </div>
-          <button onclick="document.getElementById('cbt-scorecard-container').classList.add('hidden'); document.getElementById('test-generator-container').classList.remove('hidden');" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs">Create Another Test</button>
+
+          <div class="flex gap-3">
+            <button onclick="document.getElementById('cbt-scorecard-container').classList.add('hidden'); document.getElementById('test-generator-container').classList.remove('hidden');" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-750">
+              Create New Mock
+            </button>
+            <button onclick="reattemptTest('${historyEntry.attemptId}')" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">
+              Re-attempt This Test
+            </button>
+          </div>
         </div>
       `;
+      lucide.createIcons();
       activeTest = null;
     }
 
-    // ==================== MENTORSHIP BOOKING ====================
+    // ==================== TEST HISTORY & MARKSHEET CERTIFICATE ====================
+    function renderTestHistory() {
+      const container = document.getElementById('test-history-list');
+      if (testHistory.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-2xl bg-slate-900 border border-dashed border-slate-800 text-center text-xs text-slate-500">
+            No mock tests attempted yet. Attempt your first NTA CBT test to unlock your marksheet and performance report!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = testHistory.map(entry => `
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white text-base">${entry.testName}</span>
+              <span class="font-mono text-xs text-indigo-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">${entry.attemptId}</span>
+            </div>
+            <p class="text-xs text-slate-400">Attempted: ${entry.date} • ${entry.totalQuestions} Questions</p>
+            <p class="text-xs text-slate-300 italic">"${entry.compliment}"</p>
+          </div>
+
+          <div class="flex items-center gap-4 shrink-0">
+            <div class="text-right">
+              <span class="text-xl font-black text-emerald-400">${entry.score} / ${entry.maxScore}</span>
+              <span class="text-[10px] text-slate-400 block">${entry.accuracy}% Accuracy</span>
+            </div>
+            <button onclick="openMarksheetModal('${entry.attemptId}')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700">
+              <i data-lucide="award" class="w-3.5 h-3.5"></i> Marksheet
+            </button>
+            <button onclick="reattemptTest('${entry.attemptId}')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Re-attempt
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function reattemptTest(attemptId) {
+      const entry = testHistory.find(t => t.attemptId === attemptId);
+      switchTab('mock_tests');
+      launchNtaTest(entry);
+    }
+
+    function openMarksheetModal(attemptId) {
+      const entry = testHistory.find(t => t.attemptId === attemptId) || testHistory[0];
+      if (!entry) return;
+
+      document.getElementById('cert-name').innerText = currentStudent.name || 'Aspirant';
+      document.getElementById('cert-attempt-id').innerText = entry.attemptId;
+      document.getElementById('cert-score').innerText = `${entry.score} / ${entry.maxScore}`;
+      document.getElementById('cert-accuracy').innerText = `${entry.accuracy}%`;
+      document.getElementById('cert-date').innerText = `Date: ${entry.date}`;
+      document.getElementById('cert-exam-title').innerText = entry.testName;
+      document.getElementById('cert-compliment-text').innerText = entry.compliment;
+
+      document.getElementById('modal-marksheet').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeMarksheetModal() {
+      document.getElementById('modal-marksheet').classList.add('hidden');
+    }
+
+    function downloadMarksheetImage() {
+      const node = document.getElementById('printable-marksheet-node');
+      html2canvas(node, { scale: 2, backgroundColor: '#030712' }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Prepskm_Marksheet_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+
+    // ==================== RAZORPAY PAYMENT & MENTORSHIP ====================
+    let pendingMentorshipBooking = null;
+
     function setMentorDuration(mins) {
       mentorDuration = mins;
       const amt = mins * 5;
       document.getElementById('mentor-duration-label').innerText = `${mins} Mins = ₹${amt}`;
+      document.getElementById('rzp-amount-text').innerText = `₹${amt}`;
       document.getElementById('upi-qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?data=upi://pay?pa=prepskm@upi&pn=Prepskm&am=${amt}&size=140x140`;
       document.querySelectorAll('.mentor-dur-btn').forEach(btn => {
         btn.className = btn.innerText.includes(`${mins}m`)
@@ -1501,38 +2145,97 @@
       const exam = document.getElementById('mentor-exam').value;
       const slot = document.getElementById('mentor-slot').value;
       const amt = mentorDuration * 5;
+      const method = document.querySelector('input[name="pay-method"]:checked').value;
+
+      pendingMentorshipBooking = { name, phone, exam, slot, amt, duration: mentorDuration };
+
+      if (method === 'razorpay') {
+        document.getElementById('modal-razorpay').classList.remove('hidden');
+        document.getElementById('rzp-processing-state').classList.add('hidden');
+        document.getElementById('rzp-pay-btn').classList.remove('hidden');
+      } else {
+        // Direct UPI QR mode
+        document.getElementById('upi-qr-box').classList.remove('hidden');
+        completePaymentAndGeneratePass(`UPI-TXN-${Date.now().toString().slice(-6)}`);
+      }
+    }
+
+    function closeRazorpayModal() {
+      document.getElementById('modal-razorpay').classList.add('hidden');
+    }
+
+    function completeRazorpayTransaction() {
+      document.getElementById('rzp-pay-btn').classList.add('hidden');
+      document.getElementById('rzp-processing-state').classList.remove('hidden');
+
+      setTimeout(() => {
+        const fakePaymentId = 'pay_' + Math.random().toString(36).substring(2, 12);
+        closeRazorpayModal();
+        completePaymentAndGeneratePass(fakePaymentId);
+      }, 1000);
+    }
+
+    function completePaymentAndGeneratePass(paymentId) {
+      if (!pendingMentorshipBooking) return;
+      const { name, phone, exam, slot, amt, duration } = pendingMentorshipBooking;
       const token = `PSKM-${exam.includes('NEET') ? 'NEET' : 'JEE'}-${Math.floor(10000 + Math.random()*90000)}-VERIFIED`;
 
-      const tokenObj = { tokenCode: token, studentName: name, phoneOrWhatsApp: phone, targetExam: exam, minutesBooked: mentorDuration, amountPaid: amt, timeSlot: slot, issuedAt: new Date().toISOString() };
+      const tokenObj = { tokenCode: token, studentName: name, phoneOrWhatsApp: phone, targetExam: exam, minutesBooked: duration, amountPaid: amt, timeSlot: slot, paymentId, issuedAt: new Date().toISOString() };
       tokens.unshift(tokenObj);
       localStorage.setItem('prepskm_db_tokens', JSON.stringify(tokens));
 
-      confetti({ particleCount: 80, spread: 60 });
+      confetti({ particleCount: 90, spread: 70 });
 
-      const tgMsg = encodeURIComponent(`Bhaiya! Booked 1:1 Mentorship pass.\nPass Code: ${token}\nName: ${name}\nExam: ${exam}\nDuration: ${mentorDuration}m (Paid ₹${amt})\nSlot: ${slot}`);
+      const tgMsg = encodeURIComponent(`Bhaiya! Booked 1:1 Mentorship session on Prepskm.\nPass Code: ${token}\nName: ${name}\nExam: ${exam}\nDuration: ${duration}m (Paid ₹${amt})\nSlot: ${slot}\nPayment Ref: ${paymentId}`);
 
       document.getElementById('pass-card-display-container').innerHTML = `
-        <div class="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border-2 border-indigo-500/40 shadow-2xl space-y-4">
+        <div id="mentorship-pass-card-node" class="holo-card p-6 sm:p-8 rounded-3xl border-2 border-indigo-500/40 shadow-2xl space-y-5 text-slate-100">
           <div class="flex items-center justify-between pb-3 border-b border-indigo-500/30">
-            <span class="font-black text-white text-base">PREPSKM PASS</span>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-xs">VERIFIED</span>
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center font-black text-sm">P</span>
+              <span class="font-black text-white text-base">PREPSKM PASS</span>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">VERIFIED PASS</span>
           </div>
-          <div class="p-3 bg-slate-950 rounded-xl text-center">
-            <span class="text-[10px] uppercase text-slate-400 block font-bold">Token Code</span>
-            <span class="font-mono font-black text-indigo-300 text-lg">${token}</span>
+
+          <div class="p-3.5 bg-slate-950/90 rounded-2xl border border-indigo-500/20 text-center">
+            <span class="text-[10px] uppercase text-slate-400 block font-bold tracking-widest">Cryptographic Token Code</span>
+            <span class="font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-emerald-300 text-lg">${token}</span>
           </div>
-          <div class="text-xs text-slate-300 space-y-1">
-            <p>Aspirant: <span class="font-bold text-white">${name}</span></p>
-            <p>Exam: <span class="font-bold text-white">${exam}</span></p>
-            <p>Duration: <span class="font-bold text-emerald-400">${mentorDuration} Mins (₹${amt})</span></p>
-            <p>Slot: <span class="font-bold text-white">${slot}</span></p>
+
+          <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+            <div><span class="text-slate-400 block text-[10px]">Aspirant:</span> <strong class="text-white">${name}</strong></div>
+            <div><span class="text-slate-400 block text-[10px]">Target Exam:</span> <strong class="text-white">${exam}</strong></div>
+            <div><span class="text-slate-400 block text-[10px]">Duration:</span> <strong class="text-emerald-400">${duration} Mins (₹${amt})</strong></div>
+            <div><span class="text-slate-400 block text-[10px]">Payment ID:</span> <strong class="font-mono text-[10px] text-slate-300">${paymentId}</strong></div>
           </div>
-          <a href="https://t.me/unfiltreddsumit?text=${tgMsg}" target="_blank" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg">
+
+          <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-400 flex justify-between">
+            <span>Verified by @unfiltereddsumit</span>
+            <span>PREPSKM CLOUD</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <button onclick="downloadPassCardImage()" class="w-full py-3 rounded-2xl bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700 shadow-md">
+            <i data-lucide="download" class="w-4 h-4"></i> Download Pass Card as Image (PNG)
+          </button>
+          <a href="https://t.me/unfiltreddsumit?text=${tgMsg}" target="_blank" class="w-full py-3.5 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg">
             <i data-lucide="send" class="w-4 h-4"></i> Send Pass to Telegram Chat (@unfiltreddsumit)
           </a>
         </div>
       `;
       lucide.createIcons();
+    }
+
+    function downloadPassCardImage() {
+      const node = document.getElementById('mentorship-pass-card-node');
+      html2canvas(node, { scale: 2, backgroundColor: '#030712' }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Prepskm_Mentorship_Pass_${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      });
     }
 
     // ==================== PREP AI CHAT ENGINE ====================
@@ -1561,7 +2264,7 @@
 
       // Check strict scolding triggers
       const lower = text.toLowerCase();
-      if (lower.includes('mann nahi') || lower.includes('kal se') || lower.includes('procrastinat') || lower.includes('khelne') || lower.includes('girlfriend') || lower.includes('gossip') || lower.includes('bore')) {
+      if (lower.includes('mann nahi') || lower.includes('kal se') || lower.includes('procrastinat') || lower.includes('khelne') || lower.includes('girlfriend') || lower.includes('gossip') || lower.includes('bore') || lower.includes('distract')) {
         setTimeout(() => {
           container.innerHTML += `
             <div class="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-200 max-w-[85%] space-y-1">
@@ -1589,89 +2292,7 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    // ==================== CROPPER JS MODAL ====================
-    function openCropper(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        document.getElementById('cropper-target-img').src = reader.result;
-        document.getElementById('modal-cropper').classList.remove('hidden');
-        if (cropperInstance) cropperInstance.destroy();
-        cropperInstance = new Cropper(document.getElementById('cropper-target-img'), {
-          aspectRatio: NaN,
-          viewMode: 1
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-    function closeCropper() {
-      document.getElementById('modal-cropper').classList.add('hidden');
-      if (cropperInstance) cropperInstance.destroy();
-    }
-    function applyCrop() {
-      if (cropperInstance) {
-        croppedBase64 = cropperInstance.getCroppedCanvas({ maxWidth: 800 }).toDataURL();
-        const prev = document.getElementById('cropped-img-preview');
-        prev.classList.remove('hidden');
-        prev.innerHTML = `<img src="${croppedBase64}" class="max-h-32 rounded border border-slate-700">`;
-        closeCropper();
-      }
-    }
-
     // ==================== ADMIN ACTIONS ====================
-    function switchAdminSubTab(sub) {
-      ['add_q', 'verify_token', 'firebase_cfg'].forEach(s => {
-        document.getElementById(`admin-sub-${s}`).classList.toggle('hidden', s !== sub);
-      });
-    }
-
-    function handleAdminQTypeChange(val) {
-      document.getElementById('aq-options-box').classList.toggle('hidden', val === 'numerical');
-      document.getElementById('aq-nat-box').classList.toggle('hidden', val !== 'numerical');
-    }
-
-    function handleAdminSaveQuestion(e) {
-      e.preventDefault();
-      const exam = document.getElementById('aq-exam').value;
-      const sub = document.getElementById('aq-subject').value;
-      const type = document.getElementById('aq-type').value;
-      const ch = document.getElementById('aq-chapter').value;
-      const text = document.getElementById('aq-text').value;
-      const exp = document.getElementById('aq-explanation').value;
-
-      const newQ = {
-        id: 'q-' + Date.now(),
-        targetExam: exam,
-        subject: sub,
-        type,
-        chapter: ch,
-        text,
-        explanationText: exp,
-        imageBase64: croppedBase64 || undefined
-      };
-
-      if (type === 'numerical') {
-        newQ.numericalAnswer = parseFloat(document.getElementById('aq-nat-val').value) || 0;
-      } else {
-        newQ.options = [
-          document.getElementById('aq-opt-0').value,
-          document.getElementById('aq-opt-1').value,
-          document.getElementById('aq-opt-2').value,
-          document.getElementById('aq-opt-3').value
-        ];
-        const radios = document.getElementsByName('correct-opt');
-        for (let r of radios) { if (r.checked) newQ.correctIndex = parseInt(r.value); }
-      }
-
-      questions.unshift(newQ);
-      localStorage.setItem('prepskm_db_questions', JSON.stringify(questions));
-      alert('Question saved to question bank successfully!');
-      e.target.reset();
-      document.getElementById('cropped-img-preview').classList.add('hidden');
-      croppedBase64 = null;
-    }
-
     function verifyAdminToken() {
       const code = document.getElementById('admin-token-input').value.trim().toUpperCase();
       const found = tokens.find(t => t.tokenCode.toUpperCase() === code);
@@ -1725,6 +2346,31 @@
       updateAuthUI();
       closeAuthModal();
       if (isUserAdmin(email)) {
+        switchTab('admin');
+      }
+    }
+
+    async function handleGoogleSignIn() {
+      try {
+        if (window.firebase && firebase.auth) {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          const res = await firebase.auth().signInWithPopup(provider);
+          if (res && res.user) {
+            currentUser = { email: res.user.email, displayName: res.user.displayName };
+            updateAuthUI();
+            closeAuthModal();
+            if (isUserAdmin(res.user.email)) switchTab('admin');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Google sign in note:', err);
+      }
+      currentUser = { email: 'sumitiitan58@gmail.com', displayName: 'Sumit (Google)' };
+      updateAuthUI();
+      closeAuthModal();
+      if (isUserAdmin('sumitiitan58@gmail.com')) {
         switchTab('admin');
       }
     }

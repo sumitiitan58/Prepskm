@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Student user profile and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "targetClass": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Question": {
+      "title": "Question",
+      "description": "Question bank item for mock tests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "targetClasses": { "type": "array" },
+        "subject": { "type": "string" },
+        "chapter": { "type": "string" },
+        "type": { "type": "string", "enum": ["single", "multiple", "numerical"] },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "questionText": { "type": "string" },
+        "questionImage": { "type": "string" },
+        "options": { "type": "array" },
+        "correctAnswers": { "type": "array" },
+        "numericalAnswer": { "type": "number" },
+        "numericalTolerance": { "type": "number" },
+        "explanationText": { "type": "string" },
+        "explanationImage": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["subject", "chapter", "type", "difficulty"]
+    },
+    "Material": {
+      "title": "Material",
+      "description": "Study material PDF, notes or companion lecture",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "targetClass": { "type": "string" },
+        "subject": { "type": "string" },
+        "pdfUrl": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "companionPdfTitle": { "type": "string" },
+        "companionPdfUrl": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "category", "subject"]
+    },
+    "Backlog": {
+      "title": "Backlog",
+      "description": "Student backlog task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "subject": { "type": "string" },
+        "chapter": { "type": "string" },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "status": { "type": "string", "enum": ["pending", "in-progress", "cleared"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "subject", "chapter", "priority", "status"]
+    },
+    "MockResult": {
+      "title": "MockResult",
+      "description": "NTA Mock Test Attempt and Scorecard",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "testTitle": { "type": "string" },
+        "score": { "type": "number" },
+        "maxScore": { "type": "number" },
+        "accuracy": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "timeTakenSeconds": { "type": "number" },
+        "submittedAt": { "type": "string" },
+        "answers": { "type": "object" },
+        "personalizedFeedback": { "type": "string" }
+      },
+      "required": ["userId", "score", "maxScore", "submittedAt"]
+    },
+    "MentorshipBooking": {
+      "title": "MentorshipBooking",
+      "description": "1:1 Mentorship session booking token and pass",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "studentEmail": { "type": "string" },
+        "telegramUsername": { "type": "string" },
+        "durationMinutes": { "type": "number" },
+        "amountPaid": { "type": "number" },
+        "paymentId": { "type": "string" },
+        "status": { "type": "string", "enum": ["booked", "completed", "cancelled"] },
+        "bookedAt": { "type": "string" }
+      },
+      "required": ["userId", "studentEmail", "durationMinutes", "amountPaid", "paymentId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document"
+    },
+    "/questions/{questionId}": {
+      "schema": "Question",
+      "description": "Question bank for test platform"
+    },
+    "/materials/{materialId}": {
+      "schema": "Material",
+      "description": "Study materials repository"
+    },
+    "/backlogs/{backlogId}": {
+      "schema": "Backlog",
+      "description": "Backlog tracker items"
+    },
+    "/mock_results/{resultId}": {
+      "schema": "MockResult",
+      "description": "NTA Mock exam attempts and scorecards"
+    },
+    "/mentorship_bookings/{bookingId}": {
+      "schema": "MentorshipBooking",
+      "description": "Mentorship booking records"
+    }
+  }
+}

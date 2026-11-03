@@ -26,13 +26,15 @@ CRITICAL RULES & PERSONALITY:
    - If a student wastes time, asks celebrity/dating/gaming gossip, makes excuses, complains of laziness ('padhai me mann nahi lag raha', 'kal se shuru karunga', 'batao girlfriend kaise banaye', 'khelne ka mann kar raha hai', 'kya JEE easy hai?'):
    - FIRMLY SCOLD THEM IMMEDIATELY: 'Arey padhai par dhyan do! NEET/JEE ka competition dekha hai? Lakhon bacche din-raat padh rahe hain aur tum yahan faltu baaton me time waste kar rahe ho? Phone side rakho aur agle 2 ghante padho!'
    - Strictly refuse to entertain time-wasting chatter. Push them straight back to their syllabus and backlog tracker.
-4. Prepskm Ecosystem:
+4. Real-time Search & Exam Grounding:
+   - When answering questions about latest NTA exam dates, eligibility, syllabus revisions, or test patterns, provide grounded factual dates and direct references.
+5. Prepskm Ecosystem:
    - Remind students to practice on Prepskm NTA Mock Tests and solve PYQs.
    - For personalized 1:1 strategy and time-management calls, recommend booking 1:1 Mentorship at flat ₹5/minute via Telegram (@unfiltreddsumit) or the Prepskm Mentorship Pass tab.`;
 
-// Gemini AI Chat API
+// Gemini AI Chat API with Search Grounding & Multi-Model Support
 app.post('/api/prep-ai/chat', async (req: Request, res: Response) => {
-  const { message, history, customApiKey } = req.body || {};
+  const { message, history, customApiKey, model, useSearchGrounding } = req.body || {};
   try {
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'Message is required' });
@@ -56,7 +58,29 @@ app.post('/api/prep-ai/chat', async (req: Request, res: Response) => {
       },
     });
 
-    // Format chat history if provided
+    // Check if query seeks real-time info (e.g. NTA notification, dates, syllabus updates)
+    const lower = message.toLowerCase();
+    const isSearchIntent =
+      Boolean(useSearchGrounding) ||
+      lower.includes('date') ||
+      lower.includes('schedule') ||
+      lower.includes('notification') ||
+      lower.includes('syllabus') ||
+      lower.includes('nta') ||
+      lower.includes('registration') ||
+      lower.includes('admit card') ||
+      lower.includes('cutoff') ||
+      lower.includes('latest news');
+
+    // Selected model: gemini-3.8-flash (default), gemini-4-argon (deep STEM), or gemini-3.1-flash-lite
+    let chosenModel = 'gemini-3.8-flash';
+    if (model === 'gemini-4-argon') {
+      chosenModel = 'gemini-4-argon';
+    } else if (model === 'gemini-3.1-flash-lite') {
+      chosenModel = 'gemini-3.1-flash-lite';
+    }
+
+    // Format chat history
     let conversationContext = '';
     if (Array.isArray(history) && history.length > 0) {
       conversationContext = history.slice(-6).map((h: { sender: string; text: string }) =>
@@ -66,16 +90,42 @@ app.post('/api/prep-ai/chat', async (req: Request, res: Response) => {
 
     const fullPrompt = `${conversationContext}Student: ${message}\nPrep AI:`;
 
+    // Only apply googleSearch on models that support it (gemini-3.8-flash)
+    const tools = (isSearchIntent && chosenModel === 'gemini-3.8-flash')
+      ? [{ googleSearch: {} }]
+      : undefined;
+
     const response = await aiClient.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: chosenModel,
       contents: fullPrompt,
       config: {
         systemInstruction: PREP_AI_SYSTEM_INSTRUCTION,
+        tools,
       },
     });
 
     const reply = response.text || "Bhai, answer generate nahi ho paya. Ek baar fir se try karo aur padhai par dhyan do!";
-    return res.json({ reply });
+
+    // Extract search grounding metadata if available
+    const searchSources: Array<{ title: string; url: string }> = [];
+    const groundingChunks = (response.candidates?.[0] as any)?.groundingMetadata?.groundingChunks;
+    if (Array.isArray(groundingChunks)) {
+      for (const chunk of groundingChunks) {
+        if (chunk.web?.uri) {
+          searchSources.push({
+            title: chunk.web.title || 'Google Search Source',
+            url: chunk.web.uri,
+          });
+        }
+      }
+    }
+
+    return res.json({
+      reply,
+      modelUsed: chosenModel,
+      isGrounded: searchSources.length > 0,
+      sources: searchSources,
+    });
   } catch (err: unknown) {
     const error = err as Error;
     console.error('Prep AI error:', error?.message || error);
@@ -99,7 +149,7 @@ app.post('/api/prep-ai/chat', async (req: Request, res: Response) => {
     }
 
     return res.status(200).json({
-      reply: `Bhai, network query error: ${error?.message || 'Check connection'}. Par ruko mat, Prepskm formula sheet aur handwritten notes revise karo!`,
+      reply: `Bhai, network query note: ${error?.message || 'Check connection'}. Par ruko mat, Prepskm formula sheet aur handwritten notes revise karo!`,
       error: true,
     });
   }
