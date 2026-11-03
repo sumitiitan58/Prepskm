@@ -32,6 +32,7 @@ import { TestHistory } from './components/TestHistory';
 import { AboutSection } from './components/AboutSection';
 import { MentorVideosHub } from './components/MentorVideosHub';
 import { SiteCustomizerModal } from './components/SiteCustomizerModal';
+import { DailyMotivationQuote } from './components/DailyMotivationQuote';
 
 import {
   Question,
@@ -284,6 +285,11 @@ export default function App() {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Daily Motivation Quote Section - Below hero banner to keep students inspired */}
+        {activeView !== 'admin' && activeView !== 'about' && (
+          <DailyMotivationQuote />
         )}
 
         {/* Tab 1: Backlog Destroyer */}
