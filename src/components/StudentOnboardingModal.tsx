@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Sparkles, Target, GraduationCap, ArrowRight, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Target, GraduationCap, ArrowRight, CheckCircle2, X, User, LogOut, Mail, Shield } from 'lucide-react';
 import { StudentProfile, ExamTarget } from '../types';
-import { saveStudentProfile } from '../lib/firebase';
+import { saveStudentProfile, logout } from '../lib/firebase';
 
 interface StudentOnboardingModalProps {
   initialProfile: StudentProfile;
   isOpen: boolean;
   onClose: (profile: StudentProfile) => void;
+  currentUser?: any;
 }
 
 const EXAM_OPTIONS: { label: ExamTarget; description: string; badge: string }[] = [
@@ -25,10 +26,19 @@ export const StudentOnboardingModal: React.FC<StudentOnboardingModalProps> = ({
   initialProfile,
   isOpen,
   onClose,
+  currentUser,
 }) => {
   const [name, setName] = useState(initialProfile.name === 'Aspirant' ? '' : initialProfile.name);
   const [selectedExam, setSelectedExam] = useState<ExamTarget>(initialProfile.targetExam || 'JEE Main');
   const [selectedClass, setSelectedClass] = useState<string>(initialProfile.classLevel || 'Class 12');
+
+  useEffect(() => {
+    if (initialProfile) {
+      setName(initialProfile.name === 'Aspirant' ? '' : initialProfile.name);
+      setSelectedExam(initialProfile.targetExam || 'JEE Main');
+      setSelectedClass(initialProfile.classLevel || 'Class 12');
+    }
+  }, [initialProfile, isOpen]);
 
   if (!isOpen) return null;
 
@@ -46,32 +56,89 @@ export const StudentOnboardingModal: React.FC<StudentOnboardingModalProps> = ({
     onClose(updated);
   };
 
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      const guestProfile: StudentProfile = {
+        name: 'Aspirant',
+        targetExam: 'JEE Main',
+        classLevel: 'Class 12',
+        streakCount: 1,
+        lastActiveDate: new Date().toISOString(),
+        totalTestsTaken: 0,
+        averageScorePercent: 0,
+      };
+      saveStudentProfile(guestProfile);
+      onClose(guestProfile);
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
+
+  const isFirstTime = !localStorage.getItem('prepskm_onboarded');
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-      <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+      <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl relative max-h-[92vh] flex flex-col">
         {/* Glow decorative blur */}
         <div className="absolute -top-24 -left-24 w-60 h-60 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="p-6 sm:p-8 relative z-10">
-          {/* Header */}
-          <div className="text-center space-y-2 mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" /> Welcome to Prepskm by @unfiltereddsumit
+        {/* Modal Header */}
+        <div className="p-5 sm:p-6 pb-3 border-b border-slate-800 flex items-center justify-between relative z-10 bg-slate-950/40">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold text-sm">
+              <User className="w-4 h-4" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Personalize Your Prep Engine
-            </h2>
-            <p className="text-sm text-slate-400 max-w-md mx-auto">
-              Set your target exam to calibrate your NTA CBT mock tests, study materials, and backlog tracker.
-            </p>
+            <div>
+              <h3 className="font-extrabold text-white text-base">
+                {isFirstTime ? 'Student Onboarding' : 'Edit Student Profile & Account'}
+              </h3>
+              <p className="text-[11px] text-slate-400">Prepskm Learning Engine by @unfiltereddsumit</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onClose(initialProfile)}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            title="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Account Info Bar */}
+        <div className="px-6 py-3 bg-slate-950/70 border-b border-slate-800 flex items-center justify-between text-xs relative z-10">
+          <div className="flex items-center gap-2 text-slate-300">
+            <Mail className="w-3.5 h-3.5 text-indigo-400" />
+            <span>
+              {currentUser?.email ? (
+                <span>
+                  Account: <strong className="text-white">{currentUser.email}</strong>
+                </span>
+              ) : (
+                <span className="text-slate-400">Guest Student Mode (Cloud sync via browser)</span>
+              )}
+            </span>
           </div>
 
+          {currentUser && (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs flex items-center gap-1.5 transition active:scale-95"
+            >
+              <LogOut className="w-3.5 h-3.5" /> Sign Out
+            </button>
+          )}
+        </div>
+
+        <div className="p-6 sm:p-7 overflow-y-auto space-y-6 relative z-10 flex-1">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Student Name */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-                Your Name
+                Your Full Name
               </label>
               <input
                 type="text"
@@ -141,12 +208,21 @@ export const StudentOnboardingModal: React.FC<StudentOnboardingModalProps> = ({
             </div>
 
             {/* Submit button */}
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/30 transition transform active:scale-[0.99]"
-            >
-              Start Conquering My Prep <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => onClose(initialProfile)}
+                className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-500/30 transition transform active:scale-[0.99]"
+              >
+                Save & Update Profile <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </form>
         </div>
       </div>

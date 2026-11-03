@@ -110,10 +110,10 @@
           <i data-lucide="message-square" class="w-3.5 h-3.5"></i> <span>Chat @unfiltreddsumit</span>
         </a>
         <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-rose-400 transition" title="YouTube">
-          <i data-lucide="youtube" class="w-3.5 h-3.5"></i>
+          <i data-lucide="video" class="w-3.5 h-3.5"></i>
         </a>
         <a href="https://instagram.com/unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-pink-400 transition" title="Instagram">
-          <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
+          <i data-lucide="camera" class="w-3.5 h-3.5"></i>
         </a>
       </div>
     </div>
@@ -156,6 +156,12 @@
         <!-- Promotional Scripts Modal -->
         <button onclick="openCampaignModal()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition" title="Creator Launch Scripts">
           <i data-lucide="megaphone" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Study Notification Bell -->
+        <button onclick="openNotificationsModal()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 hover:text-amber-300 transition relative" title="Study Alerts">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
         </button>
 
         <!-- Student Profile Badge -->
@@ -888,65 +894,143 @@
           <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat @unfiltreddsumit
         </a>
         <a href="https://youtube.com/@unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-rose-400 transition flex items-center gap-1">
-          <i data-lucide="youtube" class="w-3.5 h-3.5"></i> YouTube
+          <i data-lucide="video" class="w-3.5 h-3.5"></i> YouTube
         </a>
         <a href="https://instagram.com/unfiltereddsumit" target="_blank" rel="noreferrer" class="hover:text-pink-400 transition flex items-center gap-1">
-          <i data-lucide="instagram" class="w-3.5 h-3.5"></i> Instagram
+          <i data-lucide="camera" class="w-3.5 h-3.5"></i> Instagram
         </a>
       </div>
     </div>
   </footer>
 
-  <!-- FLOATING PREP AI WIDGET -->
-  <div class="fixed bottom-5 right-5 z-40">
-    <button id="prep-ai-btn" onclick="togglePrepAI()" class="flex items-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-indigo-500/40 border border-indigo-400/30 transition hover:scale-105 active:scale-95">
-      <i data-lucide="bot" class="w-5 h-5 text-indigo-200"></i>
-      <span>Prep AI Mentor</span>
-      <span class="px-1.5 py-0.5 rounded bg-white/20 text-[10px] uppercase font-black">Sumit AI</span>
+  <!-- MOBILE ICON-FIRST BOTTOM NAVIGATION BAR -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-2xl border-t border-slate-800/80 px-2 py-1.5 flex items-center justify-around shadow-2xl">
+    <button onclick="switchTab('tracker')" class="flex flex-col items-center justify-center p-2 rounded-2xl text-slate-400 hover:text-white transition">
+      <i data-lucide="flame" class="w-5 h-5 text-amber-400"></i>
+      <span class="text-[10px] mt-0.5">Backlogs</span>
     </button>
+    <button onclick="switchTab('materials')" class="flex flex-col items-center justify-center p-2 rounded-2xl text-slate-400 hover:text-white transition">
+      <i data-lucide="book-open" class="w-5 h-5 text-cyan-400"></i>
+      <span class="text-[10px] mt-0.5">Notes</span>
+    </button>
+    <button onclick="switchTab('mock_tests')" class="flex flex-col items-center justify-center p-2 rounded-2xl text-slate-400 hover:text-white transition">
+      <i data-lucide="graduation-cap" class="w-5 h-5 text-emerald-400"></i>
+      <span class="text-[10px] mt-0.5">CBT Test</span>
+    </button>
+    <button onclick="switchTab('history')" class="flex flex-col items-center justify-center p-2 rounded-2xl text-slate-400 hover:text-white transition">
+      <i data-lucide="history" class="w-5 h-5 text-purple-400"></i>
+      <span class="text-[10px] mt-0.5">History</span>
+    </button>
+    <button onclick="openOnboardingModal()" class="flex flex-col items-center justify-center p-2 rounded-2xl text-slate-400 hover:text-white transition">
+      <i data-lucide="user" class="w-5 h-5 text-indigo-400"></i>
+      <span class="text-[10px] mt-0.5">Profile</span>
+    </button>
+  </nav>
+
+  <!-- STUDY NOTIFICATIONS MODAL -->
+  <div id="modal-notifications" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="p-4 sm:p-5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">Study Notifications</h3>
+            <p class="text-xs text-slate-400">Distraction-free study alerts & schedule reminders</p>
+          </div>
+        </div>
+        <button onclick="closeNotificationsModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3 flex-1">
+        <div class="p-4 rounded-2xl bg-slate-950 border border-indigo-500/30 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800 shrink-0 text-amber-400">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-white">Daily Study Streak Active! 🔥</h4>
+            <p class="text-xs text-slate-300 mt-1">Clear your high-priority backlogs and solve at least 20 PYQs today.</p>
+            <span class="text-[10px] text-slate-500 mt-1 block">15 mins ago</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800 shrink-0 text-rose-400">
+            <i data-lucide="target" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-white">Exam Strategy Countdown 🚨</h4>
+            <p class="text-xs text-slate-300 mt-1">JEE Main Session 1 & NEET revision window is critical. Focus on high-weightage chapters!</p>
+            <span class="text-[10px] text-slate-500 mt-1 block">2 hours ago</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-start gap-3">
+          <div class="p-2 rounded-xl bg-slate-900 border border-slate-800 shrink-0 text-cyan-400">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-white">Handwritten Formulas Ready 📚</h4>
+            <p class="text-xs text-slate-300 mt-1">Mechanics and Organic Chemistry summary sheets available in the Study Materials Hub.</p>
+            <span class="text-[10px] text-slate-500 mt-1 block">Yesterday</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-3.5 bg-slate-950 border-t border-slate-800 text-center">
+        <button onclick="closeNotificationsModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
+          Got it, back to study
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- PREP AI CHAT WINDOW -->
-  <div id="prep-ai-window" class="hidden fixed bottom-5 right-5 z-50 w-[94vw] sm:w-[420px] h-[580px] max-h-[85vh] rounded-3xl bg-slate-900 border border-indigo-500/30 shadow-2xl flex flex-col overflow-hidden">
-    <!-- Header -->
-    <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
-          <i data-lucide="bot" class="w-4 h-4"></i>
+  <!-- IN-APP PDF PREVIEW READER MODAL -->
+  <div id="modal-pdf-reader" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <div class="p-4 sm:p-5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 shrink-0">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h4 id="pdf-reader-title" class="font-bold text-white text-base truncate">Document Viewer</h4>
+            <p class="text-xs text-slate-400">Prepskm In-App PDF Reader</p>
+          </div>
         </div>
-        <div>
-          <h4 class="font-bold text-white text-sm">Prep AI Mentor</h4>
-          <p class="text-[10px] text-slate-400">Strict Mentor by @unfiltereddsumit</p>
+        <div class="flex items-center gap-2">
+          <a id="pdf-reader-download-link" href="#" download class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Download
+          </a>
+          <button onclick="closePdfReaderModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
       </div>
-      <button onclick="togglePrepAI()" class="text-slate-400 hover:text-white p-1 rounded-lg">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-    </div>
 
-    <!-- Messages -->
-    <div id="ai-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
-      <div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%]">
-        Radhe Radhe! Main hoon Prep AI — official academic mentor of Prepskm by @unfiltereddsumit. Physics, Chem, Bio ya Maths ka koi bhi conceptual doubt pucho, formulas derive karwao ya backlog timetable banao. Par timepass kiya toh seedha reality check aur daat milegi!
+      <div class="flex-1 bg-slate-950 p-2 sm:p-4 min-h-[480px]">
+        <iframe id="pdf-reader-iframe" src="" class="w-full h-full min-h-[500px] rounded-xl border border-slate-800" title="PDF Document Viewer"></iframe>
       </div>
     </div>
+  </div>
 
-    <!-- Quick Chips -->
-    <div class="px-3 py-1.5 bg-slate-950 border-t border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
-      <button onclick="sendQuickPrompt('Bhai padhai me mann nahi lag raha, kya karu?')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">"Mann nahi lag raha..."</button>
-      <button onclick="sendQuickPrompt('Explain King\'s property of definite integrals with proof')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">King's Property</button>
-      <button onclick="sendQuickPrompt('How to solve projectile maximum height derivation?')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">Projectile Formula</button>
-      <button onclick="sendQuickPrompt('Give me a 7-day backlog clearance timetable for Physics mechanics')" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">Backlog Plan</button>
-    </div>
-
-    <!-- Chat Form -->
-    <div class="p-3 bg-slate-950 border-t border-slate-800">
-      <form onsubmit="handleAIChatSubmit(event)" class="flex gap-2">
-        <input id="ai-chat-input" type="text" placeholder="Ask doubt, formula or backlog schedule..." class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        <button type="submit" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white">
-          <i data-lucide="send" class="w-4 h-4"></i>
+  <!-- IMAGE LIGHTBOX ZOOM MODAL -->
+  <div id="modal-image-lightbox" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/95 backdrop-blur-md" onclick="closeImageLightbox()">
+    <div class="relative max-w-5xl max-h-[92vh] w-full flex flex-col bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+      <div class="p-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <span id="lightbox-title" class="font-bold text-white flex items-center gap-2">
+          <i data-lucide="zoom-in" class="w-4 h-4 text-indigo-400"></i> Diagram Lightbox
+        </span>
+        <button onclick="closeImageLightbox()" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition font-bold px-2.5">
+          ✕ Close
         </button>
-      </form>
+      </div>
+      <div class="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-slate-950/90">
+        <img id="lightbox-img" src="" alt="Enlarged Diagram" class="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl">
+      </div>
     </div>
   </div>
 
@@ -1102,14 +1186,30 @@
     </div>
   </div>
 
-  <!-- STUDENT ONBOARDING MODAL -->
-  <div id="modal-onboarding" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-    <div class="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-5">
-      <div class="text-center space-y-1">
-        <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold">Personalize Prepskm</span>
-        <h3 class="text-2xl font-black text-white">Welcome Aspirant</h3>
-        <p class="text-xs text-slate-400">Set your exam target to calibrate tests, notes, and study queue.</p>
+  <!-- STUDENT ONBOARDING & PROFILE MODAL -->
+  <div id="modal-onboarding" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md">
+    <div class="bg-slate-900 border border-indigo-500/30 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-5 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold">Prepskm Profile</span>
+          <h3 class="text-xl sm:text-2xl font-black text-white mt-1">Student Profile & Settings</h3>
+        </div>
+        <button onclick="closeOnboardingModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
       </div>
+
+      <!-- Account Info Bar with Sign Out -->
+      <div id="onboard-account-bar" class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 text-slate-300">
+          <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i>
+          <span id="onboard-account-email">Guest Student Mode</span>
+        </div>
+        <button id="onboard-signout-btn" onclick="handleLogout()" class="hidden px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-semibold text-xs border border-rose-500/30 transition">
+          Sign Out
+        </button>
+      </div>
+
       <form onsubmit="handleOnboardingSubmit(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Your Full Name</label>
@@ -1126,9 +1226,24 @@
             <option value="Dropper">Dropper</option>
           </select>
         </div>
-        <button type="submit" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg">
-          Start Conquering My Prep
-        </button>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Class / Standard</label>
+          <select id="onboard-class" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs">
+            <option value="Class 12">Class 12</option>
+            <option value="Class 11">Class 11</option>
+            <option value="Dropper">Dropper (Full Year)</option>
+            <option value="Class 10">Class 10</option>
+            <option value="Class 9">Class 9</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2 pt-2">
+          <button type="button" onclick="closeOnboardingModal()" class="w-1/3 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg">
+            Save & Update Profile
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -1159,16 +1274,10 @@
         Sign in with Google
       </button>
 
-      <div class="pt-4 border-t border-slate-800 space-y-2">
-        <p class="text-[11px] font-bold text-slate-400 uppercase text-center">1-Click Demo Login</p>
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <button type="button" onclick="quickDemoLogin('sumitiitan58@gmail.com')" class="p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
-            Admin Demo
-          </button>
-          <button type="button" onclick="quickDemoLogin('aspirant@prepskm.com')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">
-            Student Demo
-          </button>
-        </div>
+      <div class="pt-3 border-t border-slate-800 text-center">
+        <button type="button" onclick="quickDemoLogin('aspirant@prepskm.com')" class="w-full p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold text-xs transition">
+          Continue as Guest Aspirant
+        </button>
       </div>
     </div>
   </div>
@@ -1411,7 +1520,6 @@
       renderTestChapters();
       renderAdminChapterSelect();
       renderTestHistory();
-      initWakeWordListener();
       lucide.createIcons();
     }
 
@@ -1588,7 +1696,16 @@
             <p class="text-xs text-slate-400 line-clamp-2">${mat.description || ''}</p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
-            ${mat.pdfUrl ? `<a href="${mat.pdfUrl}" target="_blank" download class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF Attachment</a>` : ''}
+            ${mat.pdfUrl ? `
+              <div class="flex items-center gap-2">
+                <button onclick="openPdfReaderModal('${mat.title.replace(/'/g, "\\'")}', '${mat.pdfUrl}')" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i> Read PDF
+                </button>
+                <a href="${mat.pdfUrl}" target="_blank" download class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Download PDF file">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                </a>
+              </div>
+            ` : ''}
             ${mat.videoUrl ? `<a href="${mat.videoUrl}" target="_blank" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5"><i data-lucide="play" class="w-3.5 h-3.5"></i> Watch Video</a>` : ''}
           </div>
         </div>
@@ -2123,17 +2240,140 @@
       document.getElementById('cbt-exam-engine').classList.remove('flex');
       document.getElementById('cbt-exam-engine').classList.add('hidden');
 
+      // Compute subject-wise statistics
+      const subMap = {};
+      activeTest.questions.forEach(q => {
+        if (!subMap[q.subject]) subMap[q.subject] = { total: 0, correct: 0, incorrect: 0, unattempted: 0, score: 0 };
+        const uVal = activeTest.userAnswers[q.testQId];
+        subMap[q.subject].total++;
+        if (uVal === undefined || uVal === '') {
+          subMap[q.subject].unattempted++;
+        } else {
+          let isCorr = false;
+          if (q.type === 'numerical') {
+            isCorr = Math.abs(parseFloat(uVal) - q.numericalAnswer) <= 0.1;
+          } else {
+            isCorr = q.correctOptions.includes(parseInt(uVal));
+          }
+          if (isCorr) {
+            subMap[q.subject].correct++;
+            subMap[q.subject].score += 4;
+          } else {
+            subMap[q.subject].incorrect++;
+            subMap[q.subject].score -= 1;
+          }
+        }
+      });
+
+      const subjectCardsHtml = Object.entries(subMap).map(([sub, d]) => {
+        const att = d.correct + d.incorrect;
+        const subAcc = att > 0 ? Math.round((d.correct / att) * 100) : 0;
+        const maxM = d.total * 4;
+        return `
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm text-white">${sub}</span>
+              <span class="text-xs font-black text-indigo-400">${d.score} / ${maxM} Marks</span>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span>Accuracy</span>
+              <span class="font-bold text-emerald-400">${subAcc}%</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full" style="width: ${subAcc}%"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-1 text-center text-[10px] pt-1 border-t border-slate-800/80">
+              <span class="text-emerald-400 font-bold">+${d.correct} Cor</span>
+              <span class="text-rose-400 font-bold">-${d.incorrect} Inc</span>
+              <span class="text-slate-400 font-bold">${d.unattempted} Unatt</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const questionsReviewHtml = activeTest.questions.map((q, idx) => {
+        const uVal = activeTest.userAnswers[q.testQId];
+        const isUnattempted = (uVal === undefined || uVal === '');
+        let isCorrect = false;
+        if (!isUnattempted) {
+          if (q.type === 'numerical') isCorrect = Math.abs(parseFloat(uVal) - q.numericalAnswer) <= 0.1;
+          else isCorrect = q.correctOptions.includes(parseInt(uVal));
+        }
+
+        return `
+          <div class="p-5 rounded-2xl border ${isCorrect ? 'bg-slate-900 border-emerald-500/30' : isUnattempted ? 'bg-slate-900 border-slate-800' : 'bg-slate-900 border-rose-500/30'} space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded font-black text-xs bg-slate-800 text-white">Q${idx + 1}</span>
+                <span class="text-xs font-bold text-indigo-400">${q.subject}</span>
+                <span class="text-xs text-slate-400">• ${q.chapter}</span>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-500/10 text-emerald-400' : isUnattempted ? 'bg-slate-800 text-slate-400' : 'bg-rose-500/10 text-rose-400'}">
+                ${isCorrect ? '+4 Correct' : isUnattempted ? '0 Unattempted' : '-1 Incorrect'}
+              </span>
+            </div>
+
+            <p class="text-sm text-slate-200">${q.text}</p>
+
+            ${q.imageBase64 ? `
+              <div onclick="openImageLightbox('${q.imageBase64}', 'Question ${idx + 1} Diagram')" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-zoom-in inline-block">
+                <img src="${q.imageBase64}" class="max-h-72 w-auto max-w-full rounded-lg object-contain">
+                <span class="text-[10px] text-indigo-400 mt-1 block">🔍 Click to enlarge diagram</span>
+              </div>
+            ` : ''}
+
+            ${q.type !== 'numerical' ? `
+              <div class="space-y-2 text-xs">
+                ${q.options.map((opt, oIdx) => {
+                  const isOptCorrect = q.correctOptions.includes(oIdx);
+                  const isUserPick = parseInt(uVal) === oIdx;
+                  return `
+                    <div class="p-3 rounded-xl border flex flex-col gap-2 ${isOptCorrect ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300' : isUserPick ? 'bg-rose-500/10 border-rose-500/40 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                      <div class="flex items-center justify-between">
+                        <span><strong>${String.fromCharCode(65 + oIdx)}.</strong> ${opt}</span>
+                        ${isOptCorrect ? '<span class="text-[10px] font-bold text-emerald-400">✓ Correct Option</span>' : isUserPick ? '<span class="text-[10px] font-bold text-rose-400">✕ Your Response</span>' : ''}
+                      </div>
+                      ${q.optionImages && q.optionImages[oIdx] ? `
+                        <div onclick="openImageLightbox('${q.optionImages[oIdx]}', 'Option ${String.fromCharCode(65 + oIdx)} Diagram')" class="p-2 rounded-lg bg-slate-950 cursor-zoom-in">
+                          <img src="${q.optionImages[oIdx]}" class="max-h-36 w-auto max-w-full rounded object-contain">
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : `
+              <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-1">
+                <p>Correct Value: <strong class="text-emerald-400">${q.numericalAnswer}</strong></p>
+                <p>Your Input: <strong class="text-white">${uVal !== undefined && uVal !== '' ? uVal : 'None'}</strong></p>
+              </div>
+            `}
+
+            <div class="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs space-y-2">
+              <span class="font-bold text-indigo-300 block">Step-by-Step Explanation:</span>
+              <p class="text-slate-300">${q.explanationText || 'NTA standard conceptual solution.'}</p>
+              ${q.explanationImageBase64 ? `
+                <div onclick="openImageLightbox('${q.explanationImageBase64}', 'Explanation Diagram Q${idx + 1}')" class="cursor-zoom-in pt-1">
+                  <img src="${q.explanationImageBase64}" class="max-h-72 rounded-lg border border-indigo-500/30 bg-slate-950 p-2 object-contain">
+                  <span class="text-[10px] text-indigo-400 mt-1 block">🔍 Click to enlarge explanation</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
       const card = document.getElementById('cbt-scorecard-container');
       card.classList.remove('hidden');
       card.innerHTML = `
         <div class="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-indigo-500/30 space-y-6">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <span class="px-2.5 py-0.5 rounded ${feedback.badge} font-bold text-xs border">${feedback.title}</span>
-              <h3 class="text-2xl font-black text-white mt-1">NTA CBT Scorecard & Analysis</h3>
+              <h3 class="text-2xl font-black text-white mt-1">NTA CBT Scorecard & Detailed Analysis</h3>
             </div>
             <button onclick="openMarksheetModal('${historyEntry.attemptId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
-              <i data-lucide="award" class="w-4 h-4"></i> View & Download Official Marksheet
+              <i data-lucide="award" class="w-4 h-4"></i> View & Download Marksheet
             </button>
           </div>
 
@@ -2141,7 +2381,7 @@
             <div>
               <span class="text-4xl font-black text-emerald-400">${score}</span>
               <span class="text-slate-400 text-sm">/ ${maxScore} Marks</span>
-              <p class="text-xs text-indigo-400 font-bold mt-1">Accuracy: ${accuracy}%</p>
+              <p class="text-xs text-indigo-400 font-bold mt-1">Accuracy: ${accuracy}% • ${correct} Correct, ${incorrect} Incorrect</p>
             </div>
             <div class="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 max-w-md text-xs text-slate-200">
               <strong class="text-indigo-300 block mb-1">Sumit's Personal Complement:</strong>
@@ -2149,13 +2389,31 @@
             </div>
           </div>
 
-          <div class="flex gap-3">
+          <!-- Subject-Wise Diagnostics -->
+          <div class="space-y-3">
+            <h4 class="text-sm font-bold text-white uppercase tracking-wider">Subject-Wise Performance Diagnostics</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              ${subjectCardsHtml}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3 pt-2 border-t border-slate-800">
             <button onclick="document.getElementById('cbt-scorecard-container').classList.add('hidden'); document.getElementById('test-generator-container').classList.remove('hidden');" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-750">
               Create New Mock
             </button>
             <button onclick="reattemptTest('${historyEntry.attemptId}')" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">
               Re-attempt This Test
             </button>
+          </div>
+
+          <!-- Question-by-Question Solution Review with Cropped Diagrams -->
+          <div class="space-y-4 pt-4 border-t border-slate-800">
+            <h4 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-text" class="w-5 h-5 text-indigo-400"></i> Solution Key & Cropped Question Diagrams
+            </h4>
+            <div class="space-y-4">
+              ${questionsReviewHtml}
+            </div>
           </div>
         </div>
       `;
@@ -2355,130 +2613,47 @@
       });
     }
 
-    // ==================== PREP AI CHAT ENGINE ====================
-    let isAIOpen = false;
-    function togglePrepAI() {
-      isAIOpen = !isAIOpen;
-      const win = document.getElementById('prep-ai-window');
-      if (isAIOpen) win.classList.remove('hidden');
-      else win.classList.add('hidden');
+    // ==================== STUDY NOTIFICATIONS & MODALS ====================
+    function openNotificationsModal() {
+      const modal = document.getElementById('modal-notifications');
+      if (modal) modal.classList.remove('hidden');
+    }
+    function closeNotificationsModal() {
+      const modal = document.getElementById('modal-notifications');
+      if (modal) modal.classList.add('hidden');
     }
 
-    function sendQuickPrompt(prompt) {
-      document.getElementById('ai-chat-input').value = prompt;
-      handleAIChatSubmit(new Event('submit'));
+    function openPdfReaderModal(title, url) {
+      const modal = document.getElementById('modal-pdf-reader');
+      const titleEl = document.getElementById('pdf-reader-title');
+      const iframeEl = document.getElementById('pdf-reader-iframe');
+      const dlLink = document.getElementById('pdf-reader-download-link');
+      if (titleEl) titleEl.innerText = title || 'Study Document';
+      const targetUrl = url || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+      if (iframeEl) iframeEl.src = targetUrl;
+      if (dlLink) dlLink.href = targetUrl;
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closePdfReaderModal() {
+      const modal = document.getElementById('modal-pdf-reader');
+      const iframeEl = document.getElementById('pdf-reader-iframe');
+      if (iframeEl) iframeEl.src = '';
+      if (modal) modal.classList.add('hidden');
     }
 
-    async function handleAIChatSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById('ai-chat-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const container = document.getElementById('ai-chat-messages');
-      container.innerHTML += `<div class="p-3 rounded-2xl bg-indigo-600 text-white max-w-[85%] ml-auto">${text}</div>`;
-      input.value = '';
-
-      // Check strict scolding triggers
-      const lower = text.toLowerCase();
-      if (lower.includes('mann nahi') || lower.includes('kal se') || lower.includes('procrastinat') || lower.includes('khelne') || lower.includes('girlfriend') || lower.includes('gossip') || lower.includes('bore') || lower.includes('distract')) {
-        setTimeout(() => {
-          container.innerHTML += `
-            <div class="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-200 max-w-[85%] space-y-1">
-              <span class="text-[10px] font-bold text-rose-400 block uppercase">Strict Reality Check 🔥</span>
-              <p>Arey padhai par dhyan do! NEET/JEE ka competition dekha hai? Lakhon bacche din-raat padh rahe hain aur tum yahan faltu baaton me time waste kar rahe ho? Phone side rakho aur agle 2 ghante padho! Prepskm Backlog tracker kholo aur agla chapter solve karo!</p>
-            </div>
-          `;
-          container.scrollTop = container.scrollHeight;
-        }, 300);
-        return;
-      }
-
-      // Try server endpoint
-      try {
-        const res = await fetch('/api/prep-ai/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text })
-        });
-        const data = await res.json();
-        const replyText = data.reply || 'Padhai shuru karo!';
-        container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%] whitespace-pre-wrap">${replyText}</div>`;
-        speakResponseText(replyText);
-      } catch (err) {
-        container.innerHTML += `<div class="p-3.5 rounded-2xl bg-slate-800 text-slate-100 max-w-[85%]">Bhai formulas revise karo aur test series attempt karo!</div>`;
-      }
-      container.scrollTop = container.scrollHeight;
+    function openImageLightbox(src, title) {
+      const modal = document.getElementById('modal-image-lightbox');
+      const img = document.getElementById('lightbox-img');
+      const titleEl = document.getElementById('lightbox-title');
+      if (img) img.src = src;
+      if (titleEl) titleEl.innerHTML = `<i data-lucide="zoom-in" class="w-4 h-4 text-indigo-400"></i> ${title || 'Diagram Lightbox'}`;
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
     }
-
-    function speakResponseText(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const clean = text.replace(/[*#_`]/g, '').slice(0, 280);
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.rate = 1.05;
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function playWakeChime() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.3);
-      } catch (e) {}
-    }
-
-    let wakeRecognizer = null;
-    function initWakeWordListener() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
-
-      try {
-        wakeRecognizer = new SpeechRecognition();
-        wakeRecognizer.continuous = true;
-        wakeRecognizer.interimResults = false;
-        wakeRecognizer.lang = 'en-IN';
-
-        wakeRecognizer.onresult = (e) => {
-          const transcript = (e.results[e.results.length - 1][0].transcript || '').toLowerCase();
-          console.log('[Wake word listener heard]:', transcript);
-          if (
-            transcript.includes('hello prep') ||
-            transcript.includes('hey prep') ||
-            transcript.includes('he prep') ||
-            transcript.includes('hi prep') ||
-            transcript.includes('prep ai') ||
-            transcript.includes('suno prep')
-          ) {
-            playWakeChime();
-            isAIOpen = true;
-            const win = document.getElementById('prep-ai-window');
-            if (win) win.classList.remove('hidden');
-            const inp = document.getElementById('ai-chat-input');
-            if (inp) {
-              inp.focus();
-              inp.placeholder = 'Hello Prep activated! Type or speak your doubt...';
-            }
-          }
-        };
-
-        wakeRecognizer.onerror = () => {
-          setTimeout(initWakeWordListener, 3000);
-        };
-
-        wakeRecognizer.start();
-      } catch (err) {}
+    function closeImageLightbox() {
+      const modal = document.getElementById('modal-image-lightbox');
+      if (modal) modal.classList.add('hidden');
     }
 
     // ==================== ADMIN ACTIONS ====================
@@ -2556,26 +2731,28 @@
       } catch (err) {
         console.warn('Google sign in note:', err);
       }
-      currentUser = { email: 'sumitiitan58@gmail.com', displayName: 'Sumit (Google)' };
+      currentUser = { email: 'aspirant@prepskm.com', displayName: currentStudent.name || 'Aspirant' };
       updateAuthUI();
       closeAuthModal();
-      if (isUserAdmin('sumitiitan58@gmail.com')) {
-        switchTab('admin');
-      }
     }
 
     function updateAuthUI() {
       const adminBtn = document.getElementById('admin-panel-btn');
       const authCont = document.getElementById('auth-btn-container');
-      if (currentUser) {
+      const onboardEmail = document.getElementById('onboard-account-email');
+      const onboardSignout = document.getElementById('onboard-signout-btn');
+
+      if (currentUser && currentUser.email) {
         const isAdmin = isUserAdmin(currentUser.email);
         if (isAdmin) adminBtn.classList.remove('hidden');
         else adminBtn.classList.add('hidden');
         authCont.innerHTML = `
-          <button onclick="handleLogout()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold text-xs border border-slate-700">
+          <button onclick="handleLogout()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold text-xs border border-slate-700 transition">
             Sign Out (${currentUser.email.split('@')[0]})
           </button>
         `;
+        if (onboardEmail) onboardEmail.innerText = `Signed in: ${currentUser.email}`;
+        if (onboardSignout) onboardSignout.classList.remove('hidden');
       } else {
         adminBtn.classList.add('hidden');
         authCont.innerHTML = `
@@ -2583,6 +2760,8 @@
             Sign In
           </button>
         `;
+        if (onboardEmail) onboardEmail.innerText = 'Guest Student Mode';
+        if (onboardSignout) onboardSignout.classList.add('hidden');
       }
     }
 
@@ -2590,12 +2769,25 @@
       currentUser = null;
       updateAuthUI();
       if (currentTab === 'admin') switchTab('tracker');
+      closeOnboardingModal();
+    }
+
+    function openOnboardingModal() {
+      const nameEl = document.getElementById('onboard-name');
+      const examEl = document.getElementById('onboard-exam');
+      const clsEl = document.getElementById('onboard-class');
+      if (nameEl) nameEl.value = currentStudent.name || 'Aspirant';
+      if (examEl) examEl.value = currentStudent.targetExam || 'JEE Main';
+      if (clsEl) clsEl.value = currentStudent.classLevel || 'Class 12';
+      document.getElementById('modal-onboarding').classList.remove('hidden');
     }
 
     function handleOnboardingSubmit(e) {
       e.preventDefault();
-      currentStudent.name = document.getElementById('onboard-name').value;
+      currentStudent.name = document.getElementById('onboard-name').value.trim() || 'Aspirant';
       currentStudent.targetExam = document.getElementById('onboard-exam').value;
+      const clsEl = document.getElementById('onboard-class');
+      if (clsEl) currentStudent.classLevel = clsEl.value;
       localStorage.setItem('prepskm_student_profile', JSON.stringify(currentStudent));
       updateStudentUI();
       closeOnboardingModal();

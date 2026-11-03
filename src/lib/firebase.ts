@@ -184,6 +184,36 @@ export async function loginWithEmail(email: string, pass: string): Promise<{ suc
   return { success: true, user: mockUser };
 }
 
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const { auth } = initializeFirebaseApp();
+  const errInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth?.currentUser?.uid,
+      email: auth?.currentUser?.email,
+      emailVerified: auth?.currentUser?.emailVerified,
+      isAnonymous: auth?.currentUser?.isAnonymous,
+      tenantId: auth?.currentUser?.tenantId,
+      providerInfo: auth?.currentUser?.providerData?.map(provider => ({
+        providerId: provider.providerId,
+        email: provider.email,
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.warn('Firestore Operation Info: ', JSON.stringify(errInfo));
+}
+
 export async function loginWithGoogle(): Promise<{ success: boolean; user?: any; error?: string }> {
   const { auth } = initializeFirebaseApp();
   if (auth) {
@@ -194,11 +224,12 @@ export async function loginWithGoogle(): Promise<{ success: boolean; user?: any;
       return { success: true, user: cred.user };
     } catch (err: any) {
       console.warn('Google Sign-in popup note, falling back to local sync:', err);
-      // If popup is blocked by iframe or domain, provide seamless fallback
+      // Fallback student user if popup blocked in iframe (DO NOT leak admin email)
+      const currentProfile = getStudentProfile();
       const mockUser = {
-        uid: 'google-' + Date.now(),
-        email: 'sumitiitan58@gmail.com',
-        displayName: 'Sumit (Google)',
+        uid: 'student-' + Date.now(),
+        email: `${currentProfile.name.toLowerCase().replace(/\s+/g, '')}@aspirant.prepskm.com`,
+        displayName: currentProfile.name || 'Student Aspirant',
       };
       localStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
       window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: mockUser }));
@@ -206,10 +237,11 @@ export async function loginWithGoogle(): Promise<{ success: boolean; user?: any;
     }
   }
 
+  const currentProfile = getStudentProfile();
   const mockUser = {
-    uid: 'google-' + Date.now(),
-    email: 'sumitiitan58@gmail.com',
-    displayName: 'Sumit (Google)',
+    uid: 'student-' + Date.now(),
+    email: `${currentProfile.name.toLowerCase().replace(/\s+/g, '')}@aspirant.prepskm.com`,
+    displayName: currentProfile.name || 'Student Aspirant',
   };
   localStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
   window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: mockUser }));
@@ -619,19 +651,26 @@ export async function verifyTokenCode(code: string): Promise<{ valid: boolean; t
 // ==================== MOCK TEST RESULTS ====================
 
 export async function saveMockTestResult(result: MockTestAttempt): Promise<void> {
-  const { db } = initializeFirebaseApp();
+  const { auth, db } = initializeFirebaseApp();
+  const enhancedResult = {
+    ...result,
+    userId: auth?.currentUser?.uid || 'guest-aspirant',
+    submittedAt: result.submittedAt || new Date().toISOString()
+  };
+
   if (db) {
     try {
-      await setDoc(doc(db, 'mock_results', result.id), result);
+      await setDoc(doc(db, 'mock_results', result.id), enhancedResult);
     } catch (e) {
-      console.warn('Mock result write error', e);
+      handleFirestoreError(e, OperationType.WRITE, `mock_results/${result.id}`);
     }
   }
 
   const raw = localStorage.getItem(STORAGE_KEYS.mockResults);
   const list: MockTestAttempt[] = raw ? JSON.parse(raw) : [];
-  list.unshift(result);
+  list.unshift(enhancedResult);
   localStorage.setItem(STORAGE_KEYS.mockResults, JSON.stringify(list));
+  window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'mock_results' } }));
 }
 
 export async function getMockTestResults(): Promise<MockTestAttempt[]> {
@@ -643,7 +682,7 @@ export async function getMockTestResults(): Promise<MockTestAttempt[]> {
         return snap.docs.map((d) => d.data() as MockTestAttempt);
       }
     } catch (e) {
-      console.warn('Mock results fetch error', e);
+      handleFirestoreError(e, OperationType.GET, 'mock_results');
     }
   }
 
@@ -673,7 +712,24 @@ export function getStudentProfile(): StudentProfile {
   };
 }
 
-export function saveStudentProfile(profile: StudentProfile): void {
+export async function saveStudentProfile(profile: StudentProfile): Promise<void> {
   localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
   window.dispatchEvent(new CustomEvent('prepskm_profile_updated', { detail: profile }));
+
+  const { auth, db } = initializeFirebaseApp();
+  if (db && auth?.currentUser) {
+    try {
+      await setDoc(doc(db, 'users', auth.currentUser.uid), {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email || '',
+        name: profile.name,
+        targetExam: profile.targetExam,
+        classLevel: profile.classLevel,
+        streakCount: profile.streakCount,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${auth.currentUser.uid}`);
+    }
+  }
 }

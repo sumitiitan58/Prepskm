@@ -327,19 +327,20 @@ export const MaterialsHub: React.FC<MaterialsHubProps> = ({
                     <>
                       <button
                         onClick={() => setViewingMaterial(mat)}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
-                        title="Quick View"
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition active:scale-95"
+                        title="Read PDF inside website"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-3.5 h-3.5" /> Read PDF
                       </button>
                       <a
                         href={mat.fileData || mat.pdfUrl || '#'}
                         target="_blank"
                         rel="noreferrer"
                         download={mat.fileName || `${mat.title.replace(/\s+/g, '_')}.pdf`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition active:scale-95"
+                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+                        title="Download PDF file"
                       >
-                        <Download className="w-3.5 h-3.5" /> PDF
+                        <Download className="w-3.5 h-3.5" />
                       </a>
                     </>
                   )}
@@ -467,7 +468,7 @@ export const MaterialsHub: React.FC<MaterialsHubProps> = ({
                 </div>
                 <input
                   type="file"
-                  accept=".pdf,video/mp4"
+                  accept=".pdf,video/*"
                   onChange={handleFileSelect}
                   className="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
                 />

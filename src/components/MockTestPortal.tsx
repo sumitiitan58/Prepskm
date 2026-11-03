@@ -85,6 +85,7 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
 
   // Latest completed test result
   const [testResult, setTestResult] = useState<MockTestAttempt | null>(null);
+  const [solutionFilter, setSolutionFilter] = useState<'all' | 'incorrect' | 'unattempted' | 'correct'>('all');
 
   // Update selected subjects if exam target changes
   useEffect(() => {
@@ -1190,17 +1191,149 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
           </div>
         </div>
 
-        {/* Detailed Question-by-Question Solution Key */}
+        {/* Subject-Wise In-Depth Diagnostics */}
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-extrabold text-white text-base flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-indigo-400" /> Subject-Wise Diagnostics & Accuracy
+            </h3>
+            <span className="text-xs text-slate-400">Detailed Subject Breakdown</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {(() => {
+              const subMap: Record<string, { total: number; correct: number; incorrect: number; unattempted: number; score: number }> = {};
+              testQuestions.forEach((q) => {
+                if (!subMap[q.subject]) {
+                  subMap[q.subject] = { total: 0, correct: 0, incorrect: 0, unattempted: 0, score: 0 };
+                }
+                const ans = testResult.answers[q.id];
+                subMap[q.subject].total++;
+                if (ans?.isCorrect) {
+                  subMap[q.subject].correct++;
+                  subMap[q.subject].score += 4;
+                } else if (ans?.status === 'unattempted') {
+                  subMap[q.subject].unattempted++;
+                } else {
+                  subMap[q.subject].incorrect++;
+                  subMap[q.subject].score -= 1;
+                }
+              });
+
+              return Object.entries(subMap).map(([sub, d]) => {
+                const attempted = d.correct + d.incorrect;
+                const acc = attempted > 0 ? Math.round((d.correct / attempted) * 100) : 0;
+                const maxMarks = d.total * 4;
+                return (
+                  <div key={sub} className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-sm text-white">{sub}</span>
+                      <span className="text-xs font-black text-indigo-400">
+                        {d.score} / {maxMarks} Marks
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[11px] text-slate-400">
+                        <span>Accuracy</span>
+                        <span className="font-bold text-emerald-400">{acc}%</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full"
+                          style={{ width: `${acc}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1.5 text-center text-[10px] pt-1 border-t border-slate-800/80">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold">
+                        +{d.correct} Cor
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 font-bold">
+                        -{d.incorrect} Inc
+                      </div>
+                      <div className="p-1.5 rounded-lg bg-slate-800 text-slate-400 font-bold">
+                        {d.unattempted} Unatt
+                      </div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+
+        {/* Detailed Question-by-Question Solution Key & Cropped Diagrams */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-400" /> Comprehensive Solution Key & Explanations
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-400" /> Question-by-Question Analysis & Cropped Diagrams
+            </h3>
+
+            {/* Filter buttons */}
+            <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1 sm:pb-0">
+              <button
+                type="button"
+                onClick={() => setSolutionFilter('all')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition shrink-0 ${
+                  solutionFilter === 'all'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                All ({testQuestions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSolutionFilter('incorrect')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition shrink-0 ${
+                  solutionFilter === 'incorrect'
+                    ? 'bg-rose-600 text-white shadow-md'
+                    : 'bg-slate-900 border border-slate-800 text-rose-400 hover:bg-slate-800'
+                }`}
+              >
+                Incorrect (-1) ({testResult.incorrectCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSolutionFilter('unattempted')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition shrink-0 ${
+                  solutionFilter === 'unattempted'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'bg-slate-900 border border-slate-800 text-amber-400 hover:bg-slate-800'
+                }`}
+              >
+                Unattempted (0) ({testResult.unattemptedCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSolutionFilter('correct')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition shrink-0 ${
+                  solutionFilter === 'correct'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'bg-slate-900 border border-slate-800 text-emerald-400 hover:bg-slate-800'
+                }`}
+              >
+                Correct (+4) ({testResult.correctCount})
+              </button>
+            </div>
+          </div>
 
           <div className="space-y-4">
-            {testQuestions.map((q, idx) => {
-              const res = testResult.answers[q.id];
-              const isCorrect = res?.isCorrect;
-              const isUnattempted = res?.status === 'unattempted';
+            {testQuestions
+              .map((q, originalIdx) => ({ q, originalIdx }))
+              .filter(({ q }) => {
+                const res = testResult.answers[q.id];
+                if (solutionFilter === 'correct') return res?.isCorrect;
+                if (solutionFilter === 'incorrect') return res && !res.isCorrect && res.status !== 'unattempted';
+                if (solutionFilter === 'unattempted') return res?.status === 'unattempted';
+                return true;
+              })
+              .map(({ q, originalIdx }) => {
+                const res = testResult.answers[q.id];
+                const isCorrect = res?.isCorrect;
+                const isUnattempted = res?.status === 'unattempted';
 
               return (
                 <div
@@ -1217,7 +1350,7 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                   <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded font-black text-xs bg-slate-800 text-white">
-                        Q{idx + 1}
+                        Q{originalIdx + 1}
                       </span>
                       <span className="text-xs font-bold text-indigo-400">{q.subject}</span>
                       <span className="text-xs text-slate-400">• {q.chapter}</span>
@@ -1244,7 +1377,7 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                       onClick={() =>
                         setZoomedImage({
                           src: q.imageBase64!,
-                          title: `Question ${idx + 1} Diagram`,
+                          title: `Question ${originalIdx + 1} Diagram`,
                         })
                       }
                       className="p-3 rounded-2xl bg-slate-950 border border-slate-800 cursor-zoom-in inline-block max-w-full mb-3 hover:border-indigo-500/40 transition"
@@ -1342,7 +1475,7 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                         onClick={() =>
                           setZoomedImage({
                             src: q.explanationImageBase64!,
-                            title: `Question ${idx + 1} Solution Explanation`,
+                            title: `Question ${originalIdx + 1} Solution Explanation`,
                           })
                         }
                         className="pt-2 cursor-zoom-in"

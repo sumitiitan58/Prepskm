@@ -426,7 +426,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 font-bold text-xs border border-indigo-500/30">
               Admin Control Center
             </span>
-            <span className="text-xs text-slate-400">Authenticated: {currentAdminEmail}</span>
+            <span className="text-xs text-slate-400">Secure Administrator Access</span>
           </div>
           <h2 className="text-2xl font-black text-white mt-1">Prepskm Super Admin Panel</h2>
         </div>
@@ -952,7 +952,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <input
                 type="file"
-                accept=".pdf,video/mp4"
+                accept=".pdf,video/*"
                 onChange={handleMaterialFileSelect}
                 className="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
               />

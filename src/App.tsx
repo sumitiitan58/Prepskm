@@ -23,7 +23,7 @@ import { MaterialsHub } from './components/MaterialsHub';
 import { MockTestPortal } from './components/MockTestPortal';
 import { MentorshipBooking } from './components/MentorshipBooking';
 import { AdminPanel } from './components/AdminPanel';
-import { PrepAIAssistant } from './components/PrepAIAssistant';
+import { StudyNotificationModal } from './components/StudyNotificationModal';
 import { CampaignHubModal } from './components/CampaignHubModal';
 import { TestHistory } from './components/TestHistory';
 
@@ -61,6 +61,7 @@ export default function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isCampaignOpen, setIsCampaignOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   // Cross-component deep link states
   const [preselectedChapter, setPreselectedChapter] = useState<{ subject: string; chapter: string } | null>(null);
@@ -163,6 +164,7 @@ export default function App() {
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
         onOpenCampaign={() => setIsCampaignOpen(true)}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -322,8 +324,13 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Floating Prep AI Gemini Assistant */}
-      <PrepAIAssistant />
+      {/* Study Notification Modal (Replaces AI assistant with distraction-free notifications) */}
+      <StudyNotificationModal
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+        streak={studentProfile.streakCount || 5}
+        targetExam={studentProfile.targetExam || 'JEE Main'}
+      />
 
       {/* Universal Search Modal */}
       <UniversalSearchModal
@@ -335,10 +342,11 @@ export default function App() {
         onSelectMaterial={handleSelectMaterialFromSearch}
       />
 
-      {/* Student Onboarding Modal */}
+      {/* Student Onboarding & Profile Modal */}
       <StudentOnboardingModal
         isOpen={isOnboardingOpen}
         initialProfile={studentProfile}
+        currentUser={currentUser}
         onClose={handleOnboardingComplete}
       />
 

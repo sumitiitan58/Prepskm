@@ -47,17 +47,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
     }
   };
 
-  const handleQuickLogin = async (targetEmail: string) => {
-    setEmail(targetEmail);
-    setPassword('prepskm123');
-    setLoading(true);
-    const res = await loginWithEmail(targetEmail, 'prepskm123');
-    setLoading(false);
-    if (res.success) {
-      onSuccess(res.user);
-      onClose();
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -171,36 +160,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
             Sign In with Google
           </button>
 
-          {/* Quick Demo Access Bar */}
-          <div className="mt-6 pt-5 border-t border-slate-800 space-y-2.5">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-center">
-              1-Click Instant Demo Testing
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('sumitiitan58@gmail.com')}
-                className="p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-medium text-left flex items-center gap-2 transition"
-              >
-                <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
-                <div>
-                  <p className="font-bold">Admin Demo</p>
-                  <p className="text-[10px] text-slate-400 truncate">sumitiitan58@...</p>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('aspirant@prepskm.com')}
-                className="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-medium text-left flex items-center gap-2 transition"
-              >
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <div>
-                  <p className="font-bold">Student Demo</p>
-                  <p className="text-[10px] text-slate-400 truncate">aspirant@...</p>
-                </div>
-              </button>
-            </div>
-          </div>
 
           {/* Toggle Register/Sign In */}
           <div className="mt-4 text-center">

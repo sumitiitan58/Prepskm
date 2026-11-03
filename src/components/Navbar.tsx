@@ -16,6 +16,7 @@ import {
   Megaphone,
   History,
   X,
+  Bell,
 } from 'lucide-react';
 import { StudentProfile } from '../types';
 import { isUserAdmin } from '../lib/firebase';
@@ -29,6 +30,7 @@ interface NavbarProps {
   onOpenAuth: () => void;
   onOpenOnboarding: () => void;
   onOpenCampaign: () => void;
+  onOpenNotifications: () => void;
   onLogout: () => void;
 }
 
@@ -41,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth,
   onOpenOnboarding,
   onOpenCampaign,
+  onOpenNotifications,
   onLogout,
 }) => {
   const isAdmin = currentUser && isUserAdmin(currentUser.email);
@@ -164,6 +167,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Launch Promotional Scripts"
           >
             <Megaphone className="w-4 h-4" />
+          </button>
+
+          {/* Study Notification Center */}
+          <button
+            onClick={onOpenNotifications}
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 hover:text-amber-300 hover:bg-slate-800 transition relative"
+            title="Study Alerts & Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse" />
           </button>
 
           {/* Student Profile & Target Exam Badge */}
@@ -344,6 +357,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Sparkles className={`w-5 h-5 ${currentTab === 'mentorship' ? 'text-amber-400' : ''}`} />
           <span className="text-[10px] mt-0.5 tracking-tight">Mentor</span>
+        </button>
+
+        <button
+          onClick={onOpenOnboarding}
+          className="flex flex-col items-center justify-center p-2 rounded-2xl transition text-slate-400 hover:text-slate-200"
+          title="Student Profile & Settings"
+        >
+          <User className="w-5 h-5 text-indigo-400" />
+          <span className="text-[10px] mt-0.5 tracking-tight truncate max-w-[48px]">{studentProfile.name.split(' ')[0]}</span>
         </button>
 
         {isAdmin && (
