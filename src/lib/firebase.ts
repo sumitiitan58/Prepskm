@@ -18,6 +18,7 @@ import {
   getDocs,
   deleteDoc,
   getDocFromServer,
+  onSnapshot,
   Firestore
 } from 'firebase/firestore';
 import provisionedConfig from '../../firebase-applet-config.json';
@@ -36,7 +37,12 @@ import { INITIAL_QUESTIONS, INITIAL_MATERIALS, INITIAL_BACKLOG, AVAILABLE_CHAPTE
 
 const CONFIG_STORAGE_KEY = 'prepskm_firebase_config';
 const ADMIN_EMAILS_KEY = 'prepskm_admin_emails';
-const DEFAULT_ADMINS = ['admin@prepskm.com', 'sumitiitan58@gmail.com', 'unfiltereddsumit@prepskm.com'];
+const DEFAULT_ADMINS = [
+  'skylaneexperiment@gmail.com',
+  'admin@prepskm.com',
+  'sumitiitan58@gmail.com',
+  'unfiltereddsumit@prepskm.com'
+];
 
 // Local storage backup keys for offline/fallback mode
 const STORAGE_KEYS = {
@@ -215,16 +221,42 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 export async function loginWithGoogle(): Promise<{ success: boolean; user?: any; error?: string }> {
-  const { auth } = initializeFirebaseApp();
+  const { auth, db } = initializeFirebaseApp();
   if (auth) {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       const cred = await signInWithPopup(auth, provider);
-      return { success: true, user: cred.user };
+      const user = cred.user;
+
+      if (user) {
+        // Sync student profile with Google account name if available
+        const currentProfile = getStudentProfile();
+        if (user.displayName && currentProfile.name === 'Aspirant') {
+          currentProfile.name = user.displayName;
+          localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(currentProfile));
+          window.dispatchEvent(new CustomEvent('prepskm_profile_updated', { detail: currentProfile }));
+        }
+
+        if (db) {
+          try {
+            await setDoc(doc(db, 'users', user.uid), {
+              uid: user.uid,
+              email: user.email || '',
+              name: user.displayName || currentProfile.name,
+              targetExam: currentProfile.targetExam,
+              classLevel: currentProfile.classLevel,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          } catch (e) {
+            handleFirestoreError(e, OperationType.WRITE, `users/${user.uid}`);
+          }
+        }
+      }
+
+      return { success: true, user };
     } catch (err: any) {
-      console.warn('Google Sign-in popup note, falling back to local sync:', err);
-      // Fallback student user if popup blocked in iframe (DO NOT leak admin email)
+      console.warn('Google Sign-in popup notice, falling back to local sync:', err);
       const currentProfile = getStudentProfile();
       const mockUser = {
         uid: 'student-' + Date.now(),
@@ -733,3 +765,90 @@ export async function saveStudentProfile(profile: StudentProfile): Promise<void>
     }
   }
 }
+
+// ==================== REAL-TIME FIRESTORE SUBSCRIPTIONS ====================
+
+export function subscribeToBacklogsRealtime(callback: (items: BacklogItem[]) => void): () => void {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const unsub = onSnapshot(collection(db, 'backlogs'), (snapshot) => {
+        if (!snapshot.empty) {
+          const items = snapshot.docs.map((d) => d.data() as BacklogItem);
+          localStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(items));
+          callback(items);
+        }
+      }, (error) => {
+        handleFirestoreError(error, OperationType.GET, 'backlogs');
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Realtime backlogs listener fallback', e);
+    }
+  }
+  return () => {};
+}
+
+export function subscribeToMaterialsRealtime(callback: (items: StudyMaterial[]) => void): () => void {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const unsub = onSnapshot(collection(db, 'materials'), (snapshot) => {
+        if (!snapshot.empty) {
+          const items = snapshot.docs.map((d) => d.data() as StudyMaterial);
+          localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(items));
+          callback(items);
+        }
+      }, (error) => {
+        handleFirestoreError(error, OperationType.GET, 'materials');
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Realtime materials listener fallback', e);
+    }
+  }
+  return () => {};
+}
+
+export function subscribeToQuestionsRealtime(callback: (items: Question[]) => void): () => void {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const unsub = onSnapshot(collection(db, 'questions'), (snapshot) => {
+        if (!snapshot.empty) {
+          const items = snapshot.docs.map((d) => d.data() as Question);
+          localStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(items));
+          callback(items);
+        }
+      }, (error) => {
+        handleFirestoreError(error, OperationType.GET, 'questions');
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Realtime questions listener fallback', e);
+    }
+  }
+  return () => {};
+}
+
+export function subscribeToMockResultsRealtime(callback: (items: MockTestAttempt[]) => void): () => void {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const unsub = onSnapshot(collection(db, 'mock_results'), (snapshot) => {
+        if (!snapshot.empty) {
+          const items = snapshot.docs.map((d) => d.data() as MockTestAttempt);
+          localStorage.setItem(STORAGE_KEYS.mockResults, JSON.stringify(items));
+          callback(items);
+        }
+      }, (error) => {
+        handleFirestoreError(error, OperationType.GET, 'mock_results');
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Realtime mock results listener fallback', e);
+    }
+  }
+  return () => {};
+}
+

@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Target,
   Award,
+  Info
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { UniversalSearchModal } from './components/UniversalSearchModal';
@@ -26,6 +27,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { StudyNotificationModal } from './components/StudyNotificationModal';
 import { CampaignHubModal } from './components/CampaignHubModal';
 import { TestHistory } from './components/TestHistory';
+import { AboutSection } from './components/AboutSection';
 
 import {
   Question,
@@ -42,10 +44,13 @@ import {
   subscribeToAuth,
   logout,
   isUserAdmin,
+  subscribeToBacklogsRealtime,
+  subscribeToMaterialsRealtime,
+  subscribeToQuestionsRealtime,
 } from './lib/firebase';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'admin'>('tracker');
+  const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin'>('tracker');
   const [studentProfile, setStudentProfile] = useState<StudentProfile>(getStudentProfile());
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [reattemptData, setReattemptData] = useState<MockTestAttempt | null>(null);
@@ -67,9 +72,9 @@ export default function App() {
   const [preselectedChapter, setPreselectedChapter] = useState<{ subject: string; chapter: string } | null>(null);
   const [selectedMaterialFromSearch, setSelectedMaterialFromSearch] = useState<StudyMaterial | null>(null);
 
-  // Subscribe to Firebase Auth and initial data
+  // Subscribe to Firebase Auth and initial data + Real-time Firestore Listeners
   useEffect(() => {
-    const unsubscribe = subscribeToAuth((user) => {
+    const unsubscribeAuth = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
 
@@ -81,6 +86,17 @@ export default function App() {
     };
 
     refreshData();
+
+    // Attach Realtime Firestore Listeners for instant multi-user cloud sync
+    const unsubBacklogs = subscribeToBacklogsRealtime((items) => {
+      setBacklogs(items);
+    });
+    const unsubMaterials = subscribeToMaterialsRealtime((items) => {
+      setMaterials(items);
+    });
+    const unsubQuestions = subscribeToQuestionsRealtime((items) => {
+      setQuestions(items);
+    });
 
     // Event listener for local data updates
     const handleDataUpdate = () => refreshData();
@@ -99,7 +115,10 @@ export default function App() {
     }
 
     return () => {
-      unsubscribe();
+      unsubscribeAuth();
+      unsubBacklogs();
+      unsubMaterials();
+      unsubQuestions();
       window.removeEventListener('prepskm_data_updated', handleDataUpdate);
       window.removeEventListener('prepskm_profile_updated', handleProfileUpdate);
     };
@@ -147,7 +166,7 @@ export default function App() {
   const activeView = currentTab === 'admin' && !isAdmin ? 'tracker' : currentTab;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-150">
       {/* Top Navbar */}
       <Navbar
         currentTab={activeView}
@@ -171,20 +190,20 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-6 pb-24 md:pb-8">
         {/* Dynamic Personalized Greeting Banner - Dismissible to save vertical space on mobile screens */}
-        {activeView !== 'admin' && !isGreetingDismissed && (
-          <div className="p-4 sm:p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative">
+        {activeView !== 'admin' && activeView !== 'about' && !isGreetingDismissed && (
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative">
             <div className="space-y-1 pr-6 md:pr-0">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
                   Target: {studentProfile.targetExam} ({studentProfile.classLevel})
                 </span>
-                <span className="text-slate-600 hidden sm:inline">•</span>
-                <span className="text-xs text-slate-400 hidden sm:inline">Daily Study Engine</span>
+                <span className="text-slate-400 dark:text-slate-600 hidden sm:inline">•</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline">Daily Study Engine</span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-extrabold text-white tracking-tight">
+              <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Welcome back, {studentProfile.name}! Ready to conquer {studentProfile.targetExam} today?
               </h1>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
                 Discipline beat talent every time. Clear your pending backlogs and take a balanced mock test.
               </p>
             </div>
@@ -198,13 +217,13 @@ export default function App() {
               </button>
               <button
                 onClick={() => setCurrentTab('history')}
-                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-750 text-indigo-300 border border-indigo-500/30 font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1.5"
+                className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-indigo-600 dark:text-indigo-300 border border-slate-300 dark:border-indigo-500/30 font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1.5"
               >
                 <TrendingUp className="w-4 h-4" /> Score Progress
               </button>
               <button
                 onClick={() => setIsGreetingDismissed(true)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                 title="Hide greeting banner"
               >
                 ✕
@@ -262,7 +281,16 @@ export default function App() {
           />
         )}
 
-        {/* Tab 6: Secure Admin Panel (Protected) */}
+        {/* Tab 6: About Prepskm Section */}
+        {activeView === 'about' && (
+          <AboutSection
+            onStartMockTest={() => setCurrentTab('mock_tests')}
+            onOpenBacklog={() => setCurrentTab('tracker')}
+            onBookMentor={() => setCurrentTab('mentorship')}
+          />
+        )}
+
+        {/* Tab 7: Secure Admin Panel (Protected) */}
         {activeView === 'admin' && isAdmin && (
           <AdminPanel
             questions={questions}
@@ -273,12 +301,12 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-800/80 bg-slate-950 py-8 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-400">
+      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950 py-8 px-4 sm:px-6 transition-colors">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500 dark:text-slate-400">
           <div className="space-y-1 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2">
-              <span className="font-extrabold text-white text-sm">PREPSKM</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <span className="font-extrabold text-slate-900 dark:text-white text-sm">PREPSKM</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                 Engineered for Aspirants
               </span>
             </div>
@@ -287,12 +315,18 @@ export default function App() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold">
+            <button
+              onClick={() => setCurrentTab('about')}
+              className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+            >
+              <Info className="w-3.5 h-3.5" /> About Us
+            </button>
             <a
               href="https://t.me/prepskm"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-sky-400 transition flex items-center gap-1"
+              className="hover:text-sky-500 dark:hover:text-sky-400 transition flex items-center gap-1"
             >
               <Send className="w-3.5 h-3.5" /> Telegram @prepskm
             </a>
@@ -300,7 +334,7 @@ export default function App() {
               href="https://t.me/unfiltreddsumit"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-sky-300 transition flex items-center gap-1"
+              className="hover:text-sky-500 dark:hover:text-sky-300 transition flex items-center gap-1"
             >
               <MessageSquare className="w-3.5 h-3.5" /> Chat @unfiltreddsumit
             </a>
@@ -308,7 +342,7 @@ export default function App() {
               href="https://youtube.com/@unfiltereddsumit"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-rose-400 transition flex items-center gap-1"
+              className="hover:text-rose-500 dark:hover:text-rose-400 transition flex items-center gap-1"
             >
               <Youtube className="w-3.5 h-3.5" /> YouTube
             </a>
@@ -316,7 +350,7 @@ export default function App() {
               href="https://instagram.com/unfiltereddsumit"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-pink-400 transition flex items-center gap-1"
+              className="hover:text-pink-500 dark:hover:text-pink-400 transition flex items-center gap-1"
             >
               <Instagram className="w-3.5 h-3.5" /> Instagram
             </a>
@@ -324,7 +358,7 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Study Notification Modal (Replaces AI assistant with distraction-free notifications) */}
+      {/* Study Notification Modal (Distraction-free reminders) */}
       <StudyNotificationModal
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
@@ -350,7 +384,7 @@ export default function App() {
         onClose={handleOnboardingComplete}
       />
 
-      {/* Auth Modal */}
+      {/* Auth Modal with Google Sign-In */}
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}

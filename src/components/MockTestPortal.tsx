@@ -87,10 +87,19 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
   const [testResult, setTestResult] = useState<MockTestAttempt | null>(null);
   const [solutionFilter, setSolutionFilter] = useState<'all' | 'incorrect' | 'unattempted' | 'correct'>('all');
 
-  // Update selected subjects if exam target changes
+  // Update selected subjects and clean chapters if exam target changes
   useEffect(() => {
     if (examTarget === 'NEET') {
       setSelectedSubjects(['Physics', 'Chemistry', 'Biology']);
+      setSelectedChapters((prev) =>
+        prev.filter((ch) => !(AVAILABLE_CHAPTERS.Mathematics || []).includes(ch))
+      );
+    } else if (examTarget === 'JEE Main' || examTarget === 'JEE Advanced') {
+      setSelectedSubjects(['Physics', 'Chemistry', 'Mathematics']);
+      // Strictly remove any Biology chapters from selection
+      setSelectedChapters((prev) =>
+        prev.filter((ch) => !(AVAILABLE_CHAPTERS.Biology || []).includes(ch))
+      );
     } else {
       setSelectedSubjects(['Physics', 'Chemistry', 'Mathematics']);
     }
@@ -206,8 +215,19 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
     const natCount = Math.round(count * 0.2); // 20% NAT
     const mcqCount = count - natCount; // 80% MCQ
 
+    const isJEE = examTarget === 'JEE Main' || examTarget === 'JEE Advanced';
+    const effectiveSubjects: SubjectName[] = isJEE
+      ? selectedSubjects.filter((s) => s !== 'Biology')
+      : examTarget === 'NEET'
+      ? selectedSubjects.filter((s) => s !== 'Mathematics')
+      : selectedSubjects;
+
     // Filter candidate questions from question bank matching subjects & chapters if selected
-    let pool = questions.filter((q) => selectedSubjects.includes(q.subject));
+    let pool = questions.filter((q) => {
+      if (isJEE && q.subject === 'Biology') return false;
+      if (examTarget === 'NEET' && q.subject === 'Mathematics') return false;
+      return effectiveSubjects.includes(q.subject);
+    });
     if (selectedChapters.length > 0) {
       const chapterPool = pool.filter((q) => selectedChapters.includes(q.chapter));
       if (chapterPool.length >= count / 2) {
@@ -230,14 +250,14 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
             id: `${item.id}-${selected.length + 1}`,
           });
         } else {
-          // Fallback synthesizer
-          const sub = selectedSubjects[selected.length % selectedSubjects.length];
+          // Fallback synthesizer strictly using effective subjects
+          const sub = effectiveSubjects[selected.length % effectiveSubjects.length] || (isJEE ? 'Physics' : 'Biology');
           selected.push({
             id: `synth-${Date.now()}-${selected.length + 1}`,
             targetExam: examTarget,
             classLevel: 'Class 12',
             subject: sub,
-            chapter: selectedChapters[0] || 'High Yield Section',
+            chapter: selectedChapters[0] || (isJEE ? 'Mechanics & Calculus' : 'High Yield Section'),
             type: fallbackType,
             difficulty: 'medium',
             text:
@@ -571,9 +591,65 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Column 1 & 2: Setup Options */}
           <div className="lg:col-span-2 space-y-5">
+            {/* Quick NTA Presets */}
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                ⚡ Quick NTA Test Presets:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExamTarget('JEE Main');
+                    setSelectedSubjects(['Physics', 'Chemistry', 'Mathematics']);
+                    setSelectedChapters(availableChaptersList.filter(c => c.subject !== 'Biology').map(c => c.chapter));
+                    setTotalQuestionsRequested(75);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 ${
+                    (examTarget === 'JEE Main' || examTarget === 'JEE Advanced') && totalQuestionsRequested === 75
+                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30'
+                      : 'bg-slate-100 dark:bg-slate-950 text-indigo-600 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-slate-850'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                  <span>JEE Main Full Mock (75 Qs / 300 Marks - PCM)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExamTarget('JEE Main');
+                    setSelectedSubjects(['Physics', 'Chemistry', 'Mathematics']);
+                    setTotalQuestionsRequested(20);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 ${
+                    (examTarget === 'JEE Main' || examTarget === 'JEE Advanced') && totalQuestionsRequested === 20
+                      ? 'bg-indigo-600 text-white border-indigo-500'
+                      : 'bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-850'
+                  }`}
+                >
+                  <span>JEE PCM Drill (20 Qs)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExamTarget('NEET');
+                    setSelectedSubjects(['Physics', 'Chemistry', 'Biology']);
+                    setTotalQuestionsRequested(45);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 ${
+                    examTarget === 'NEET'
+                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30'
+                      : 'bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-850'
+                  }`}
+                >
+                  <span>NEET PCB Mock (45 Qs)</span>
+                </button>
+              </div>
+            </div>
+
             {/* 1. Target Exam */}
-            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 1. Target Exam
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -585,7 +661,7 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                     className={`py-3 px-4 rounded-xl text-xs font-bold border transition text-center ${
                       examTarget === exam
                         ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/25'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                        : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                     }`}
                   >
                     {exam}
@@ -595,18 +671,37 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
             </div>
 
             {/* 2. Subjects Selector */}
-            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                2. Subjects to Include (Strict Sequence: Physics → Chem → Math/Bio)
-              </label>
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  2. Subjects to Include (Strict Sequence: Physics → Chem → Math/Bio)
+                </label>
+                {(examTarget === 'JEE Main' || examTarget === 'JEE Advanced') && (
+                  <span className="text-[10px] font-bold text-amber-500 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    Strict JEE PCM Protocol Active (Biology Excluded)
+                  </span>
+                )}
+                {examTarget === 'NEET' && (
+                  <span className="text-[10px] font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    Strict NEET PCB Protocol Active (Math Excluded)
+                  </span>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {(['Physics', 'Chemistry', 'Mathematics', 'Biology'] as SubjectName[]).map((sub) => {
                   const isChecked = selectedSubjects.includes(sub);
+                  const isJEE = examTarget === 'JEE Main' || examTarget === 'JEE Advanced';
+                  const isNEET = examTarget === 'NEET';
+                  const isDisabled = (isJEE && sub === 'Biology') || (isNEET && sub === 'Mathematics');
+
                   return (
                     <button
                       key={sub}
                       type="button"
+                      disabled={isDisabled}
                       onClick={() => {
+                        if (isDisabled) return;
                         if (isChecked && selectedSubjects.length > 1) {
                           setSelectedSubjects(selectedSubjects.filter((s) => s !== sub));
                         } else if (!isChecked) {
@@ -614,13 +709,22 @@ export const MockTestPortal: React.FC<MockTestPortalProps> = ({
                         }
                       }}
                       className={`p-3 rounded-xl border text-xs font-bold transition flex items-center justify-between ${
-                        isChecked
-                          ? 'bg-indigo-500/15 border-indigo-500 text-indigo-300'
-                          : 'bg-slate-950 border-slate-800 text-slate-500'
+                        isDisabled
+                          ? 'bg-slate-100 dark:bg-slate-950/40 border-slate-200 dark:border-slate-900 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50'
+                          : isChecked
+                          ? 'bg-indigo-500/15 border-indigo-500 text-indigo-600 dark:text-indigo-300 shadow-sm'
+                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
                       }`}
                     >
-                      <span>{sub}</span>
-                      {isChecked && <Check className="w-4 h-4 text-indigo-400" />}
+                      <div className="flex flex-col text-left">
+                        <span>{sub}</span>
+                        {isDisabled && (
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-normal">
+                            {isJEE ? 'NEET Only' : 'JEE Only'}
+                          </span>
+                        )}
+                      </div>
+                      {isChecked && !isDisabled && <Check className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />}
                     </button>
                   );
                 })}
