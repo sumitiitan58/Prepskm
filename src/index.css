@@ -3,13 +3,35 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  body {
+  html, body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+    pointer-events: auto;
+  }
+
+  #root {
+    pointer-events: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Optimize touch responsiveness and eliminate 300ms tap delay on mobile/tablet */
+  button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
   }
 
   code, pre, kbd, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
+}
+
+/* Safe area padding for mobile home indicator */
+.safe-area-pb {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem));
 }
 
 @keyframes fadeIn {

@@ -23,6 +23,7 @@ import {
   Firestore
 } from 'firebase/firestore';
 import provisionedConfig from '../../firebase-applet-config.json';
+import { safeStorage } from './safeStorage';
 import {
   FirebaseConfig,
   Question,
@@ -87,7 +88,7 @@ let analyticsInstance: Analytics | null = null;
 // Initialize Firebase with stored config, provisioned config, or fallback
 export function getSavedFirebaseConfig(): FirebaseConfig | null {
   try {
-    const raw = localStorage.getItem(CONFIG_STORAGE_KEY);
+    const raw = safeStorage.getItem(CONFIG_STORAGE_KEY);
     if (raw) {
       return JSON.parse(raw);
     }
@@ -102,7 +103,7 @@ export function getSavedFirebaseConfig(): FirebaseConfig | null {
 
 export function saveFirebaseConfig(config: FirebaseConfig): boolean {
   try {
-    localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+    safeStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
     initializeFirebaseApp(config);
     return true;
   } catch (e) {
@@ -185,7 +186,7 @@ export const OWNER_EMAIL = 'saurav586kumar@gmail.com';
 
 export function getAdminEmails(): string[] {
   try {
-    const saved = localStorage.getItem(ADMIN_EMAILS_KEY);
+    const saved = safeStorage.getItem(ADMIN_EMAILS_KEY);
     if (saved) {
       const list = JSON.parse(saved);
       return Array.from(new Set([PRIMARY_SUPER_ADMIN, CO_SUPER_ADMIN, ...DEFAULT_ADMINS, ...list]));
@@ -235,7 +236,7 @@ export function addAdminEmail(email: string) {
   const normalized = email.toLowerCase().trim();
   if (!current.includes(normalized)) {
     const updated = [...current, normalized];
-    localStorage.setItem(ADMIN_EMAILS_KEY, JSON.stringify(updated));
+    safeStorage.setItem(ADMIN_EMAILS_KEY, JSON.stringify(updated));
   }
 }
 
@@ -258,7 +259,7 @@ export async function loginWithEmail(email: string, pass: string): Promise<{ suc
     email,
     displayName: email.split('@')[0],
   };
-  localStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
+  safeStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
   window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: mockUser }));
   return { success: true, user: mockUser };
 }
@@ -307,7 +308,7 @@ export async function loginWithGoogle(): Promise<{ success: boolean; user?: any;
         const currentProfile = getStudentProfile();
         if (user.displayName && currentProfile.name === 'Aspirant') {
           currentProfile.name = user.displayName;
-          localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(currentProfile));
+          safeStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(currentProfile));
           window.dispatchEvent(new CustomEvent('prepskm_profile_updated', { detail: currentProfile }));
         }
 
@@ -336,7 +337,7 @@ export async function loginWithGoogle(): Promise<{ success: boolean; user?: any;
         email: `${currentProfile.name.toLowerCase().replace(/\s+/g, '')}@aspirant.prepskm.com`,
         displayName: currentProfile.name || 'Student Aspirant',
       };
-      localStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
+      safeStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
       window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: mockUser }));
       return { success: true, user: mockUser };
     }
@@ -348,7 +349,7 @@ export async function loginWithGoogle(): Promise<{ success: boolean; user?: any;
     email: `${currentProfile.name.toLowerCase().replace(/\s+/g, '')}@aspirant.prepskm.com`,
     displayName: currentProfile.name || 'Student Aspirant',
   };
-  localStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
+  safeStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
   window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: mockUser }));
   return { success: true, user: mockUser };
 }
@@ -369,7 +370,7 @@ export async function registerWithEmail(email: string, pass: string): Promise<{ 
     email,
     displayName: email.split('@')[0],
   };
-  localStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
+  safeStorage.setItem(STORAGE_KEYS.mockUser, JSON.stringify(mockUser));
   window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: mockUser }));
   return { success: true, user: mockUser };
 }
@@ -383,7 +384,7 @@ export async function logout(): Promise<void> {
       console.warn('Sign out error', e);
     }
   }
-  localStorage.removeItem(STORAGE_KEYS.mockUser);
+  safeStorage.removeItem(STORAGE_KEYS.mockUser);
   window.dispatchEvent(new CustomEvent('prepskm_auth_state_changed', { detail: null }));
 }
 
@@ -395,7 +396,7 @@ export function subscribeToAuth(callback: (user: FirebaseUser | { uid: string; e
         callback(user);
       } else {
         // Check mock user fallback
-        const mockRaw = localStorage.getItem(STORAGE_KEYS.mockUser);
+        const mockRaw = safeStorage.getItem(STORAGE_KEYS.mockUser);
         callback(mockRaw ? JSON.parse(mockRaw) : null);
       }
     });
@@ -409,7 +410,7 @@ export function subscribeToAuth(callback: (user: FirebaseUser | { uid: string; e
   window.addEventListener('prepskm_auth_state_changed', handleCustomAuth);
 
   // Initial callback
-  const mockRaw = localStorage.getItem(STORAGE_KEYS.mockUser);
+  const mockRaw = safeStorage.getItem(STORAGE_KEYS.mockUser);
   callback(mockRaw ? JSON.parse(mockRaw) : null);
 
   return () => {
@@ -434,7 +435,7 @@ export async function getQuestions(): Promise<Question[]> {
   }
 
   // Fallback to local storage
-  const stored = localStorage.getItem(STORAGE_KEYS.questions);
+  const stored = safeStorage.getItem(STORAGE_KEYS.questions);
   if (stored) {
     try {
       return JSON.parse(stored);
@@ -442,7 +443,7 @@ export async function getQuestions(): Promise<Question[]> {
       // ignore
     }
   }
-  localStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(INITIAL_QUESTIONS));
+  safeStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(INITIAL_QUESTIONS));
   return INITIAL_QUESTIONS;
 }
 
@@ -467,7 +468,7 @@ export async function saveQuestionToFirestore(question: Question): Promise<boole
   } else {
     updated = [question, ...questions];
   }
-  localStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'questions' } }));
   return true;
 }
@@ -484,7 +485,7 @@ export async function deleteQuestionFromFirestore(questionId: string): Promise<b
 
   const questions = await getQuestions();
   const filtered = questions.filter((q) => q.id !== questionId);
-  localStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(filtered));
+  safeStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(filtered));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'questions' } }));
   return true;
 }
@@ -505,7 +506,7 @@ export async function getMaterials(): Promise<StudyMaterial[]> {
     }
   }
 
-  const stored = localStorage.getItem(STORAGE_KEYS.materials);
+  const stored = safeStorage.getItem(STORAGE_KEYS.materials);
   if (stored) {
     try {
       return JSON.parse(stored);
@@ -513,7 +514,7 @@ export async function getMaterials(): Promise<StudyMaterial[]> {
       // ignore
     }
   }
-  localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(INITIAL_MATERIALS));
+  safeStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(INITIAL_MATERIALS));
   return INITIAL_MATERIALS;
 }
 
@@ -536,7 +537,7 @@ export async function saveMaterialToFirestore(material: StudyMaterial): Promise<
   } else {
     updated = [material, ...list];
   }
-  localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'materials' } }));
   return true;
 }
@@ -553,7 +554,7 @@ export async function deleteMaterialFromFirestore(materialId: string): Promise<b
 
   const list = await getMaterials();
   const updated = list.filter((m) => m.id !== materialId);
-  localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'materials' } }));
   return true;
 }
@@ -562,7 +563,7 @@ export async function deleteMaterialFromFirestore(materialId: string): Promise<b
 
 export function getCustomSections(): CustomSection[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.customSections);
+    const raw = safeStorage.getItem(STORAGE_KEYS.customSections);
     if (raw) {
       return JSON.parse(raw);
     }
@@ -586,7 +587,7 @@ export function saveCustomSection(name: string, description?: string): CustomSec
   const exists = current.find((s) => s.id === id || s.name.toLowerCase() === normalizedName.toLowerCase());
   if (!exists) {
     const updated = [...current, newSection];
-    localStorage.setItem(STORAGE_KEYS.customSections, JSON.stringify(updated));
+    safeStorage.setItem(STORAGE_KEYS.customSections, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent('prepskm_sections_updated', { detail: updated }));
   }
   return exists || newSection;
@@ -595,7 +596,7 @@ export function saveCustomSection(name: string, description?: string): CustomSec
 export function deleteCustomSection(sectionId: string): void {
   const current = getCustomSections();
   const updated = current.filter((s) => s.id !== sectionId);
-  localStorage.setItem(STORAGE_KEYS.customSections, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.customSections, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_sections_updated', { detail: updated }));
 }
 
@@ -603,7 +604,7 @@ export function deleteCustomSection(sectionId: string): void {
 
 export function getCustomChapters(): Record<string, string[]> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.customChapters);
+    const raw = safeStorage.getItem(STORAGE_KEYS.customChapters);
     if (raw) {
       return JSON.parse(raw);
     }
@@ -631,7 +632,7 @@ export function saveCustomChapter(subject: SubjectName, chapterName: string): bo
     ...current,
     [subject]: updatedSub,
   };
-  localStorage.setItem(STORAGE_KEYS.customChapters, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.customChapters, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_chapters_updated', { detail: { subject, chapter: trimmed } }));
   return true;
 }
@@ -658,7 +659,7 @@ export async function getBacklogs(): Promise<BacklogItem[]> {
     }
   }
 
-  const stored = localStorage.getItem(STORAGE_KEYS.backlogs);
+  const stored = safeStorage.getItem(STORAGE_KEYS.backlogs);
   if (stored) {
     try {
       return JSON.parse(stored);
@@ -666,7 +667,7 @@ export async function getBacklogs(): Promise<BacklogItem[]> {
       // ignore
     }
   }
-  localStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(INITIAL_BACKLOG));
+  safeStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(INITIAL_BACKLOG));
   return INITIAL_BACKLOG;
 }
 
@@ -689,7 +690,7 @@ export async function saveBacklog(item: BacklogItem): Promise<void> {
   } else {
     updated = [item, ...list];
   }
-  localStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'backlogs' } }));
 }
 
@@ -705,7 +706,7 @@ export async function deleteBacklog(id: string): Promise<void> {
 
   const list = await getBacklogs();
   const updated = list.filter((b) => b.id !== id);
-  localStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'backlogs' } }));
 }
 
@@ -724,7 +725,7 @@ export async function getMentorshipTokens(): Promise<MentorshipToken[]> {
     }
   }
 
-  const stored = localStorage.getItem(STORAGE_KEYS.tokens);
+  const stored = safeStorage.getItem(STORAGE_KEYS.tokens);
   return stored ? JSON.parse(stored) : [];
 }
 
@@ -740,7 +741,7 @@ export async function saveMentorshipToken(token: MentorshipToken): Promise<void>
 
   const list = await getMentorshipTokens();
   const updated = [token, ...list.filter((t) => t.tokenCode !== token.tokenCode)];
-  localStorage.setItem(STORAGE_KEYS.tokens, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.tokens, JSON.stringify(updated));
 }
 
 export async function verifyTokenCode(code: string): Promise<{ valid: boolean; token?: MentorshipToken }> {
@@ -771,10 +772,10 @@ export async function saveMockTestResult(result: MockTestAttempt): Promise<void>
     }
   }
 
-  const raw = localStorage.getItem(STORAGE_KEYS.mockResults);
+  const raw = safeStorage.getItem(STORAGE_KEYS.mockResults);
   const list: MockTestAttempt[] = raw ? JSON.parse(raw) : [];
   list.unshift(enhancedResult);
-  localStorage.setItem(STORAGE_KEYS.mockResults, JSON.stringify(list));
+  safeStorage.setItem(STORAGE_KEYS.mockResults, JSON.stringify(list));
   window.dispatchEvent(new CustomEvent('prepskm_data_updated', { detail: { type: 'mock_results' } }));
 }
 
@@ -791,14 +792,14 @@ export async function getMockTestResults(): Promise<MockTestAttempt[]> {
     }
   }
 
-  const raw = localStorage.getItem(STORAGE_KEYS.mockResults);
+  const raw = safeStorage.getItem(STORAGE_KEYS.mockResults);
   return raw ? JSON.parse(raw) : [];
 }
 
 // ==================== STUDENT PROFILE ====================
 
 export function getStudentProfile(): StudentProfile {
-  const raw = localStorage.getItem(STORAGE_KEYS.profile);
+  const raw = safeStorage.getItem(STORAGE_KEYS.profile);
   if (raw) {
     try {
       return JSON.parse(raw);
@@ -818,7 +819,7 @@ export function getStudentProfile(): StudentProfile {
 }
 
 export async function saveStudentProfile(profile: StudentProfile): Promise<void> {
-  localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
+  safeStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
   window.dispatchEvent(new CustomEvent('prepskm_profile_updated', { detail: profile }));
 
   const { auth, db } = initializeFirebaseApp();
@@ -848,7 +849,7 @@ export function subscribeToBacklogsRealtime(callback: (items: BacklogItem[]) => 
       const unsub = onSnapshot(collection(db, 'backlogs'), (snapshot) => {
         if (!snapshot.empty) {
           const items = snapshot.docs.map((d) => d.data() as BacklogItem);
-          localStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(items));
+          safeStorage.setItem(STORAGE_KEYS.backlogs, JSON.stringify(items));
           callback(items);
         }
       }, (error) => {
@@ -869,7 +870,7 @@ export function subscribeToMaterialsRealtime(callback: (items: StudyMaterial[]) 
       const unsub = onSnapshot(collection(db, 'materials'), (snapshot) => {
         if (!snapshot.empty) {
           const items = snapshot.docs.map((d) => d.data() as StudyMaterial);
-          localStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(items));
+          safeStorage.setItem(STORAGE_KEYS.materials, JSON.stringify(items));
           callback(items);
         }
       }, (error) => {
@@ -890,7 +891,7 @@ export function subscribeToQuestionsRealtime(callback: (items: Question[]) => vo
       const unsub = onSnapshot(collection(db, 'questions'), (snapshot) => {
         if (!snapshot.empty) {
           const items = snapshot.docs.map((d) => d.data() as Question);
-          localStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(items));
+          safeStorage.setItem(STORAGE_KEYS.questions, JSON.stringify(items));
           callback(items);
         }
       }, (error) => {
@@ -911,7 +912,7 @@ export function subscribeToMockResultsRealtime(callback: (items: MockTestAttempt
       const unsub = onSnapshot(collection(db, 'mock_results'), (snapshot) => {
         if (!snapshot.empty) {
           const items = snapshot.docs.map((d) => d.data() as MockTestAttempt);
-          localStorage.setItem(STORAGE_KEYS.mockResults, JSON.stringify(items));
+          safeStorage.setItem(STORAGE_KEYS.mockResults, JSON.stringify(items));
           callback(items);
         }
       }, (error) => {
@@ -929,7 +930,7 @@ export function subscribeToMockResultsRealtime(callback: (items: MockTestAttempt
 
 export function getStoredMentors(): Mentor[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.mentors);
+    const raw = safeStorage.getItem(STORAGE_KEYS.mentors);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -947,7 +948,7 @@ export async function getMentors(): Promise<Mentor[]> {
       const snap = await getDocs(collection(db, 'mentors'));
       if (!snap.empty) {
         const items = snap.docs.map((d) => d.data() as Mentor);
-        localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(items));
+        safeStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(items));
         return items;
       }
     } catch (e) {
@@ -955,7 +956,7 @@ export async function getMentors(): Promise<Mentor[]> {
     }
   }
   const local = getStoredMentors();
-  localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(local));
+  safeStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(local));
   return local;
 }
 
@@ -978,7 +979,7 @@ export async function saveMentor(mentor: Mentor): Promise<boolean> {
   } else {
     updated = [mentor, ...current];
   }
-  localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_mentors_updated', { detail: updated }));
   return true;
 }
@@ -995,7 +996,7 @@ export async function deleteMentor(mentorId: string): Promise<boolean> {
 
   const current = getStoredMentors();
   const updated = current.filter((m) => m.id !== mentorId);
-  localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_mentors_updated', { detail: updated }));
   return true;
 }
@@ -1007,7 +1008,7 @@ export function subscribeToMentorsRealtime(callback: (mentors: Mentor[]) => void
       const unsub = onSnapshot(collection(db, 'mentors'), (snap) => {
         if (!snap.empty) {
           const items = snap.docs.map((d) => d.data() as Mentor);
-          localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(items));
+          safeStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(items));
           callback(items);
         }
       }, (err) => {
@@ -1025,7 +1026,7 @@ export function subscribeToMentorsRealtime(callback: (mentors: Mentor[]) => void
 
 export function getStoredMentorVideos(): MentorVideo[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.mentorVideos);
+    const raw = safeStorage.getItem(STORAGE_KEYS.mentorVideos);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -1043,7 +1044,7 @@ export async function getMentorVideos(): Promise<MentorVideo[]> {
       const snap = await getDocs(collection(db, 'mentor_videos'));
       if (!snap.empty) {
         const items = snap.docs.map((d) => d.data() as MentorVideo);
-        localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(items));
+        safeStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(items));
         return items;
       }
     } catch (e) {
@@ -1051,7 +1052,7 @@ export async function getMentorVideos(): Promise<MentorVideo[]> {
     }
   }
   const local = getStoredMentorVideos();
-  localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(local));
+  safeStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(local));
   return local;
 }
 
@@ -1074,7 +1075,7 @@ export async function saveMentorVideo(video: MentorVideo): Promise<boolean> {
   } else {
     updated = [video, ...current];
   }
-  localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_mentor_videos_updated', { detail: updated }));
   return true;
 }
@@ -1091,7 +1092,7 @@ export async function deleteMentorVideo(videoId: string): Promise<boolean> {
 
   const current = getStoredMentorVideos();
   const updated = current.filter((v) => v.id !== videoId);
-  localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(updated));
+  safeStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent('prepskm_mentor_videos_updated', { detail: updated }));
   return true;
 }
@@ -1103,7 +1104,7 @@ export function subscribeToMentorVideosRealtime(callback: (videos: MentorVideo[]
       const unsub = onSnapshot(collection(db, 'mentor_videos'), (snap) => {
         if (!snap.empty) {
           const items = snap.docs.map((d) => d.data() as MentorVideo);
-          localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(items));
+          safeStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(items));
           callback(items);
         }
       }, (err) => {
@@ -1121,7 +1122,7 @@ export function subscribeToMentorVideosRealtime(callback: (videos: MentorVideo[]
 
 export function getSiteCustomization(): SiteCustomization {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.siteCustomization);
+    const raw = safeStorage.getItem(STORAGE_KEYS.siteCustomization);
     if (raw) {
       const parsed = JSON.parse(raw);
       return { ...DEFAULT_SITE_CUSTOMIZATION, ...parsed };
@@ -1142,7 +1143,7 @@ export async function saveSiteCustomization(customization: SiteCustomization): P
     }
   }
 
-  localStorage.setItem(STORAGE_KEYS.siteCustomization, JSON.stringify(customization));
+  safeStorage.setItem(STORAGE_KEYS.siteCustomization, JSON.stringify(customization));
   applySiteCustomization(customization);
   window.dispatchEvent(new CustomEvent('prepskm_customization_updated', { detail: customization }));
   return true;

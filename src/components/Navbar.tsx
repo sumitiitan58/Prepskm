@@ -81,9 +81,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const bannerText = siteCustomization?.bannerText || 'Founded by @unfiltereddsumit • Distraction-Free JEE & NEET Ecosystem';
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors">
-      {/* Main Navbar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
+    <>
+      <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors pointer-events-auto touch-manipulation">
+        {/* Main Navbar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3 shrink-0">
           <div
@@ -332,9 +333,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       )}
+    </header>
 
-      {/* Mobile Icon-First Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/80 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-pb">
+    {/* Mobile Icon-First Bottom Navigation Bar (Placed OUTSIDE header so it never creates a full-height touch blocking box) */}
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-slate-200 dark:border-slate-800/80 px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-pb pointer-events-auto touch-manipulation">
         <button
           onClick={() => onSelectTab('tracker')}
           className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
@@ -437,6 +439,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
       </nav>
-    </header>
+    </>
   );
 };

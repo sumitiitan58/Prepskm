@@ -62,6 +62,7 @@ import {
   subscribeToMentorsRealtime,
   subscribeToMentorVideosRealtime
 } from './lib/firebase';
+import { safeStorage } from './lib/safeStorage';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mentor_videos' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin'>('tracker');
@@ -153,10 +154,10 @@ export default function App() {
 
     // Check first visit for onboarding without blocking dashboard
     try {
-      const hasSeenOnboarding = localStorage.getItem('prepskm_onboarded');
+      const hasSeenOnboarding = safeStorage.getItem('prepskm_onboarded');
       // If student hasn't onboarded yet, mark it visited so dashboard is immediately visible
       if (!hasSeenOnboarding) {
-        localStorage.setItem('prepskm_onboarded', 'true');
+        safeStorage.setItem('prepskm_onboarded', 'true');
       }
     } catch (e) {
       console.warn('LocalStorage access note:', e);
@@ -196,7 +197,7 @@ export default function App() {
 
   const handleOnboardingComplete = (updated: StudentProfile) => {
     setStudentProfile(updated);
-    localStorage.setItem('prepskm_onboarded', 'true');
+    safeStorage.setItem('prepskm_onboarded', 'true');
     setIsOnboardingOpen(false);
   };
 

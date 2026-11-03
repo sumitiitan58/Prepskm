@@ -2,11 +2,17 @@ export type ThemeMode = 'dark' | 'light' | 'system';
 
 const THEME_STORAGE_KEY = 'prepskm_theme_mode';
 
+let memoryTheme: ThemeMode = 'light';
+
 export function getStoredTheme(): ThemeMode {
   if (typeof window === 'undefined') return 'light';
-  const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
-  if (saved && (saved === 'dark' || saved === 'light' || saved === 'system')) {
-    return saved;
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+    if (saved && (saved === 'dark' || saved === 'light' || saved === 'system')) {
+      return saved;
+    }
+  } catch (e) {
+    return memoryTheme;
   }
   return 'light'; // Default to light with white background as requested
 }
@@ -15,9 +21,14 @@ export function applyTheme(theme: ThemeMode): void {
   if (typeof window === 'undefined') return;
 
   const root = document.documentElement;
-  const isDark =
-    theme === 'dark' ||
-    (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  let isDark = theme === 'dark';
+  try {
+    if (theme === 'system' && window.matchMedia) {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+  } catch (e) {
+    isDark = false;
+  }
 
   if (isDark) {
     root.classList.add('dark');
@@ -35,8 +46,15 @@ export function applyTheme(theme: ThemeMode): void {
     }
   }
 
-  localStorage.setItem(THEME_STORAGE_KEY, theme);
-  window.dispatchEvent(new CustomEvent('prepskm_theme_changed', { detail: { theme, isDark } }));
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (e) {
+    memoryTheme = theme;
+  }
+
+  try {
+    window.dispatchEvent(new CustomEvent('prepskm_theme_changed', { detail: { theme, isDark } }));
+  } catch (e) {}
 }
 
 export function toggleTheme(): ThemeMode {

@@ -2,8 +2,22 @@
 <html lang="en" class="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Prepskm - JEE & NEET Study Platform</title>
+
+  <!-- Global Touch & Mobile Responsiveness CSS -->
+  <style>
+    html, body, #root {
+      touch-action: manipulation;
+      -webkit-overflow-scrolling: touch;
+      pointer-events: auto !important;
+    }
+    button, a, input, select, textarea, [role="button"] {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+    }
+  </style>
 
   <!-- Intercept and suppress harmless HMR WebSocket disconnect errors in proxy/iframe environment -->
   <script>
@@ -46,44 +60,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Cropper.js CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-
-  <!-- html2canvas for 1-click Pass Card and Marksheet image downloads -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <!-- Immediate Theme Initialization Script (Avoids flash of wrong theme, defaults to Light/White) -->
+  <!-- Immediate Theme Initialization Script (Safe for in-app browsers & private mode) -->
   <script>
     (function() {
       try {
-        const theme = localStorage.getItem('prepskm_theme_mode') || 'light';
-        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var theme = 'light';
+        try { theme = localStorage.getItem('prepskm_theme_mode') || 'light'; } catch(e) {}
+        var isDark = false;
+        if (theme === 'dark') isDark = true;
+        else if (theme === 'system' && window.matchMedia) {
+          try { isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch(e) {}
+        }
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.classList.remove('light');
