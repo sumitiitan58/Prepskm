@@ -7,6 +7,7 @@ service cloud.firestore {
     
     function isAdmin() {
       return isAuthenticated() && (
+        request.auth.token.email == 'saurav586kumar@gmail.com' ||
         request.auth.token.email == 'skylaneexperiment@gmail.com' ||
         request.auth.token.email == 'sumitiitan58@gmail.com' ||
         request.auth.token.email == 'admin@prepskm.com' ||
@@ -24,10 +25,25 @@ service cloud.firestore {
 
     match /questions/{questionId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     match /materials/{materialId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /mentors/{mentorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /mentor_videos/{videoId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /site_settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
     }

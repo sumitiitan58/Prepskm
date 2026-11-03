@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Target,
   Award,
-  Info
+  Info,
+  PenTool
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { UniversalSearchModal } from './components/UniversalSearchModal';
@@ -28,6 +29,8 @@ import { StudyNotificationModal } from './components/StudyNotificationModal';
 import { CampaignHubModal } from './components/CampaignHubModal';
 import { TestHistory } from './components/TestHistory';
 import { AboutSection } from './components/AboutSection';
+import { MentorVideosHub } from './components/MentorVideosHub';
+import { SiteCustomizerModal } from './components/SiteCustomizerModal';
 
 import {
   Question,
@@ -35,6 +38,9 @@ import {
   BacklogItem,
   StudentProfile,
   MockTestAttempt,
+  Mentor,
+  MentorVideo,
+  SiteCustomization
 } from './types';
 import {
   getQuestions,
@@ -44,22 +50,32 @@ import {
   subscribeToAuth,
   logout,
   isUserAdmin,
+  isSuperAdmin,
   subscribeToBacklogsRealtime,
   subscribeToMaterialsRealtime,
   subscribeToQuestionsRealtime,
+  getMentors,
+  getMentorVideos,
+  getSiteCustomization,
+  applySiteCustomization,
+  subscribeToMentorsRealtime,
+  subscribeToMentorVideosRealtime
 } from './lib/firebase';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin'>('tracker');
+  const [currentTab, setCurrentTab] = useState<'tracker' | 'materials' | 'mentor_videos' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin'>('tracker');
   const [studentProfile, setStudentProfile] = useState<StudentProfile>(getStudentProfile());
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [reattemptData, setReattemptData] = useState<MockTestAttempt | null>(null);
   const [isGreetingDismissed, setIsGreetingDismissed] = useState(false);
+  const [siteCustomization, setSiteCustomization] = useState<SiteCustomization>(getSiteCustomization());
 
   // Data states
   const [questions, setQuestions] = useState<Question[]>([]);
   const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [backlogs, setBacklogs] = useState<BacklogItem[]>([]);
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [mentorVideos, setMentorVideos] = useState<MentorVideo[]>([]);
 
   // Modals
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -67,6 +83,7 @@ export default function App() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isCampaignOpen, setIsCampaignOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 
   // Cross-component deep link states
   const [preselectedChapter, setPreselectedChapter] = useState<{ subject: string; chapter: string } | null>(null);
@@ -74,15 +91,25 @@ export default function App() {
 
   // Subscribe to Firebase Auth and initial data + Real-time Firestore Listeners
   useEffect(() => {
+    applySiteCustomization(siteCustomization);
+
     const unsubscribeAuth = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
 
     const refreshData = async () => {
-      const [q, m, b] = await Promise.all([getQuestions(), getMaterials(), getBacklogs()]);
+      const [q, m, b, men, vids] = await Promise.all([
+        getQuestions(),
+        getMaterials(),
+        getBacklogs(),
+        getMentors(),
+        getMentorVideos()
+      ]);
       setQuestions(q);
       setMaterials(m);
       setBacklogs(b);
+      setMentors(men);
+      setMentorVideos(vids);
     };
 
     refreshData();
@@ -97,6 +124,21 @@ export default function App() {
     const unsubQuestions = subscribeToQuestionsRealtime((items) => {
       setQuestions(items);
     });
+    const unsubMentors = subscribeToMentorsRealtime((items) => {
+      setMentors(items);
+    });
+    const unsubVideos = subscribeToMentorVideosRealtime((items) => {
+      setMentorVideos(items);
+    });
+
+    // Customization update listener
+    const handleCustomizationUpdate = (e: any) => {
+      if (e.detail) {
+        setSiteCustomization(e.detail);
+        applySiteCustomization(e.detail);
+      }
+    };
+    window.addEventListener('prepskm_customization_updated', handleCustomizationUpdate);
 
     // Event listener for local data updates
     const handleDataUpdate = () => refreshData();
@@ -119,6 +161,9 @@ export default function App() {
       unsubBacklogs();
       unsubMaterials();
       unsubQuestions();
+      unsubMentors();
+      unsubVideos();
+      window.removeEventListener('prepskm_customization_updated', handleCustomizationUpdate);
       window.removeEventListener('prepskm_data_updated', handleDataUpdate);
       window.removeEventListener('prepskm_profile_updated', handleProfileUpdate);
     };
@@ -166,7 +211,7 @@ export default function App() {
   const activeView = currentTab === 'admin' && !isAdmin ? 'tracker' : currentTab;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-150">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white transition-colors duration-150">
       {/* Top Navbar */}
       <Navbar
         currentTab={activeView}
@@ -179,11 +224,13 @@ export default function App() {
         }}
         studentProfile={studentProfile}
         currentUser={currentUser}
+        siteCustomization={siteCustomization}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
         onOpenCampaign={() => setIsCampaignOpen(true)}
         onOpenNotifications={() => setIsNotificationsOpen(true)}
+        onOpenCustomizer={() => setIsCustomizerOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -201,10 +248,10 @@ export default function App() {
                 <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline">Daily Study Engine</span>
               </div>
               <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Welcome back, {studentProfile.name}! Ready to conquer {studentProfile.targetExam} today?
+                {siteCustomization.heroHeadline || `Welcome back, ${studentProfile.name}! Ready to conquer ${studentProfile.targetExam}?`}
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
-                Discipline beat talent every time. Clear your pending backlogs and take a balanced mock test.
+                {siteCustomization.heroSubheadline || 'Discipline beats talent every time. Clear your pending backlogs and take a balanced mock test.'}
               </p>
             </div>
 
@@ -243,6 +290,23 @@ export default function App() {
             materials={materials}
             selectedMaterialFromSearch={selectedMaterialFromSearch}
             onClearSelectedMaterial={() => setSelectedMaterialFromSearch(null)}
+          />
+        )}
+
+        {/* Tab: Mentor Videos Hub */}
+        {activeView === 'mentor_videos' && (
+          <MentorVideosHub
+            videos={mentorVideos}
+            mentors={mentors}
+            currentUser={currentUser}
+            onRefreshVideos={async () => {
+              const v = await getMentorVideos();
+              setMentorVideos(v);
+            }}
+            onRefreshMentors={async () => {
+              const m = await getMentors();
+              setMentors(m);
+            }}
           />
         )}
 
@@ -401,6 +465,28 @@ export default function App() {
         isOpen={isCampaignOpen}
         onClose={() => setIsCampaignOpen(false)}
       />
+
+      {/* Whole Website Customizer Modal (Super Admin Only) */}
+      <SiteCustomizerModal
+        isOpen={isCustomizerOpen}
+        onClose={() => setIsCustomizerOpen(false)}
+        onCustomizationUpdated={(updated) => setSiteCustomization(updated)}
+      />
+
+      {/* Corner Floating Pen Icon for Super Admin Live Website Customizer */}
+      {isSuperAdmin(currentUser?.email) && (
+        <button
+          onClick={() => setIsCustomizerOpen(true)}
+          className="fixed bottom-20 md:bottom-6 right-5 md:right-6 z-40 p-3 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-2 group ring-4 ring-amber-400/30 cursor-pointer animate-fade-in"
+          title="Whole Website Customizer (Super Admin Only)"
+          aria-label="Customize Website"
+        >
+          <PenTool className="w-5 h-5 group-hover:rotate-45 transition duration-300" />
+          <span className="hidden sm:inline text-xs font-black tracking-wide">
+            Site Customizer
+          </span>
+        </button>
+      )}
     </div>
   );
 }

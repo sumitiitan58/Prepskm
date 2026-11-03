@@ -32,13 +32,30 @@ import {
   MockTestAttempt,
   StudentProfile,
   CustomSection,
-  SubjectName
+  SubjectName,
+  Mentor,
+  MentorVideo,
+  SiteCustomization,
+  UserRole
 } from '../types';
-import { INITIAL_QUESTIONS, INITIAL_MATERIALS, INITIAL_BACKLOG, AVAILABLE_CHAPTERS } from '../data/initialData';
+import {
+  INITIAL_QUESTIONS,
+  INITIAL_MATERIALS,
+  INITIAL_BACKLOG,
+  AVAILABLE_CHAPTERS,
+  INITIAL_MENTORS,
+  INITIAL_MENTOR_VIDEOS,
+  DEFAULT_SITE_CUSTOMIZATION
+} from '../data/initialData';
 
 const CONFIG_STORAGE_KEY = 'prepskm_firebase_config';
 const ADMIN_EMAILS_KEY = 'prepskm_admin_emails';
+
+export const PRIMARY_SUPER_ADMIN = 'saurav586kumar@gmail.com';
+export const CO_SUPER_ADMIN = 'skylaneexperiment@gmail.com';
+
 const DEFAULT_ADMINS = [
+  'saurav586kumar@gmail.com',
   'skylaneexperiment@gmail.com',
   'admin@prepskm.com',
   'sumitiitan58@gmail.com',
@@ -56,6 +73,9 @@ const STORAGE_KEYS = {
   mockUser: 'prepskm_mock_user',
   customSections: 'prepskm_custom_sections',
   customChapters: 'prepskm_custom_chapters',
+  mentors: 'prepskm_db_mentors',
+  mentorVideos: 'prepskm_db_mentor_videos',
+  siteCustomization: 'prepskm_db_site_customization',
 };
 
 // Global Firebase instance references
@@ -161,30 +181,53 @@ async function testConnection() {
 testConnection();
 
 // Admin & Owner Email management
-export const OWNER_EMAIL = 'skylaneexperiment@gmail.com';
+export const OWNER_EMAIL = 'saurav586kumar@gmail.com';
 
 export function getAdminEmails(): string[] {
   try {
     const saved = localStorage.getItem(ADMIN_EMAILS_KEY);
     if (saved) {
       const list = JSON.parse(saved);
-      return Array.from(new Set([OWNER_EMAIL, ...DEFAULT_ADMINS, ...list]));
+      return Array.from(new Set([PRIMARY_SUPER_ADMIN, CO_SUPER_ADMIN, ...DEFAULT_ADMINS, ...list]));
     }
   } catch {
     // fallback
   }
-  return Array.from(new Set([OWNER_EMAIL, ...DEFAULT_ADMINS]));
-}
-
-export function isUserAdmin(email?: string | null): boolean {
-  if (!email) return false;
-  const adminList = getAdminEmails().map((e) => e.toLowerCase().trim());
-  return adminList.includes(email.toLowerCase().trim());
+  return Array.from(new Set([PRIMARY_SUPER_ADMIN, CO_SUPER_ADMIN, ...DEFAULT_ADMINS]));
 }
 
 export function isOwner(email?: string | null): boolean {
   if (!email) return false;
-  return email.toLowerCase().trim() === OWNER_EMAIL.toLowerCase();
+  const normalized = email.toLowerCase().trim();
+  return (
+    normalized === PRIMARY_SUPER_ADMIN.toLowerCase() ||
+    normalized === CO_SUPER_ADMIN.toLowerCase()
+  );
+}
+
+export function isSuperAdmin(email?: string | null): boolean {
+  if (!email) return false;
+  const normalized = email.toLowerCase().trim();
+  const adminList = getAdminEmails().map((e) => e.toLowerCase().trim());
+  return adminList.includes(normalized) || isOwner(email);
+}
+
+export function isUserMentor(email?: string | null): boolean {
+  if (!email) return false;
+  const normalized = email.toLowerCase().trim();
+  const mentors = getStoredMentors();
+  return mentors.some((m) => m.email.toLowerCase().trim() === normalized);
+}
+
+export function isUserAdmin(email?: string | null): boolean {
+  if (!email) return false;
+  return isSuperAdmin(email) || isUserMentor(email);
+}
+
+export function getUserRole(email?: string | null): UserRole {
+  if (isSuperAdmin(email)) return 'super_admin';
+  if (isUserMentor(email)) return 'mentor';
+  return 'student';
 }
 
 export function addAdminEmail(email: string) {
@@ -880,5 +923,239 @@ export function subscribeToMockResultsRealtime(callback: (items: MockTestAttempt
     }
   }
   return () => {};
+}
+
+// ==================== MENTORS CRUD & REALTIME ====================
+
+export function getStoredMentors(): Mentor[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.mentors);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error reading stored mentors', e);
+  }
+  return INITIAL_MENTORS;
+}
+
+export async function getMentors(): Promise<Mentor[]> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const snap = await getDocs(collection(db, 'mentors'));
+      if (!snap.empty) {
+        const items = snap.docs.map((d) => d.data() as Mentor);
+        localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(items));
+        return items;
+      }
+    } catch (e) {
+      console.warn('Error fetching mentors from Firestore, using local store', e);
+    }
+  }
+  const local = getStoredMentors();
+  localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(local));
+  return local;
+}
+
+export async function saveMentor(mentor: Mentor): Promise<boolean> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      await setDoc(doc(db, 'mentors', mentor.id), mentor, { merge: true });
+    } catch (e) {
+      console.warn('Firestore mentor save note:', e);
+    }
+  }
+
+  const current = getStoredMentors();
+  const idx = current.findIndex((m) => m.id === mentor.id || m.email.toLowerCase() === mentor.email.toLowerCase());
+  let updated: Mentor[];
+  if (idx >= 0) {
+    updated = [...current];
+    updated[idx] = mentor;
+  } else {
+    updated = [mentor, ...current];
+  }
+  localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_mentors_updated', { detail: updated }));
+  return true;
+}
+
+export async function deleteMentor(mentorId: string): Promise<boolean> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      await deleteDoc(doc(db, 'mentors', mentorId));
+    } catch (e) {
+      console.warn('Firestore mentor delete note:', e);
+    }
+  }
+
+  const current = getStoredMentors();
+  const updated = current.filter((m) => m.id !== mentorId);
+  localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_mentors_updated', { detail: updated }));
+  return true;
+}
+
+export function subscribeToMentorsRealtime(callback: (mentors: Mentor[]) => void): () => void {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const unsub = onSnapshot(collection(db, 'mentors'), (snap) => {
+        if (!snap.empty) {
+          const items = snap.docs.map((d) => d.data() as Mentor);
+          localStorage.setItem(STORAGE_KEYS.mentors, JSON.stringify(items));
+          callback(items);
+        }
+      }, (err) => {
+        handleFirestoreError(err, OperationType.GET, 'mentors');
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Realtime mentors listener fallback', e);
+    }
+  }
+  return () => {};
+}
+
+// ==================== MENTOR VIDEOS CRUD & REALTIME ====================
+
+export function getStoredMentorVideos(): MentorVideo[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.mentorVideos);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error('Error reading stored mentor videos', e);
+  }
+  return INITIAL_MENTOR_VIDEOS;
+}
+
+export async function getMentorVideos(): Promise<MentorVideo[]> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const snap = await getDocs(collection(db, 'mentor_videos'));
+      if (!snap.empty) {
+        const items = snap.docs.map((d) => d.data() as MentorVideo);
+        localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(items));
+        return items;
+      }
+    } catch (e) {
+      console.warn('Error fetching mentor videos from Firestore, using local store', e);
+    }
+  }
+  const local = getStoredMentorVideos();
+  localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(local));
+  return local;
+}
+
+export async function saveMentorVideo(video: MentorVideo): Promise<boolean> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      await setDoc(doc(db, 'mentor_videos', video.id), video, { merge: true });
+    } catch (e) {
+      console.warn('Firestore mentor video save note:', e);
+    }
+  }
+
+  const current = getStoredMentorVideos();
+  const idx = current.findIndex((v) => v.id === video.id);
+  let updated: MentorVideo[];
+  if (idx >= 0) {
+    updated = [...current];
+    updated[idx] = video;
+  } else {
+    updated = [video, ...current];
+  }
+  localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_mentor_videos_updated', { detail: updated }));
+  return true;
+}
+
+export async function deleteMentorVideo(videoId: string): Promise<boolean> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      await deleteDoc(doc(db, 'mentor_videos', videoId));
+    } catch (e) {
+      console.warn('Firestore mentor video delete note:', e);
+    }
+  }
+
+  const current = getStoredMentorVideos();
+  const updated = current.filter((v) => v.id !== videoId);
+  localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('prepskm_mentor_videos_updated', { detail: updated }));
+  return true;
+}
+
+export function subscribeToMentorVideosRealtime(callback: (videos: MentorVideo[]) => void): () => void {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      const unsub = onSnapshot(collection(db, 'mentor_videos'), (snap) => {
+        if (!snap.empty) {
+          const items = snap.docs.map((d) => d.data() as MentorVideo);
+          localStorage.setItem(STORAGE_KEYS.mentorVideos, JSON.stringify(items));
+          callback(items);
+        }
+      }, (err) => {
+        handleFirestoreError(err, OperationType.GET, 'mentor_videos');
+      });
+      return unsub;
+    } catch (e) {
+      console.warn('Realtime mentor videos listener fallback', e);
+    }
+  }
+  return () => {};
+}
+
+// ==================== SITE CUSTOMIZATION (WHOLE WEBSITE) ====================
+
+export function getSiteCustomization(): SiteCustomization {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.siteCustomization);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_SITE_CUSTOMIZATION, ...parsed };
+    }
+  } catch (e) {
+    console.error('Error reading site customization', e);
+  }
+  return DEFAULT_SITE_CUSTOMIZATION;
+}
+
+export async function saveSiteCustomization(customization: SiteCustomization): Promise<boolean> {
+  const { db } = initializeFirebaseApp();
+  if (db) {
+    try {
+      await setDoc(doc(db, 'site_settings', 'customization'), customization, { merge: true });
+    } catch (e) {
+      console.warn('Firestore site customization save note:', e);
+    }
+  }
+
+  localStorage.setItem(STORAGE_KEYS.siteCustomization, JSON.stringify(customization));
+  applySiteCustomization(customization);
+  window.dispatchEvent(new CustomEvent('prepskm_customization_updated', { detail: customization }));
+  return true;
+}
+
+export function applySiteCustomization(customization: SiteCustomization): void {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  if (customization.primaryColor) {
+    root.style.setProperty('--brand-primary', customization.primaryColor);
+  }
+  if (customization.accentColor) {
+    root.style.setProperty('--brand-accent', customization.accentColor);
+  }
 }
 

@@ -1,4 +1,4 @@
-import { Question, StudyMaterial, BacklogItem } from '../types';
+import { Question, StudyMaterial, BacklogItem, Mentor, MentorVideo, SiteCustomization } from '../types';
 
 export const INITIAL_QUESTIONS: Question[] = [
   // PHYSICS - JEE / NEET
@@ -508,4 +508,76 @@ export const AVAILABLE_CHAPTERS: Record<string, string[]> = {
     'Biotechnology: Principles & Applications',
     'Ecology & Environment'
   ]
+};
+
+export const INITIAL_MENTORS: Mentor[] = [
+  {
+    id: 'mentor-1',
+    name: 'Saurav Kumar',
+    email: 'saurav586kumar@gmail.com',
+    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    subject: 'Physics',
+    tagline: 'Super Admin & Lead JEE/NEET Mentor',
+    bio: 'IITian & Veteran Physics Faculty. Specializing in mechanics shortcuts, rotational dynamics intuition, and solving 25+ years of JEE Advanced PYQs in under 90 seconds.',
+    qualification: 'B.Tech IIT | AIR 142 | 6+ Yrs Mentorship',
+    telegramUsername: '@sauravkumar_prep',
+    addedAt: new Date().toISOString(),
+  },
+  {
+    id: 'mentor-2',
+    name: 'Sumit (@unfiltereddsumit)',
+    email: 'unfiltereddsumit@prepskm.com',
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    subject: 'Chemistry',
+    tagline: 'Founder of Prepskm & Mindset Coach',
+    bio: 'Founder of Prepskm. Passionate educator breaking educational gatekeeping. Known for ruthless distraction elimination, Organic reaction mechanisms, and 1:1 strategy passes.',
+    qualification: 'Founder @prepskm | Organic Chemistry Master',
+    telegramUsername: '@unfiltreddsumit',
+    addedAt: new Date().toISOString(),
+  }
+];
+
+export const INITIAL_MENTOR_VIDEOS: MentorVideo[] = [
+  {
+    id: 'vid-1',
+    mentorId: 'mentor-1',
+    mentorName: 'Saurav Kumar',
+    mentorEmail: 'saurav586kumar@gmail.com',
+    mentorImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    title: 'Rotational Motion: Moment of Inertia Tricks in 15 Minutes',
+    description: 'Master perpendicular and parallel axis theorems without getting stuck in lengthy integrals. Includes 3 direct JEE PYQ shortcuts verified by Saurav Sir.',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    subject: 'Physics',
+    chapter: 'Rotational Dynamics',
+    duration: '22:45',
+    createdAt: new Date().toISOString(),
+    viewsCount: 1420,
+  },
+  {
+    id: 'vid-2',
+    mentorId: 'mentor-2',
+    mentorName: 'Sumit (@unfiltereddsumit)',
+    mentorEmail: 'unfiltereddsumit@prepskm.com',
+    mentorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+    title: 'Destroy Backlogs in 7 Days: Realistic Daily Routine for JEE/NEET',
+    description: 'Stop crying over pending lectures. Use the 2-Hour Backlog Destroyer Framework to complete 1 major backlog chapter daily alongside current syllabus.',
+    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    subject: 'Chemistry',
+    chapter: 'General Strategy & Mindset',
+    duration: '18:10',
+    createdAt: new Date().toISOString(),
+    viewsCount: 3890,
+  }
+];
+
+export const DEFAULT_SITE_CUSTOMIZATION: SiteCustomization = {
+  brandName: 'Prepskm',
+  heroHeadline: 'Crush Your JEE & NEET Dreams with Zero Distractions',
+  heroSubheadline: 'NTA-Style CBT Mock Tests, Backlog Destroyer, Notes Vault & 1:1 Mentorship Passes',
+  bannerText: 'Founded by @unfiltereddsumit • Distraction-Free JEE & NEET Ecosystem',
+  primaryColor: '#4f46e5',
+  accentColor: '#6366f1',
+  tagline: 'Pure Hard Work. Zero Commercial Noise.',
+  founderName: 'Sumit (@unfiltereddsumit)',
+  founderTelegram: '@unfiltreddsumit',
 };

@@ -17,6 +17,7 @@ import {
   Lock,
   Layers,
   Sparkles,
+  GraduationCap,
 } from 'lucide-react';
 import {
   Question,
@@ -27,6 +28,7 @@ import {
   QuestionType,
   DifficultyLevel,
   FirebaseConfig,
+  Mentor,
 } from '../types';
 import {
   saveQuestionToFirestore,
@@ -44,6 +46,12 @@ import {
   saveCustomSection,
   isOwner,
   OWNER_EMAIL,
+  isSuperAdmin,
+  isUserMentor,
+  getUserRole,
+  getMentors,
+  saveMentor,
+  deleteMentor,
 } from '../lib/firebase';
 import { ImageCropperModal } from './ImageCropperModal';
 import { AVAILABLE_CHAPTERS } from '../data/initialData';
@@ -59,7 +67,67 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   materials,
   currentAdminEmail,
 }) => {
-  const [activeTab, setActiveTab] = useState<'questions' | 'materials' | 'tokens' | 'firebase'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'materials' | 'mentors' | 'tokens' | 'firebase'>('questions');
+  const isSuper = isSuperAdmin(currentAdminEmail);
+  const isMentorOnly = isUserMentor(currentAdminEmail) && !isSuper;
+
+  // ==================== MENTORS MANAGEMENT STATE (SUPER ADMIN ONLY) ====================
+  const [allMentors, setAllMentors] = useState<Mentor[]>([]);
+  const [newMentorName, setNewMentorName] = useState('');
+  const [newMentorEmail, setNewMentorEmail] = useState('');
+  const [newMentorImage, setNewMentorImage] = useState('');
+  const [newMentorSubject, setNewMentorSubject] = useState<SubjectName>('Physics');
+  const [newMentorTagline, setNewMentorTagline] = useState('');
+  const [newMentorBio, setNewMentorBio] = useState('');
+  const [mentorNotice, setMentorNotice] = useState<string | null>(null);
+  const [isSavingMentor, setIsSavingMentor] = useState(false);
+
+  React.useEffect(() => {
+    getMentors().then((m) => setAllMentors(m));
+    const handleUpdate = () => {
+      getMentors().then((m) => setAllMentors(m));
+    };
+    window.addEventListener('prepskm_mentors_updated', handleUpdate);
+    return () => window.removeEventListener('prepskm_mentors_updated', handleUpdate);
+  }, []);
+
+  const handleAddMentor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMentorName.trim() || !newMentorEmail.trim()) {
+      setMentorNotice('Please enter Mentor Name and Email ID.');
+      return;
+    }
+
+    setIsSavingMentor(true);
+    const mentor: Mentor = {
+      id: 'mentor-' + Date.now(),
+      name: newMentorName.trim(),
+      email: newMentorEmail.trim().toLowerCase(),
+      imageUrl: newMentorImage.trim() || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      subject: newMentorSubject,
+      tagline: newMentorTagline.trim() || `${newMentorSubject} Faculty Mentor`,
+      bio: newMentorBio.trim() || 'Prepskm verified faculty mentor dedicated to conceptual mastery and problem-solving tricks.',
+      addedAt: new Date().toISOString(),
+    };
+
+    await saveMentor(mentor);
+    setIsSavingMentor(false);
+    setNewMentorName('');
+    setNewMentorEmail('');
+    setNewMentorImage('');
+    setNewMentorTagline('');
+    setNewMentorBio('');
+    setMentorNotice(`Mentor "${mentor.name}" added successfully! When they log in with "${mentor.email}", they will get authorized mentor console.`);
+    setTimeout(() => setMentorNotice(null), 5000);
+  };
+
+  const handleDeleteMentor = async (id: string) => {
+    if (confirm('Are you sure you want to remove this mentor?')) {
+      await deleteMentor(id);
+      setMentorNotice('Mentor removed.');
+      setTimeout(() => setMentorNotice(null), 3000);
+    }
+  };
 
   // ==================== TAB 1: QUESTION BUILDER STATE ====================
   const [qExamTarget, setQExamTarget] = useState<ExamTarget>('JEE Main');
@@ -431,14 +499,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <span className="px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 font-bold text-xs border border-indigo-500/30">
               Admin Control Center
             </span>
-            {isOwner(currentAdminEmail) && (
+            {isOwner(currentAdminEmail) ? (
               <span className="px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/40 flex items-center gap-1 shadow-sm shadow-amber-500/20">
-                👑 Platform Owner ({currentAdminEmail})
+                👑 Super Admin ({currentAdminEmail})
               </span>
-            )}
-            <span className="text-xs text-slate-400">Secure Administrator Access</span>
+            ) : isMentorOnly ? (
+              <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold text-xs border border-emerald-500/40 flex items-center gap-1">
+                🎓 Faculty Mentor ({currentAdminEmail})
+              </span>
+            ) : null}
+            <span className="text-xs text-slate-400">
+              {isMentorOnly ? 'Upload & Content Management Privileges' : 'Full Platform & System Control'}
+            </span>
           </div>
-          <h2 className="text-2xl font-black text-white mt-1">Prepskm Super Admin Panel</h2>
+          <h2 className="text-2xl font-black text-white mt-1">
+            {isMentorOnly ? 'Prepskm Faculty Mentor Console' : 'Prepskm Super Admin Panel'}
+          </h2>
         </div>
 
         {/* Tab Switcher */}
@@ -459,6 +535,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             Materials & Videos
           </button>
+          {isSuper && (
+            <button
+              onClick={() => setActiveTab('mentors')}
+              className={`px-3.5 py-2 rounded-xl font-bold transition shrink-0 ${
+                activeTab === 'mentors' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Mentors Management
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('tokens')}
             className={`px-3.5 py-2 rounded-xl font-bold transition shrink-0 ${
@@ -467,14 +553,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           >
             Token Verifier
           </button>
-          <button
-            onClick={() => setActiveTab('firebase')}
-            className={`px-3.5 py-2 rounded-xl font-bold transition shrink-0 ${
-              activeTab === 'firebase' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Firebase Config
-          </button>
+          {isSuper && (
+            <button
+              onClick={() => setActiveTab('firebase')}
+              className={`px-3.5 py-2 rounded-xl font-bold transition shrink-0 ${
+                activeTab === 'firebase' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Firebase Config
+            </button>
+          )}
         </div>
       </div>
 
@@ -1142,8 +1230,176 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
+      {/* ==================== TAB: MENTORS MANAGEMENT (SUPER ADMIN ONLY) ==================== */}
+      {activeTab === 'mentors' && isSuper && (
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-indigo-400" /> Mentors & Faculty Access Management
+              </h3>
+              <p className="text-xs text-slate-400">
+                Add verified faculty mentors. When they sign in with their registered Email ID, they receive instant access to upload & edit questions, materials, and videos.
+              </p>
+            </div>
+          </div>
+
+          {mentorNotice && (
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 shrink-0" /> {mentorNotice}
+            </div>
+          )}
+
+          {/* Form to Add New Mentor */}
+          <form onSubmit={handleAddMentor} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+              <Plus className="w-4 h-4 text-indigo-400" /> Register New Mentor
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold uppercase mb-1">
+                  Mentor Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newMentorName}
+                  onChange={(e) => setNewMentorName(e.target.value)}
+                  placeholder="e.g. Saurav Kumar"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold uppercase mb-1">
+                  Mentor Email ID * (Must match their Google Sign-In)
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={newMentorEmail}
+                  onChange={(e) => setNewMentorEmail(e.target.value)}
+                  placeholder="e.g. mentor@gmail.com"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-semibold uppercase mb-1">
+                  Primary Subject
+                </label>
+                <select
+                  value={newMentorSubject}
+                  onChange={(e) => setNewMentorSubject(e.target.value as SubjectName)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                >
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Biology">Biology</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold uppercase mb-1">
+                  Tagline / Specialization
+                </label>
+                <input
+                  type="text"
+                  value={newMentorTagline}
+                  onChange={(e) => setNewMentorTagline(e.target.value)}
+                  placeholder="e.g. IITian Physics Mentor | AIR 142"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold uppercase mb-1">
+                  Profile Photo URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={newMentorImage}
+                  onChange={(e) => setNewMentorImage(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-semibold uppercase mb-1 text-xs">
+                Mentor Bio / Description (Mentor can also edit this later)
+              </label>
+              <textarea
+                rows={3}
+                value={newMentorBio}
+                onChange={(e) => setNewMentorBio(e.target.value)}
+                placeholder="Describe teaching credentials, problem-solving mastery, and Telegram contact..."
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSavingMentor}
+              className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow-md shadow-indigo-600/30 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{isSavingMentor ? 'Authorizing Mentor...' : 'Authorize & Add Mentor'}</span>
+            </button>
+          </form>
+
+          {/* List of Existing Mentors */}
+          <div className="space-y-3 pt-2">
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider">
+              Currently Authorized Mentors ({allMentors.length})
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {allMentors.map((m) => (
+                <div
+                  key={m.id}
+                  className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-3 text-xs"
+                >
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={m.imageUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                      alt={m.name}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-700 shrink-0 mt-0.5"
+                    />
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white text-sm truncate">{m.name}</span>
+                        <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 font-bold text-[10px]">
+                          {m.subject || 'Faculty'}
+                        </span>
+                      </div>
+                      <p className="font-mono text-slate-400 text-[11px] truncate">{m.email}</p>
+                      {m.tagline && <p className="text-slate-300 text-[11px] font-semibold">{m.tagline}</p>}
+                      <p className="text-slate-400 text-[11px] line-clamp-2">{m.bio}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleDeleteMentor(m.id)}
+                    className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-500/10 transition shrink-0"
+                    title="Remove Mentor Access"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ==================== TAB 4: FIREBASE SETTINGS ==================== */}
-      {activeTab === 'firebase' && (
+      {activeTab === 'firebase' && isSuper && (
         <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-800">
             <div>

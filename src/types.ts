@@ -63,6 +63,13 @@ export interface StudyMaterial {
   createdAt: string;
 }
 
+export interface BacklogSubtask {
+  id: string;
+  title: string;
+  completed: boolean;
+  estMinutes?: number;
+}
+
 export interface BacklogItem {
   id: string;
   subject: SubjectName;
@@ -70,7 +77,10 @@ export interface BacklogItem {
   priority: 'high' | 'medium' | 'low';
   status: 'pending' | 'in_progress' | 'cleared';
   targetDate: string;
+  dayOfWeek?: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
   notes?: string;
+  subtasks?: BacklogSubtask[];
+  aiGenerated?: boolean;
 }
 
 export interface StudentProfile {
@@ -134,4 +144,59 @@ export interface FirebaseConfig {
   appId: string;
   measurementId?: string;
   firestoreDatabaseId?: string;
+}
+
+export type UserRole = 'super_admin' | 'mentor' | 'student';
+
+export interface Mentor {
+  id: string;
+  name: string;
+  email: string;
+  imageUrl?: string;
+  subject?: SubjectName | string;
+  tagline?: string;
+  bio: string;
+  qualification?: string;
+  telegramUsername?: string;
+  addedAt: string;
+}
+
+export interface MentorVideo {
+  id: string;
+  mentorId: string;
+  mentorName: string;
+  mentorEmail: string;
+  mentorImage?: string;
+  title: string;
+  description: string;
+  videoUrl: string; // YouTube or direct video URL
+  subject: SubjectName | string;
+  chapter?: string;
+  duration?: string;
+  createdAt: string;
+  viewsCount?: number;
+}
+
+export interface SiteCustomization {
+  brandName: string;
+  heroHeadline: string;
+  heroSubheadline: string;
+  bannerText: string;
+  primaryColor: string; // e.g. '#4f46e5'
+  accentColor: string;  // e.g. '#6366f1'
+  tagline: string;
+  founderName: string;
+  founderTelegram: string;
+}
+
+export interface DailyTarget {
+  id: string;
+  title: string;
+  subject: SubjectName;
+  chapter: string;
+  completed: boolean;
+  scheduledDate: string; // YYYY-MM-DD
+  dayOfWeek: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+  priority: 'high' | 'medium' | 'low';
+  estimatedHours: number;
 }

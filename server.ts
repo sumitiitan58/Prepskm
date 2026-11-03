@@ -155,6 +155,91 @@ app.post('/api/prep-ai/chat', async (req: Request, res: Response) => {
   }
 });
 
+// AI Backlog Breakdown & Planner API
+app.post('/api/prep-ai/backlog-breakdown', async (req: Request, res: Response) => {
+  const { subject, chapter, examTarget, customApiKey } = req.body || {};
+  try {
+    if (!subject || !chapter) {
+      return res.status(400).json({ error: 'Subject and chapter are required' });
+    }
+
+    const apiKey = customApiKey || process.env.GEMINI_API_KEY;
+
+    if (apiKey) {
+      const aiClient = new GoogleGenAI({
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
+
+      const prompt = `You are the lead academic planner for Prepskm (JEE & NEET platform).
+Break down the chapter "${chapter}" in "${subject}" for a student preparing for "${examTarget || 'JEE Main'}".
+Return a strict JSON object with:
+1. "recommendedHours": (number, total realistic study hours, e.g. 6)
+2. "highYieldTopics": (array of 3-4 key subtopics frequently asked in NTA exams)
+3. "tasks": (array of 3-5 sequential actionable study tasks, each with "title" (string, concise) and "estMinutes" (number, between 25 and 90))
+4. "proTip": (string, 1 short motivational and high-yield tip in Hinglish)
+
+JSON response ONLY. No markdown ticks, no preamble.`;
+
+      const response = await aiClient.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+        },
+      });
+
+      const text = response.text || '';
+      try {
+        const parsed = JSON.parse(text);
+        return res.json({ success: true, plan: parsed });
+      } catch (parseErr) {
+        console.warn('JSON parse fallback for AI plan:', parseErr);
+      }
+    }
+
+    // High-yield fallback heuristic plan if API key is not present or offline
+    const fallbackPlan = {
+      recommendedHours: 5,
+      highYieldTopics: [
+        `${chapter} Core Formulas & Derivations`,
+        `High-Frequency PYQ Concepts (2021-2024)`,
+        `Speed & Accuracy Shortcuts for ${subject}`
+      ],
+      tasks: [
+        { title: `Revise fundamental concepts & NCERT summary for ${chapter}`, estMinutes: 45 },
+        { title: `Derive critical standard formulas & make 1-page formula cheat sheet`, estMinutes: 30 },
+        { title: `Solve 15 essential past-year JEE/NEET questions on ${chapter}`, estMinutes: 75 },
+        { title: `Attempt 5 challenging numerical / multi-statement problems`, estMinutes: 45 },
+        { title: `Take a 15-minute timed mini mock test on Prepskm CBT engine`, estMinutes: 20 }
+      ],
+      proTip: `Bhai, ${chapter} ko ratna band karo! Formulas derive karo aur 15 PYQs solve karo, marks pakka increase honge!`
+    };
+
+    return res.json({ success: true, plan: fallbackPlan });
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error('Backlog breakdown error:', error);
+    return res.status(200).json({
+      success: true,
+      plan: {
+        recommendedHours: 4,
+        highYieldTopics: [`Core Theory`, `PYQ Patterns`, `Numerical Shortcuts`],
+        tasks: [
+          { title: `Quick theory revision for ${chapter}`, estMinutes: 40 },
+          { title: `Solve 10 standard PYQ problems`, estMinutes: 60 },
+          { title: `Formula sheet memorization`, estMinutes: 25 }
+        ],
+        proTip: 'Consistency is key. 2 hours of focused problem-solving beats 6 hours of passive reading!'
+      }
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

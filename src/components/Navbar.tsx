@@ -19,22 +19,26 @@ import {
   Sun,
   Moon,
   Info,
-  Radio
+  Radio,
+  Video,
+  PenTool
 } from 'lucide-react';
-import { StudentProfile } from '../types';
-import { isUserAdmin, isOwner } from '../lib/firebase';
+import { StudentProfile, SiteCustomization } from '../types';
+import { isUserAdmin, isOwner, isSuperAdmin, isUserMentor } from '../lib/firebase';
 import { getStoredTheme, toggleTheme, applyTheme, ThemeMode } from '../lib/theme';
 
 interface NavbarProps {
-  currentTab: 'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin';
-  onSelectTab: (tab: 'tracker' | 'materials' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin') => void;
+  currentTab: 'tracker' | 'materials' | 'mentor_videos' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin';
+  onSelectTab: (tab: 'tracker' | 'materials' | 'mentor_videos' | 'mock_tests' | 'history' | 'mentorship' | 'about' | 'admin') => void;
   studentProfile: StudentProfile;
   currentUser: any;
+  siteCustomization?: SiteCustomization;
   onOpenSearch: () => void;
   onOpenAuth: () => void;
   onOpenOnboarding: () => void;
   onOpenCampaign: () => void;
   onOpenNotifications: () => void;
+  onOpenCustomizer?: () => void;
   onLogout: () => void;
 }
 
@@ -43,14 +47,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectTab,
   studentProfile,
   currentUser,
+  siteCustomization,
   onOpenSearch,
   onOpenAuth,
   onOpenOnboarding,
   onOpenCampaign,
   onOpenNotifications,
+  onOpenCustomizer,
   onLogout,
 }) => {
   const isAdmin = currentUser && isUserAdmin(currentUser.email);
+  const isSuper = currentUser && isSuperAdmin(currentUser.email);
+  const isMentor = currentUser && isUserMentor(currentUser.email);
   const isPlatformOwner = currentUser && isOwner(currentUser.email);
   const [isBannerDismissed, setIsBannerDismissed] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme());
@@ -69,15 +77,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     setThemeMode(next);
   };
 
+  const brandName = siteCustomization?.brandName || 'PREPSKM';
+  const bannerText = siteCustomization?.bannerText || 'Founded by @unfiltereddsumit • Distraction-Free JEE & NEET Ecosystem';
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 transition-colors">
       {/* Top micro announcement bar - Hidden on mobile screens to save screen space, dismissible on desktop */}
       {!isBannerDismissed && (
         <div className="hidden sm:flex bg-gradient-to-r from-indigo-900/90 via-purple-950/80 to-slate-950 border-b border-indigo-500/15 px-4 py-1.5 items-center justify-between text-[11px] text-slate-200">
           <div className="flex items-center gap-2 truncate">
-            <span className="font-extrabold text-indigo-400">PREPSKM</span>
+            <span className="font-extrabold text-indigo-400">{brandName}</span>
             <span className="text-slate-500">|</span>
-            <span className="truncate">Founded by @unfiltereddsumit • Distraction-Free JEE & NEET Ecosystem</span>
+            <span className="truncate">{bannerText}</span>
           </div>
 
           {/* Creator social links */}
@@ -296,6 +307,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         <button
+          onClick={() => onSelectTab('mentor_videos')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition shrink-0 ${
+            currentTab === 'mentor_videos'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900'
+          }`}
+        >
+          <Video className="w-4 h-4 text-rose-400" />
+          <span>Mentor Videos</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-rose-500 text-white font-bold text-[9px] uppercase tracking-wider">
+            New
+          </span>
+        </button>
+
+        <button
           onClick={() => onSelectTab('mock_tests')}
           className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl transition shrink-0 ${
             currentTab === 'mock_tests'
@@ -371,6 +397,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <BookOpen className={`w-5 h-5 ${currentTab === 'materials' ? 'text-cyan-400' : ''}`} />
           <span className="text-[10px] mt-0.5 tracking-tight">Notes</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('mentor_videos')}
+          className={`flex flex-col items-center justify-center p-2 rounded-2xl transition ${
+            currentTab === 'mentor_videos'
+              ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 font-bold scale-105'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+          title="Mentor Videos"
+        >
+          <Video className={`w-5 h-5 ${currentTab === 'mentor_videos' ? 'text-rose-400' : ''}`} />
+          <span className="text-[10px] mt-0.5 tracking-tight">Videos</span>
         </button>
 
         <button

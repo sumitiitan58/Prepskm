@@ -3,12 +3,12 @@ export type ThemeMode = 'dark' | 'light' | 'system';
 const THEME_STORAGE_KEY = 'prepskm_theme_mode';
 
 export function getStoredTheme(): ThemeMode {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === 'undefined') return 'light';
   const saved = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
   if (saved && (saved === 'dark' || saved === 'light' || saved === 'system')) {
     return saved;
   }
-  return 'dark'; // Default to dark for distraction-free night study
+  return 'light'; // Default to light with white background as requested
 }
 
 export function applyTheme(theme: ThemeMode): void {
@@ -22,13 +22,17 @@ export function applyTheme(theme: ThemeMode): void {
   if (isDark) {
     root.classList.add('dark');
     root.classList.remove('light');
-    document.body.style.backgroundColor = '#020617';
-    document.body.style.color = '#f1f5f9';
+    if (document.body) {
+      document.body.style.backgroundColor = '#020617';
+      document.body.style.color = '#f1f5f9';
+    }
   } else {
     root.classList.remove('dark');
     root.classList.add('light');
-    document.body.style.backgroundColor = '#f8fafc';
-    document.body.style.color = '#0f172a';
+    if (document.body) {
+      document.body.style.backgroundColor = '#ffffff';
+      document.body.style.color = '#0f172a';
+    }
   }
 
   localStorage.setItem(THEME_STORAGE_KEY, theme);
