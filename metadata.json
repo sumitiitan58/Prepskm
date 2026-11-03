@@ -1,0 +1,6 @@
+{
+  "name": "Prepskm - JEE & NEET Study Platform",
+  "description": "Distraction-free educational platform by @unfiltereddsumit with NTA-style CBT mock test engine, chapter-wise notes, formula sheets, backlog destroyer, 1:1 mentorship passes, and Prep AI doubt tutor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
